@@ -1,0 +1,349 @@
+import 'package:flutter/material.dart';
+import '../models/request_type.dart';
+import '../models/schedule_model.dart';
+import '../services/schedule_search_service.dart';
+
+class AddSchedulePage extends StatefulWidget {
+  static Route<ScheduleModel> route() {
+    return MaterialPageRoute(
+      builder: (_) => const AddSchedulePage._(),
+      fullscreenDialog: true,
+    );
+  }
+
+  const AddSchedulePage._();
+
+  @override
+  State<AddSchedulePage> createState() => _AddSchedulePageState();
+}
+
+class _AddSchedulePageState extends State<AddSchedulePage> {
+  final _controller = TextEditingController();
+  final _searchService = ScheduleSearchService();
+  final _focusNode = FocusNode();
+
+  RequestType requestType = RequestType.group;
+  ScheduleModel? selected;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_focusNode);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _searchService.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Добавить расписание",
+            style: Theme.of(context).textTheme.bodyMedium),
+        centerTitle: false,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.close, color: Colors.grey[600]),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ElevatedButton.icon(
+              onPressed: selected == null
+                  ? null
+                  : () => Navigator.pop(context, selected),
+              icon: Icon(Icons.add, size: 20),
+              label: Text(
+                "Добавить",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Тип расписания
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<RequestType>(
+                      value: requestType,
+                      isExpanded: true,
+                      icon: Icon(Icons.arrow_drop_down),
+                      items: RequestType.values.map((type) {
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Row(
+                            spacing: 10,
+                            children: [
+                              Icon(
+                                type.icon,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              Text(type.text),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() {
+                          requestType = value;
+                          _controller.clear();
+                          selected = null;
+                        });
+                        FocusScope.of(context).requestFocus(_focusNode);
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+
+                // Поле поиска
+                TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  decoration: InputDecoration(
+                    hintText: 'Начните вводить название...',
+                    prefixIcon: Icon(Icons.search),
+                    suffixIcon: _controller.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              _controller.clear();
+                              selected = null;
+                              setState(() {});
+                            },
+                          )
+                        : null,
+                  ),
+                  onChanged: (value) {
+                    selected = null;
+                    setState(() {});
+                    _searchService.search(
+                      ScheduleModel(
+                        requestType: requestType,
+                        queryValue: value.trim(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Результаты поиска
+          Expanded(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(25),
+                ),
+                color: Theme.of(context).cardColor,
+              ),
+              child: StreamBuilder<List<ScheduleModel>>(
+                stream: _searchService.results,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData || _controller.text.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  final items = snapshot.data!;
+
+                  if (items.isEmpty) {
+                    return _buildNoResults();
+                  }
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(4),
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) => SizedBox(height: 1),
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      final isSelected = selected == item;
+
+                      return _ResultItem(
+                        item: item,
+                        isSelected: isSelected,
+                        onTap: () {
+                          setState(() {
+                            selected = item;
+                            _controller.text = item.queryValue;
+                          });
+                          _focusNode.unfocus();
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_outlined,
+            size: 80,
+            color: Colors.grey[300],
+          ),
+          SizedBox(height: 16),
+          Text(
+            "Начните поиск",
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            "Введите название в поле выше",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoResults() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_off_outlined,
+            size: 80,
+            color: Colors.grey[300],
+          ),
+          SizedBox(height: 16),
+          Text(
+            "Ничего не найдено",
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            "Попробуйте другой запрос",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResultItem extends StatelessWidget {
+  final ScheduleModel item;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ResultItem({
+    required this.item,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Colors.grey[200]!,
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  item.requestType.icon,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.queryValue,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4),
+                    Text(item.requestType.text,
+                        style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+              ),
+              if (isSelected)
+                Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
