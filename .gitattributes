@@ -1,0 +1,15 @@
+*.h linguist-vendored
+*.cpp linguist-vendored
+*.c linguist-vendored
+*.cc linguist-vendored
+*.mm linguist-vendored
+*.m linguist-vendored
+*.cmake linguist-vendored
+**/CMakeLists.txt linguist-vendored
+
+/windows/** linguist-vendored
+
+/windows/runner/*.cpp linguist-vendored
+/windows/runner/*.h linguist-vendored
+/windows/flutter/*.cpp linguist-vendored
+/windows/flutter/*.h linguist-vendored
