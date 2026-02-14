@@ -297,6 +297,7 @@ class _ResultItem extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
+            spacing: 12,
             children: [
               Container(
                 width: 40,
@@ -314,10 +315,10 @@ class _ResultItem extends StatelessWidget {
                   size: 20,
                 ),
               ),
-              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 4,
                   children: [
                     Text(
                       item.queryValue,
@@ -328,7 +329,6 @@ class _ResultItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 4),
                     Text(item.requestType.text,
                         style: Theme.of(context).textTheme.bodySmall),
                   ],

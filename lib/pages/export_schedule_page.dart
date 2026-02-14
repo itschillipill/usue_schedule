@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:usue_schedule/v2/models/schedule_model.dart';
-import 'package:usue_schedule/v2/services/file_service.dart';
-import 'package:usue_schedule/v2/widgets/borde_box.dart';
+import 'package:usue_schedule/models/schedule_model.dart';
+import 'package:usue_schedule/services/file_service.dart';
+import 'package:usue_schedule/widgets/borde_box.dart';
 
 import '../models/export_format.dart';
 import '../models/request_type.dart';

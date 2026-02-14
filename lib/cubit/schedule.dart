@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:usue_schedule/v2/models/schedule_model.dart';
+import 'package:usue_schedule/models/schedule_model.dart';
 
 class MyScheduleState {
   final ScheduleModel? currentSchedule;

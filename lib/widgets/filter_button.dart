@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:usue_schedule/v2/models/request_type.dart';
+import 'package:usue_schedule/models/request_type.dart';
 
 class FilterButton extends StatelessWidget {
   final String? selectedGroupFilter;

@@ -1,5 +1,6 @@
 // lib/services/ics/converter.dart
-import 'package:usue_schedule/v2/core/constants.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:usue_schedule/core/constants.dart';
 
 import '../core/utils/date_utils.dart' as date_utils;
 import '../models/i_calendar_event.dart';
@@ -108,7 +109,7 @@ class ICalendarConverter {
         },
       );
     } catch (e) {
-      print('Ошибка конвертации пары в событие: $e');
+      debugPrint('Ошибка конвертации пары в событие: $e');
       return null;
     }
   }
@@ -266,7 +267,7 @@ class ICalendarConverter {
         DateTime(now.year, now.month, now.day, endHour, endMinute),
       );
     } catch (e) {
-      print('Ошибка парсинга времени: $e');
+      debugPrint('Ошибка парсинга времени: $e');
       return null;
     }
   }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:usue_schedule/v2/core/constants.dart';
-import 'package:usue_schedule/v2/cubit/settings_cubit.dart';
-import 'package:usue_schedule/v2/widgets/borde_box.dart';
+import 'package:usue_schedule/core/constants.dart';
+import 'package:usue_schedule/cubit/settings_cubit.dart';
+import 'package:usue_schedule/widgets/borde_box.dart';
 
 import '../core/theme/schedule_styles.dart';
 

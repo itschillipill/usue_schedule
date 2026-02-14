@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:usue_schedule/v2/core/theme/schedule_styles.dart';
-import 'package:usue_schedule/v2/widgets/label_group.dart';
+import 'package:usue_schedule/core/theme/schedule_styles.dart';
+import 'package:usue_schedule/widgets/label_group.dart';
 import '../models/schedule_pair.dart';
 
 class ScheduleItem extends StatelessWidget {

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:usue_schedule/v2/models/request_type.dart';
-import 'package:usue_schedule/v2/widgets/day_view.dart';
-import 'package:usue_schedule/v2/widgets/filter_button.dart';
-import 'package:usue_schedule/v2/widgets/load_view.dart';
+import 'package:usue_schedule/models/request_type.dart';
+import 'package:usue_schedule/widgets/day_view.dart';
+import 'package:usue_schedule/widgets/filter_button.dart';
+import 'package:usue_schedule/widgets/load_view.dart';
 import '../models/schedule_model.dart';
 import '../models/schedule_response.dart';
 import '../services/api.dart';

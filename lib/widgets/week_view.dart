@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
-import 'package:usue_schedule/v2/widgets/borde_box.dart';
-import 'package:usue_schedule/v2/widgets/label_group.dart';
+import 'package:usue_schedule/widgets/borde_box.dart';
+import 'package:usue_schedule/widgets/label_group.dart';
 
 import '../core/utils/date_utils.dart';
 import '../models/day_schedule.dart';

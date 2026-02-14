@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:http/http.dart' as http;
-import 'package:usue_schedule/v2/models/request_type.dart';
-import 'package:usue_schedule/v2/models/schedule_model.dart';
+import 'package:usue_schedule/models/request_type.dart';
+import 'package:usue_schedule/models/schedule_model.dart';
 
 class ScheduleSearchService {
   final _querySubject = PublishSubject<ScheduleModel>();
