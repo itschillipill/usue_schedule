@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:usue_schedule/models/schedule_model.dart';
@@ -250,42 +251,8 @@ class _ExportSchedulePageState extends State<ExportSchedulePage> {
     });
   }
 
-  Future<void> _exportSchedule(BuildContext context) async {
-    if(_selectedFormat != ExportFormat.ics && !kDebugMode) {
-      ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Еше не реализовано экспорт в формат ${_selectedFormat.label}..'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ));
-      return;}
-    if (_startDate.isAfter(_endDate)) return;
-    final responce = await widget.getResponse(
-      startDate: _startDate,
-      endDate: _endDate,
-      requestType: widget.params.requestType,
-      queryValue: widget.params.queryValue,
-    );
-    final filtredResponse= ScheduleResponse(schedules: responce.schedules.where((s)=>s.pairs.any((p)=>p.schedulePairs.isNotEmpty)).toList());
-    if(filtredResponse.schedules.any((s)=>s.pairs.any((p)=>p.schedulePairs.isNotEmpty)) && context.mounted){
-       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Экспорт в ${_selectedFormat.label}...'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-    );
-    await FileService.saveSchedule(schedule: filtredResponse, format: _selectedFormat, queryValue: widget.params.queryValue, shareAfterSave: shareAfterSavig);
-    }else{
-      if(context.mounted) {ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('На этот период расписание не найдено'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-    );}
-    }
-  }
 
-  void _showHelpDialog() {
-    showDialog(
+ void _showHelpDialog() =>showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Справка по экспорту'),
@@ -303,8 +270,185 @@ class _ExportSchedulePageState extends State<ExportSchedulePage> {
         ],
       ),
     );
+    
+ Future<void> _exportSchedule(BuildContext context) async => await MessageService.showLoading<bool>(
+    context: context,
+    message: 'Экспорт расписания...',
+    onSuccess: (success) {
+      if (success == true && context.mounted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Расписание успешно экспортировано в формат ${_selectedFormat.label}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    },
+    onError: (e, stackTrace) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка при экспорте: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    },
+    fn: () async {
+      if (_selectedFormat != ExportFormat.ics) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Еще не реализован экспорт в формат ${_selectedFormat.label}..'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+        }
+        return false;
+      }
+
+      if (_startDate.isAfter(_endDate)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Дата начала не может быть позже даты окончания'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+        }
+        return false;
+      }
+
+      final response = await widget.getResponse(
+        startDate: _startDate,
+        endDate: _endDate,
+        requestType: widget.params.requestType,
+        queryValue: widget.params.queryValue,
+      );
+
+      final filteredResponse = ScheduleResponse(
+        schedules: response.schedules
+            .where((s) => s.pairs.any((p) => p.schedulePairs.isNotEmpty))
+            .toList(),
+      );
+
+      if (filteredResponse.schedules.isNotEmpty &&
+          filteredResponse.schedules.any((s) => s.pairs.any((p) => p.schedulePairs.isNotEmpty))) {
+        
+        await FileService.saveSchedule(
+          schedule: filteredResponse,
+          format: _selectedFormat,
+          queryValue: widget.params.queryValue,
+          shareAfterSave: shareAfterSavig,
+        );
+        
+        return true; 
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('На этот период расписание не найдено'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+        }
+        return false;
+      }
+    },
+  );
+}
+
+
+class MessageService {
+  static OverlayEntry? _loadingOverlay;
+
+  static void _showLoading(BuildContext context, {String? message}) {
+    if (_loadingOverlay != null) return;
+
+    final overlayState = Overlay.of(context);
+
+    _loadingOverlay = OverlayEntry(
+      builder: (_) => Stack(
+        children: [
+          ModalBarrier(
+            color: Colors.black.withValues(alpha: 0.4),
+            dismissible: false,
+          ),
+          Material(
+            color: Colors.transparent,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  spacing: 12,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    if (message != null)
+                      Text(message, style: const TextStyle(fontSize: 16)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    overlayState.insert(_loadingOverlay!);
+  }
+
+  static void _hideLoading() {
+    if (_loadingOverlay == null) return;
+    _loadingOverlay?.remove();
+    _loadingOverlay = null;
+  }
+
+  static FutureOr<void> showLoading<T>({
+    required BuildContext context,
+    String? message,
+    required Future<T> Function() fn,
+    void Function(T value)? onSuccess,
+    void Function(Object e, StackTrace? stacktrace)? onError,
+    Duration delay = const Duration(milliseconds: 500),
+    Duration? timeout,
+  }) async {
+    _showLoading(context, message: message);
+
+    try {
+      final result = await (timeout != null
+          ? Future.any([
+              fn(),
+              Future.delayed(timeout, () {
+                throw TimeoutException("Operation timed out");
+              }),
+            ])
+          : fn());
+
+      await Future.delayed(delay);
+      
+      if (result != null) {
+        onSuccess?.call(result);
+      }
+      
+    } catch (e, stackTrace) {
+      debugPrint('Error in showLoading: $e');
+      debugPrint('Stack trace: $stackTrace');
+      
+      // Вызываем onError если колбэк предоставлен
+   
+        onError?.call(e, stackTrace);
+      
+    } finally {
+      _hideLoading();
+    }
   }
 }
+
 
 Widget _buildRangeCard(ThemeData theme, String label, VoidCallback onTap, String date){
   return InkWell(
