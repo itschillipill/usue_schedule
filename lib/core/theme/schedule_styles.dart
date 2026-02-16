@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 class ScheduleStyles {
-  static BoxDecoration linearBackgroundDecoration(BuildContext context){
+  static BoxDecoration linearBackgroundDecoration(BuildContext context) {
     return BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-              Theme.of(context).colorScheme.surface,
-            ],
-          ),
-      );
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+          Theme.of(context).colorScheme.surface,
+        ],
+      ),
+    );
   }
 
   static Color getLessonTypeColor(String type) {

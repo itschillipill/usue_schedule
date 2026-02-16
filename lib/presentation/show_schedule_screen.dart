@@ -1,35 +1,35 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:usue_schedule/models/request_type.dart';
-import 'package:usue_schedule/widgets/day_view.dart';
-import 'package:usue_schedule/widgets/filter_button.dart';
-import 'package:usue_schedule/widgets/load_view.dart';
+import 'package:usue_schedule/presentation/widgets/day_view.dart';
+import 'package:usue_schedule/presentation/widgets/filter_button.dart';
+import 'package:usue_schedule/presentation/widgets/load_view.dart';
 import '../models/schedule_model.dart';
 import '../models/schedule_response.dart';
 import '../services/api.dart';
-import '../widgets/build_empty_state.dart';
-import '../widgets/date_picker.dart';
-import '../widgets/error_view.dart';
-import '../widgets/schedule_header.dart';
-import '../widgets/week_view.dart';
-import 'export_schedule_page.dart';
+import 'widgets/build_empty_state.dart';
+import 'widgets/date_picker.dart';
+import 'widgets/error_view.dart';
+import 'widgets/schedule_header.dart';
+import 'widgets/week_view.dart';
+import 'export_schedule_screen.dart';
 
-class ShowSchedulePage extends StatefulWidget {
+class ShowScheduleScreen extends StatefulWidget {
   static Route<ScheduleModel> route({required ScheduleModel params}) {
     return MaterialPageRoute(
-      builder: (_) => ShowSchedulePage(params: params),
+      builder: (_) => ShowScheduleScreen(params: params),
     );
   }
 
   final ScheduleModel params;
 
-  const ShowSchedulePage({super.key, required this.params});
+  const ShowScheduleScreen({super.key, required this.params});
 
   @override
-  State<ShowSchedulePage> createState() => _ShowSchedulePageState();
+  State<ShowScheduleScreen> createState() => _ShowScheduleScreenState();
 }
 
-class _ShowSchedulePageState extends State<ShowSchedulePage> {
+class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   late final ApiService _apiService;
 
   DateTime _selectedDate = DateTime.now();
@@ -136,11 +136,9 @@ class _ShowSchedulePageState extends State<ShowSchedulePage> {
       }
     }
 
-    setState(() {
-      _availableGroups = groups.toList()..sort();
-      _availableTeachers = teachers.toList()..sort();
-      _generateGroupColors();
-    });
+    _availableGroups = groups.toList()..sort();
+    _availableTeachers = teachers.toList()..sort();
+    _generateGroupColors();
   }
 
   void _generateGroupColors() {
@@ -168,32 +166,31 @@ class _ShowSchedulePageState extends State<ShowSchedulePage> {
   }
 
   void _onDateSelected(DateTime date) {
-      _selectedDate = date;
-      _updateWeekDates();
+    _selectedDate = date;
+    _updateWeekDates();
     _loadSchedule();
   }
 
   void _toggleView() {
-      _isDayView = !_isDayView;
+    _isDayView = !_isDayView;
     _loadSchedule();
   }
 
   void _navigateToPrevious() {
-      _selectedDate =
-          _selectedDate.subtract(Duration(days: _isDayView ? 1 : 7));
-      _updateWeekDates();
+    _selectedDate = _selectedDate.subtract(Duration(days: _isDayView ? 1 : 7));
+    _updateWeekDates();
     _loadSchedule();
   }
 
   void _navigateToNext() {
-      _selectedDate = _selectedDate.add(Duration(days: _isDayView ? 1 : 7));
-      _updateWeekDates();
+    _selectedDate = _selectedDate.add(Duration(days: _isDayView ? 1 : 7));
+    _updateWeekDates();
     _loadSchedule();
   }
 
-  void _toggleFilter({required String? group, required String? teacher}){
+  void _toggleFilter({required String? group, required String? teacher}) {
     _selectedGroupFilter = _selectedGroupFilter == group ? null : group;
-    _selectedTeacherFilter=_selectedTeacherFilter == teacher ? null : teacher;
+    _selectedTeacherFilter = _selectedTeacherFilter == teacher ? null : teacher;
     _generateGroupColors();
     setState(() {});
   }
@@ -203,10 +200,6 @@ class _ShowSchedulePageState extends State<ShowSchedulePage> {
       _selectedGroupFilter = null;
       _selectedTeacherFilter = null;
     });
-  }
-
-  void _retry() {
-    _loadSchedule();
   }
 
   @override
@@ -243,21 +236,23 @@ class _ShowSchedulePageState extends State<ShowSchedulePage> {
                     generatedColors: _generatedColors,
                     toggleFilter: _toggleFilter,
                   ),
-               PopupMenuButton<String>(
-      onSelected: (value) {
-        if (value == "export_schedule") {
-          Navigator.push(context, ExportSchedulePage.route(
-            widget.params,
-            _apiService.getSchedule,
-            ));
-        }
-      },
-      itemBuilder:(context) => [
-        PopupMenuItem(
-          value: "export_schedule",
-          child: Text("Экспорт расписания"))
-      ],
-      child:  Icon(Icons.more_vert)),
+                  PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == "export_schedule") {
+                          Navigator.push(
+                              context,
+                              ExportScheduleScreen.route(
+                                widget.params,
+                                _apiService.getSchedule,
+                              ));
+                        }
+                      },
+                      itemBuilder: (context) => [
+                            PopupMenuItem(
+                                value: "export_schedule",
+                                child: Text("Экспорт расписания"))
+                          ],
+                      child: Icon(Icons.more_vert)),
                 ],
               ),
               SliverPersistentHeader(
@@ -292,7 +287,7 @@ class _ShowSchedulePageState extends State<ShowSchedulePage> {
     if (_error != null) {
       return ErrorView(
         error: _error!,
-        onRetry: _retry,
+        onRetry: _loadSchedule,
       );
     }
 
@@ -326,7 +321,7 @@ class _ShowSchedulePageState extends State<ShowSchedulePage> {
         buildEmptyState: BuildEmptyState(
           isFiltered:
               (_selectedGroupFilter != null || _selectedTeacherFilter != null),
-          isDayView: false,
+          isDayView: _isDayView,
           clearFilters: clearFilters,
         ),
         data: filteredData,

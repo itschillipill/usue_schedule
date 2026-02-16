@@ -36,7 +36,6 @@ class FileService {
     }
   }
 
-
   static Future<void> _handleAndroidPermissions() async {
     final info = await DeviceInfoPlugin().androidInfo;
 
@@ -49,7 +48,6 @@ class FileService {
       }
     }
   }
-
 
   static Future<String> _getSaveDirectory() async {
     if (Platform.isAndroid) {
@@ -67,10 +65,9 @@ class FileService {
       return dir.path;
     }
 
-    final dir = await getDownloadsDirectory()??await getTemporaryDirectory();
+    final dir = await getDownloadsDirectory() ?? await getTemporaryDirectory();
     return dir.path;
   }
-
 
   static Future<String> _saveAsICS(
     ScheduleResponse schedule,
@@ -107,7 +104,6 @@ class FileService {
     return file.path;
   }
 
-
   static Future<String> _saveAsPdf(
     ScheduleResponse schedule,
     String? fileName,
@@ -123,7 +119,6 @@ class FileService {
     return file.path;
   }
 
-
   static Future<String> _saveAsExcel(
     ScheduleResponse schedule,
     String? fileName,
@@ -138,7 +133,6 @@ class FileService {
 
     return file.path;
   }
-
 
   static Future<void> _shareFile(String filePath, ExportFormat format) async {
     final file = File(filePath);
@@ -163,7 +157,6 @@ class FileService {
 
     debugPrint("📤 Файл отправлен");
   }
-
 
   static String _sanitizeFileName(String fileName) {
     return fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');

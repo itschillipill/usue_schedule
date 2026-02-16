@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:usue_schedule/widgets/borde_box.dart';
+import 'package:usue_schedule/presentation/widgets/borde_box.dart';
 
-import '../models/day_schedule.dart';
+import '../../models/day_schedule.dart';
 
 class DayHeader extends StatelessWidget {
   final DaySchedule day;
   final DateTime date;
   final bool? isExpanded;
 
-  const DayHeader({super.key, required this.day, required this.date, this.isExpanded});
+  const DayHeader(
+      {super.key, required this.day, required this.date, this.isExpanded});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class DayHeader extends StatelessWidget {
 
     return BorderBox(
       padding: const EdgeInsets.all(8),
-      color: isCurrent?Theme.of(context).canvasColor:null,
+      color: isCurrent ? Theme.of(context).canvasColor : null,
       child: Row(
         spacing: 10,
         children: [
@@ -62,7 +63,10 @@ class DayHeader extends StatelessWidget {
                 ),
               ),
             ),
-           if(isExpanded case bool i)Icon(i? Icons.arrow_circle_up_rounded: Icons.arrow_circle_down_rounded)
+          if (isExpanded case bool i)
+            Icon(i
+                ? Icons.arrow_circle_up_rounded
+                : Icons.arrow_circle_down_rounded)
         ],
       ),
     );

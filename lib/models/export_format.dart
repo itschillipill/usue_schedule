@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart' show Icons, IconData;
 
 enum ExportFormat {
-  ics(Icons.calendar_today, 'ICS (Календарь)', 'Импорт в Google Calendar, Apple Calendar, Outlook'),
+  ics(Icons.calendar_today, 'ICS (Календарь)',
+      'Импорт в Google Calendar, Apple Calendar, Outlook'),
   excel(Icons.table_chart, 'Excel', 'Редактирование и анализ данных'),
   pdf(Icons.picture_as_pdf, 'PDF', 'Печать и общий доступ');
 

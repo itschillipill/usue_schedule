@@ -72,3 +72,14 @@ class SchedulePair {
     };
   }
 }
+
+extension X on List<SchedulePair> {
+  bool get hasMultipleGroups => groups.length > 1;
+
+  Iterable<String> get groups => map((p) => p.cleanGroup).toSet();
+
+  Iterable<String> get teachers => map((p) => p.teacher).toSet();
+
+  Iterable<String> get subgroups =>
+      where((p) => p.isSubgroup).map((p) => '${p.subgroupNumber}').toSet();
+}

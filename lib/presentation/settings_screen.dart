@@ -4,18 +4,13 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:usue_schedule/core/constants.dart';
 import 'package:usue_schedule/cubit/settings_cubit.dart';
-import 'package:usue_schedule/widgets/borde_box.dart';
+import 'package:usue_schedule/presentation/widgets/borde_box.dart';
 
 import '../core/theme/schedule_styles.dart';
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
 
-  @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final SettingsCubit settingsCubit = context.watch<SettingsCubit>();
@@ -112,17 +107,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: Icons.delete_sweep,
                   title: 'Очистить кэш',
                   subtitle: 'Удалить данные расписаний',
-                  onTap: () => 
-                  _showCacheClearDialog(
-                    context, 
-                    onClear: () async{
-                     await settingsCubit.prefs.clear();
-                    },),
+                  onTap: () => _showCacheClearDialog(
+                    context,
+                    onClear: () async {
+                      await settingsCubit.prefs.clear();
+                    },
+                  ),
                 ),
               ],
             ),
-        SizedBox(height: 5),
-        
+            SizedBox(height: 5),
             _buildSection(
               context,
               icon: Icons.info,
@@ -142,7 +136,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   subtitle: 'Оставьте отзыв в магазине',
                   onTap: _rateApp,
                   trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [Colors.amber.shade400, Colors.orange],
@@ -174,9 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
-        
             SizedBox(height: 5),
-        
             _buildSection(
               context,
               icon: Icons.contact_support,
@@ -205,7 +198,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
-        
             const SizedBox(height: 10),
             Center(
               child: Column(
@@ -247,7 +239,7 @@ class _SettingsPageState extends State<SettingsPage> {
     required List<Widget> children,
   }) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -278,9 +270,9 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 12),
         ...children.map((child) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: child,
-        )),
+              padding: const EdgeInsets.only(bottom: 8),
+              child: child,
+            )),
       ],
     );
   }
@@ -294,7 +286,7 @@ class _SettingsPageState extends State<SettingsPage> {
     Widget? trailing,
   }) {
     final theme = Theme.of(context);
-    
+
     return GestureDetector(
       onTap: onTap,
       child: BorderBox(
@@ -346,8 +338,8 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-
-  Future<void> _showCacheClearDialog(BuildContext context, {VoidCallback? onClear}) async {
+  Future<void> _showCacheClearDialog(BuildContext context,
+      {VoidCallback? onClear}) async {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -390,206 +382,195 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _showAboutDialog(BuildContext context) async {
-  await showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Row(
-        children: [
-          Icon(Icons.school, color: Colors.blue),
-          SizedBox(width: 12),
-          Text('О приложении'),
-        ],
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
           children: [
-            Text(
-              Constants.appName,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
-              ),
-            ),
-            const SizedBox(height: 8),
-            
-            Container(
-              padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: Colors.orange.shade700,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Важное примечание',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.orange.shade800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 8),
-            RichText(
-              text: TextSpan(
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  height: 1.5,
+            Icon(Icons.school, color: Colors.blue),
+            SizedBox(width: 12),
+            Text('О приложении'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                Constants.appName,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
                 ),
-                children: [
-                  TextSpan(
-                    text: 'Версия: ',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  TextSpan(text: '${Constants.version}\n'),
-                  
-                  TextSpan(
-                    text: 'Сборка: ',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  TextSpan(text: '${Constants.buildNumber}\n\n'),
-                  
-                  const TextSpan(
-                    text: 'Это приложение является ',
-                  ),
-                  TextSpan(
-                    text: 'неофициальным клиентом ',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.blue,
-                    ),
-                  ),
-                  const TextSpan(
-                    text: 'для просмотра расписания УрГЭУ (USUE) '
-                        'и было создано в рамках учебного проекта.\n\n',
-                  ),
-                  const TextSpan(
-                    text: 'Статус: ',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const TextSpan(text: 'Студенческий проект\n'),
-                
-                  const TextSpan(
-                    text: 'Разработчик: ',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  TextSpan(text: '${Constants.author}\n'),
-                  
-                  const TextSpan(
-                    text: 'Источник данных: ',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const TextSpan(
-                    text: 'Официальный сайт расписания УрГЭУ\n',
-                  ),
-                ],
               ),
-            ),
-            RichText(text:TextSpan(
-              children: [
-                const TextSpan(
-                    text: '⚖️ ',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const TextSpan(
-                    text: 'Лицензия: ',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const TextSpan(
-                    text: 'Проприетарная (закрытая)',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-              ]
-            )),
-            
-            GestureDetector(
-              onTap: () {
-                launchUrl(Uri.parse(Constants.usueScheduleLink));
-              },
-              child: Container(
+              const SizedBox(height: 8),
+              Container(
                 padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.08),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+                  border:
+                      Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Офицальный сайт расписания',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.blue.shade700,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            Constants.usueScheduleLink,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.blue.shade600,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
                     Icon(
-                      Icons.open_in_new,
-                      size: 16,
-                      color: Colors.blue,
+                      Icons.info_outline,
+                      color: Colors.orange.shade700,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Важное примечание',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.orange.shade800,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    height: 1.5,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: 'Версия: ',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    TextSpan(text: '${Constants.version}\n'),
+                    TextSpan(
+                      text: 'Сборка: ',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    TextSpan(text: '${Constants.buildNumber}\n\n'),
+                    const TextSpan(
+                      text: 'Это приложение является ',
+                    ),
+                    TextSpan(
+                      text: 'неофициальным клиентом ',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    const TextSpan(
+                      text: 'для просмотра расписания УрГЭУ (USUE) '
+                          'и было создано в рамках учебного проекта.\n\n',
+                    ),
+                    const TextSpan(
+                      text: 'Статус: ',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const TextSpan(text: 'Студенческий проект\n'),
+                    const TextSpan(
+                      text: 'Разработчик: ',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    TextSpan(text: '${Constants.author}\n'),
+                    const TextSpan(
+                      text: 'Источник данных: ',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const TextSpan(
+                      text: 'Официальный сайт расписания УрГЭУ\n',
+                    ),
+                  ],
+                ),
+              ),
+              RichText(
+                  text: TextSpan(children: [
+                const TextSpan(
+                  text: '⚖️ ',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const TextSpan(
+                  text: 'Лицензия: ',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const TextSpan(
+                  text: 'Проприетарная (закрытая)',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ])),
+              GestureDetector(
+                onTap: () {
+                  launchUrl(Uri.parse(Constants.usueScheduleLink));
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border:
+                        Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Офицальный сайт расписания',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              Constants.usueScheduleLink,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue.shade600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.open_in_new,
+                        size: 16,
+                        color: Colors.blue,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Закрыть'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Закрыть'),
-        ),
-      ],
-    ),
-  );
-}
-
+    );
+  }
 
   Future<void> _rateApp() async {
-    final url = Uri.parse(Constants.appLinkRuStore);
-    
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    }
+    await launchUrl(Uri.parse(Constants.appLinkRuStore));
   }
 
   Future<void> _shareApp() async {
-  final text = '''
+    final text = '''
 📅 ${Constants.appName} - твое расписание в телефоне!
 
 Скачивай приложение для удобного просмотра расписания УрГЭУ:
@@ -601,13 +582,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
 Поделись с коллегами! 🎓''';
 
-  await SharePlus.instance.share(
-    ShareParams(
-      text:text,
-    subject: 'Удобное расписание УрГЭУ',
-    )
-  );
-}
+    await SharePlus.instance.share(ShareParams(
+      text: text,
+      subject: 'Удобное расписание УрГЭУ',
+    ));
+  }
 
   Future<void> _sendEmail(BuildContext context) async {
     final email = Uri(
@@ -632,7 +611,8 @@ class _SettingsPageState extends State<SettingsPage> {
         content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Нашли что-то? Опишите проблему, которую вы обнаружили по телеграмм.'),
+            Text(
+                'Нашли что-то? Опишите проблему, которую вы обнаружили по телеграмм.'),
           ],
         ),
         actions: [
@@ -641,13 +621,12 @@ class _SettingsPageState extends State<SettingsPage> {
             child: const Text('Отмена'),
           ),
           ElevatedButton(
-            onPressed: () async{ 
-          final url = Uri.parse(Constants.telegramContact);
-           if (await canLaunchUrl(url)) {
-        await launchUrl(url);
-         if(context.mounted) Navigator.pop(context);
-      }
-            
+            onPressed: () async {
+              final url = Uri.parse(Constants.telegramContact);
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url);
+                if (context.mounted) Navigator.pop(context);
+              }
             },
             child: const Text('Открыть'),
           ),
@@ -658,7 +637,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _showOtherProjects() async {
     final url = Uri.parse(Constants.developerLinkRuStore);
-    
+
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }

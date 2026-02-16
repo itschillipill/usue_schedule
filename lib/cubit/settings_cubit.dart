@@ -19,6 +19,7 @@ class SettingsState {
       themeMode: themeMode ?? this.themeMode,
     );
   }
+
   @override
   String toString() => 'SettingsState(themeMode: $themeMode)';
 
@@ -38,7 +39,7 @@ class SettingsState {
 class SettingsCubit extends Cubit<SettingsState> {
   final settingsKey = "settings";
   final SharedPreferences prefs;
-  SettingsCubit({required this.prefs}) : super(SettingsState.initial()){
+  SettingsCubit({required this.prefs}) : super(SettingsState.initial()) {
     _loadSettings();
   }
   void _loadSettings() async {
@@ -47,8 +48,9 @@ class SettingsCubit extends Cubit<SettingsState> {
       emit(SettingsState.fromMap(jsonDecode(settingsString)));
     }
   }
+
   void setThemeMode(ThemeMode? themeMode) {
-    if(themeMode==null) return;
+    if (themeMode == null) return;
     emit(state.copyWith(themeMode: themeMode));
     prefs.setString(settingsKey, jsonEncode(state.toMap()));
   }

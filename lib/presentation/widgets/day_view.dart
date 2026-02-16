@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:usue_schedule/core/constants.dart';
 import 'package:usue_schedule/core/utils/date_utils.dart';
-import 'package:usue_schedule/widgets/borde_box.dart';
-import '../models/pair.dart';
-import '../models/schedule_response.dart';
+import 'package:usue_schedule/presentation/widgets/borde_box.dart';
+import '../../models/pair.dart';
+import '../../models/schedule_response.dart';
 
-import '../models/day_schedule.dart';
+import '../../models/day_schedule.dart';
 import 'day_header.dart';
 import 'empty_day.dart';
 import 'schedule_item.dart';
@@ -54,11 +54,7 @@ class DayView extends StatelessWidget {
         children: [
           DayHeader(day: daySchedule, date: selectedDate),
           ...daySchedule.nonEmptyPairs.map(
-            (pair)=>
-             _TimelineLessonCard(
-              pair: pair,
-              groupColors: groupColors
-            ),
+            (pair) => _TimelineLessonCard(pair: pair, groupColors: groupColors),
           ),
         ],
       ),
@@ -77,14 +73,13 @@ class _TimelineLessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final schedulePair = pair.schedulePairs.first;
     return BorderBox(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 5),
       child: Column(
         children: [
           // Временная метка
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Row(
               children: [
                 Container(
@@ -140,10 +135,9 @@ class _TimelineLessonCard extends StatelessWidget {
           ),
 
           ScheduleItem(
-              schedulePair: schedulePair,
-              pairNumber: pair.number,
-              groupColor: groupColors[schedulePair.cleanGroup] ?? Colors.grey,
-              relatedPairs: pair.schedulePairs)
+            groupColors: groupColors,
+            pairs: pair.schedulePairs,
+          )
         ],
       ),
     );

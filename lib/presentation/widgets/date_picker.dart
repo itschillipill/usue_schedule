@@ -38,8 +38,9 @@ class DatePicker {
                       ),
                     ),
                   ),
-                  TextButton(onPressed: ()=>Navigator.pop(context, DateTime.now()), 
-                  child: Text("Сегодня")),
+                  TextButton(
+                      onPressed: () => Navigator.pop(context, DateTime.now()),
+                      child: Text("Сегодня")),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),

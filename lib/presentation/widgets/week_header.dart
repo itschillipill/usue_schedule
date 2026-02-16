@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:usue_schedule/widgets/borde_box.dart';
+import 'package:usue_schedule/presentation/widgets/borde_box.dart';
 
-import '../models/day_schedule.dart';
+import '../../models/day_schedule.dart';
 
 class WeekHeader extends StatelessWidget {
   final List<DaySchedule> days;

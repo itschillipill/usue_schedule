@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
-import 'schedule_page.dart';
-import 'settings_page.dart';
+import 'schedule_screen.dart';
+import 'settings_screen.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class AppGate extends StatefulWidget {
+  const AppGate({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<AppGate> createState() => _AppGateState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _AppGateState extends State<AppGate> {
   int _selectedIndex = 0;
-  List<Widget> pages = [
-    SchedulePage(),
-    SettingsPage(),
+  List<Widget> screens = [
+    ScheduleScreen(),
+    SettingsScreen(),
   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[_selectedIndex],
+      body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: (index) {

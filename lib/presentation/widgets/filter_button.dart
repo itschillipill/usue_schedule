@@ -8,7 +8,8 @@ class FilterButton extends StatelessWidget {
   final List<String> availableTeachers;
   final RequestType requestType;
   final Map<String, Color> generatedColors;
-  final Function({required String? group, required String? teacher}) toggleFilter;
+  final Function({required String? group, required String? teacher})
+      toggleFilter;
 
   const FilterButton({
     super.key,
@@ -134,9 +135,11 @@ class FilterButton extends StatelessWidget {
     );
     if (selectedFilter == null) return;
     if (requestType == RequestType.teacher) {
-      toggleFilter(group: selectedFilter.isEmpty? null : selectedFilter, teacher: null);
+      toggleFilter(
+          group: selectedFilter.isEmpty ? null : selectedFilter, teacher: null);
     } else {
-      toggleFilter(teacher: selectedFilter.isEmpty? null : selectedFilter, group: null);
+      toggleFilter(
+          teacher: selectedFilter.isEmpty ? null : selectedFilter, group: null);
     }
   }
 }

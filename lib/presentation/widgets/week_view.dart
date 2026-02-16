@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
-import 'package:usue_schedule/widgets/borde_box.dart';
-import 'package:usue_schedule/widgets/label_group.dart';
+import 'package:usue_schedule/presentation/widgets/borde_box.dart';
+import 'package:usue_schedule/presentation/widgets/label_group.dart';
 
-import '../core/utils/date_utils.dart';
-import '../models/day_schedule.dart';
-import '../models/pair.dart';
-import '../models/schedule_response.dart';
+import '../../core/utils/date_utils.dart';
+import '../../models/day_schedule.dart';
+import '../../models/pair.dart';
+import '../../models/schedule_response.dart';
 import 'day_header.dart';
 import 'week_header.dart';
 
@@ -36,7 +36,7 @@ class WeekView extends StatelessWidget {
           startDate: selectedWeek.first,
           endDate: selectedWeek.last,
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 12),
         ...selectedWeek.map((date) {
           final dateStr = DateFormat('dd.MM.yyyy').format(date);
           final daySchedule = scheduleMap[dateStr] ??
@@ -48,14 +48,13 @@ class WeekView extends StatelessWidget {
               );
           if (!daySchedule.hasPairs) return SizedBox.shrink();
           return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _LessonCard(
-              daySchedule: daySchedule,
-              date: date,
-              groupColors: groupColors,
-              selectedGroup: selectedGroupFilter,
-            )
-          );
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _LessonCard(
+                daySchedule: daySchedule,
+                date: date,
+                groupColors: groupColors,
+                selectedGroup: selectedGroupFilter,
+              ));
         })
       ]),
     );
@@ -69,11 +68,11 @@ class _LessonCard extends StatefulWidget {
   final String? selectedGroup;
 
   const _LessonCard({
-    required this.daySchedule, 
-    required this.date, 
+    required this.daySchedule,
+    required this.date,
     required this.groupColors,
     this.selectedGroup,
-    });
+  });
   @override
   State<_LessonCard> createState() => _LessonCardState();
 }
@@ -83,22 +82,27 @@ class _LessonCardState extends State<_LessonCard> {
   @override
   Widget build(BuildContext context) {
     return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 10,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isExpanded = !isExpanded;
-                    });
-                  },
-                  child: DayHeader(day: widget.daySchedule, date: widget.date, isExpanded: isExpanded,)),
-                AnimatedSize(
-                  duration: Durations.short4,
-                  curve: Curves.linear,
-                  child: !isExpanded?SizedBox.shrink(): Column(
-                    children: [
-                      ...widget.daySchedule.nonEmptyPairs.map(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 10,
+      children: [
+        GestureDetector(
+            onTap: () {
+              setState(() {
+                isExpanded = !isExpanded;
+              });
+            },
+            child: DayHeader(
+              day: widget.daySchedule,
+              date: widget.date,
+              isExpanded: isExpanded,
+            )),
+        AnimatedSize(
+          duration: Durations.short4,
+          curve: Curves.linear,
+          child: !isExpanded
+              ? SizedBox.shrink()
+              : Column(children: [
+                  ...widget.daySchedule.nonEmptyPairs.map(
                     (pair) => Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: _CompactLessonCard(
@@ -107,10 +111,11 @@ class _LessonCardState extends State<_LessonCard> {
                         selectedGroup: widget.selectedGroup,
                       ),
                     ),
-                  ),]),
-                )
-              ],
-            );
+                  ),
+                ]),
+        )
+      ],
+    );
   }
 }
 
@@ -129,7 +134,7 @@ class _CompactLessonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final schedulePair = pair.schedulePairs.first;
     return BorderBox(
-      color: pair.isCurrentPair? Theme.of(context).canvasColor :null,
+      color: pair.isCurrentPair ? Theme.of(context).canvasColor : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -170,51 +175,53 @@ class _CompactLessonCard extends StatelessWidget {
                 ),
               const Spacer(),
               if (pair.schedulePairs.length > 1)
-                LabelGroup(pairs: pair.schedulePairs.length,)
+                LabelGroup(
+                  pairs: pair.schedulePairs.length,
+                )
             ],
           ),
           const SizedBox(height: 8),
           Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 4,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color:
-                          groupColors[schedulePair.cleanGroup] ?? Colors.grey,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 4,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: groupColors[schedulePair.cleanGroup] ?? Colors.grey,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 2,
-                      children: [
-                        Text(
-                          schedulePair.subject,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 2,
+                    children: [
+                      Text(
+                        schedulePair.subject,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
                         ),
-                        Text(
-                          schedulePair.teacher,
-                          style: TextStyle(
-                            fontSize: 12,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        schedulePair.teacher,
+                        style: TextStyle(
+                          fontSize: 12,
                         ),
-                        Wrap(
-                          spacing: 5,
-                          children: [
-                            ...pair.schedulePairs.map((sp)=>Container(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Wrap(
+                        spacing: 5,
+                        children: [
+                          ...pair.schedulePairs.map(
+                            (sp) => Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 4, vertical: 1),
                               decoration: BoxDecoration(
@@ -230,27 +237,28 @@ class _CompactLessonCard extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ),),
-                            Row(
-                              spacing: 2,
-                              children: [
-                                Icon(Icons.meeting_room, size: 12), 
-                                Text(
-                              schedulePair.audience,
-                              style: TextStyle(
-                                fontSize: 11,
+                            ),
+                          ),
+                          Row(
+                            spacing: 2,
+                            children: [
+                              Icon(Icons.meeting_room, size: 12),
+                              Text(
+                                schedulePair.audience,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                ),
                               ),
-                            ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );

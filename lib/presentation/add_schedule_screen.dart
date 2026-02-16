@@ -3,21 +3,21 @@ import '../models/request_type.dart';
 import '../models/schedule_model.dart';
 import '../services/schedule_search_service.dart';
 
-class AddSchedulePage extends StatefulWidget {
+class AddScheduleScreen extends StatefulWidget {
   static Route<ScheduleModel> route() {
     return MaterialPageRoute(
-      builder: (_) => const AddSchedulePage._(),
+      builder: (_) => const AddScheduleScreen._(),
       fullscreenDialog: true,
     );
   }
 
-  const AddSchedulePage._();
+  const AddScheduleScreen._();
 
   @override
-  State<AddSchedulePage> createState() => _AddSchedulePageState();
+  State<AddScheduleScreen> createState() => _AddScheduleScreenState();
 }
 
-class _AddSchedulePageState extends State<AddSchedulePage> {
+class _AddScheduleScreenState extends State<AddScheduleScreen> {
   final _controller = TextEditingController();
   final _searchService = ScheduleSearchService();
   final _focusNode = FocusNode();

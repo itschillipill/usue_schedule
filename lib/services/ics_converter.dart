@@ -8,7 +8,6 @@ import '../models/pair.dart';
 import '../models/schedule_pair.dart';
 import '../models/schedule_response.dart';
 
-
 class ICalendarConverter {
   // Основной метод - один календарь для преподавателя
   static ICalendar convertScheduleToCalendar(
@@ -19,11 +18,11 @@ class ICalendarConverter {
     String? timezone,
   }) {
     final events = <ICalendarEvent>[];
-    
+
     for (final day in schedule.schedules) {
       final dayDate = date_utils.DateTimeUtils.parseDate(day.date);
       if (dayDate == null) continue;
-      
+
       for (final pair in day.nonEmptyPairs) {
         for (final schedulePair in pair.schedulePairs) {
           final event = _convertPairToEvent(
@@ -38,14 +37,14 @@ class ICalendarConverter {
         }
       }
     }
-    
+
     return ICalendar(
       calendarName: calendarName,
       timezone: timezone ?? 'Europe/Yekaterinburg',
       events: events,
     );
   }
-  
+
   static ICalendarEvent? _convertPairToEvent(
     SchedulePair schedulePair,
     Pair pair,
@@ -56,9 +55,10 @@ class ICalendarConverter {
       // Парсим время начала и окончания
       final timeRange = _parseTimeRange(pair.time);
       if (timeRange == null) return null;
-      
-      final PairTime pairTime = Constants.pairTimes[pair.number]?? PairTime(start: (0,0), end: (0,0));
-      
+
+      final PairTime pairTime = Constants.pairTimes[pair.number] ??
+          PairTime(start: (0, 0), end: (0, 0));
+
       // Создаем DateTime объекты
       final startDateTime = DateTime(
         dayDate.year,
@@ -67,7 +67,7 @@ class ICalendarConverter {
         pairTime.start.$1,
         pairTime.start.$2,
       );
-      
+
       final endDateTime = DateTime(
         dayDate.year,
         dayDate.month,
@@ -75,18 +75,18 @@ class ICalendarConverter {
         pairTime.end.$1,
         pairTime.end.$2,
       );
-      
+
       // Формируем описание (все группы в одном событии)
       final description = _buildDescription(schedulePair);
-      
+
       // Формируем summary с указанием группы
       final summary = _buildSummary(schedulePair);
-      
+
       // Местоположение
-      final location = schedulePair.audience.isNotEmpty 
+      final location = schedulePair.audience.isNotEmpty
           ? 'Ауд. ${schedulePair.audience}, УрГЭУ'
           : 'УрГЭУ';
-      
+
       return ICalendarEvent(
         start: startDateTime,
         end: endDateTime,
@@ -113,7 +113,7 @@ class ICalendarConverter {
       return null;
     }
   }
-  
+
   // Метод для преподавателя - ВСЕ группы в ОДНОМ файле
   static ICalendar $convertScheduleToCalendar(
     ScheduleResponse schedule,
@@ -121,12 +121,12 @@ class ICalendarConverter {
   ) {
     final events = <ICalendarEvent>[];
     final eventsByTimeSlot = <String, List<ICalendarEvent>>{};
-    
+
     // Сначала группируем события по дате и времени
     for (final day in schedule.schedules) {
       final dayDate = date_utils.DateTimeUtils.parseDate(day.date);
       if (dayDate == null) continue;
-      
+
       for (final pair in day.nonEmptyPairs) {
         for (final schedulePair in pair.schedulePairs) {
           final event = _convertPairToEvent(
@@ -135,7 +135,7 @@ class ICalendarConverter {
             dayDate,
             queryValue: queryValue,
           );
-          
+
           if (event != null) {
             final timeSlotKey = '${day.date}_${pair.time}';
             eventsByTimeSlot.putIfAbsent(timeSlotKey, () => []).add(event);
@@ -143,7 +143,7 @@ class ICalendarConverter {
         }
       }
     }
-    
+
     // Теперь объединяем события в одни и те же слоты времени
     for (final slotEvents in eventsByTimeSlot.values) {
       if (slotEvents.length == 1) {
@@ -158,66 +158,68 @@ class ICalendarConverter {
         }
       }
     }
-    
+
     return ICalendar(
       calendarName: 'Расписание: $queryValue',
       events: events,
     );
   }
-  
+
   // Объединение нескольких событий в один временной слот
-  static ICalendarEvent? _mergeEvents(List<ICalendarEvent> events, String queryValue) {
+  static ICalendarEvent? _mergeEvents(
+      List<ICalendarEvent> events, String queryValue) {
     if (events.isEmpty) return null;
-    
+
     // Берем первое событие как базовое
     final firstEvent = events.first;
-    
+
     // Собираем информацию о всех группах
     final groups = <String>{};
     final subjects = <String>{};
     final audiences = <String>{};
     final descriptions = <String>{};
-    
+
     for (final event in events) {
       final group = event.customProperties?['X-УрГЭУ-Группа'] ?? '';
       final subject = _extractSubjectFromSummary(event.summary);
-      final audience = event.location?.replaceAll('Ауд. ', '').replaceAll(', УрГЭУ', '') ?? '';
-      
+      final audience =
+          event.location?.replaceAll('Ауд. ', '').replaceAll(', УрГЭУ', '') ??
+              '';
+
       if (group.isNotEmpty) groups.add(group);
       if (subject.isNotEmpty) subjects.add(subject);
       if (audience.isNotEmpty) audiences.add(audience);
-      
+
       if (event.description != null) {
         descriptions.add(event.description!);
       }
     }
-    
+
     // Создаем объединенный summary
     final subjectStr = subjects.join('/');
     final groupsStr = groups.join(', ');
     final summary = '$subjectStr ($groupsStr)';
-    
+
     // Создаем объединенное описание
     final descriptionBuffer = StringBuffer();
     descriptionBuffer.writeln('Преподаватель: ${events.first.organizer}');
     descriptionBuffer.writeln('Группы: ${groups.join(', ')}');
-    
+
     if (subjects.isNotEmpty) {
       descriptionBuffer.writeln('Предметы: ${subjects.join('/')}');
     }
-    
+
     if (audiences.isNotEmpty) {
       descriptionBuffer.writeln('Аудитории: ${audiences.join(', ')}');
     }
-    
+
     descriptionBuffer.writeln('');
     descriptionBuffer.write('Создано в приложении "Расписание УрГЭУ"');
-    
+
     // Создаем объединенное местоположение
-    final location = audiences.isNotEmpty 
-        ? 'Ауд. ${audiences.join(', ')}, УрГЭУ'
-        : 'УрГЭУ';
-    
+    final location =
+        audiences.isNotEmpty ? 'Ауд. ${audiences.join(', ')}, УрГЭУ' : 'УрГЭУ';
+
     return ICalendarEvent(
       start: firstEvent.start,
       end: firstEvent.end,
@@ -237,31 +239,31 @@ class ICalendarConverter {
       },
     );
   }
-  
+
   static String _extractSubjectFromSummary(String summary) {
     // Убираем группу из summary, если есть в скобках
     final regex = RegExp(r'^(.*?)\s*\([^)]*\)$');
     final match = regex.firstMatch(summary);
     return match?.group(1)?.trim() ?? summary;
   }
-  
+
   static (DateTime start, DateTime end)? _parseTimeRange(String timeString) {
     try {
       final parts = timeString.split('-');
       if (parts.length != 2) return null;
-      
+
       final startParts = parts[0].trim().split(':');
       final endParts = parts[1].trim().split(':');
-      
+
       if (startParts.length != 2 || endParts.length != 2) return null;
-      
+
       final startHour = int.parse(startParts[0]);
       final startMinute = int.parse(startParts[1]);
       final endHour = int.parse(endParts[0]);
       final endMinute = int.parse(endParts[1]);
-      
+
       final now = DateTime.now();
-      
+
       return (
         DateTime(now.year, now.month, now.day, startHour, startMinute),
         DateTime(now.year, now.month, now.day, endHour, endMinute),
@@ -271,47 +273,47 @@ class ICalendarConverter {
       return null;
     }
   }
-  
+
   static String _buildDescription(SchedulePair schedulePair) {
     final buffer = StringBuffer();
-    
+
     buffer.writeln('Предмет: ${schedulePair.subject}');
     buffer.writeln('Тип занятия: ${schedulePair.lessonType}');
     buffer.writeln('Группа: ${schedulePair.group}');
     buffer.writeln('Преподаватель: ${schedulePair.teacher}');
-    
+
     if (schedulePair.audience.isNotEmpty) {
       buffer.writeln('Аудитория: ${schedulePair.audience}');
     }
-    
+
     if (schedulePair.comment.isNotEmpty) {
       buffer.writeln('Примечание: ${schedulePair.comment}');
     }
-    
+
     buffer.writeln('');
     buffer.write('Создано в приложении "Расписание УрГЭУ"');
-    
+
     return buffer.toString();
   }
-  
+
   static String _buildSummary(SchedulePair schedulePair) {
     final parts = <String>[];
-    
+
     // Добавляем предмет
     parts.add(schedulePair.subject);
-    
+
     // Добавляем группу (укороченную версию если длинная)
     String groupDisplay = schedulePair.group;
     if (groupDisplay.length > 15) {
       groupDisplay = schedulePair.cleanGroup;
     }
     parts.add('($groupDisplay)');
-    
+
     // Добавляем тип занятия если не "Занятие"
     if (schedulePair.lessonType != 'Занятие') {
       parts.add('(${schedulePair.lessonType})');
     }
-    
+
     return parts.join(' ');
   }
 }

@@ -4,13 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/theme/schedule_styles.dart';
 import '../cubit/schedule.dart';
-import '../models/schedule_model.dart';
-import '../widgets/borde_box.dart';
-import 'add_schedule_page.dart';
-import 'show_schedule_page.dart';
+import 'widgets/borde_box.dart';
+import 'add_schedule_screen.dart';
+import 'show_schedule_screen.dart';
+import 'widgets/schedule_card.dart';
 
-class SchedulePage extends StatelessWidget {
-  const SchedulePage({super.key});
+class ScheduleScreen extends StatelessWidget {
+  const ScheduleScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,6 @@ class SchedulePage extends StatelessWidget {
               style: Theme.of(context).textTheme.displaySmall,
             ),
             centerTitle: true,
-            elevation: 0,
           ),
           body: DecoratedBox(
             decoration: ScheduleStyles.linearBackgroundDecoration(context),
@@ -65,8 +64,8 @@ class SchedulePage extends StatelessWidget {
                   )
                 else ...[
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
                     child: Text(
                       "Мои расписания",
                       style: Theme.of(context).textTheme.titleLarge,
@@ -76,7 +75,8 @@ class SchedulePage extends StatelessWidget {
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       itemCount: mySchedules.length,
-                      separatorBuilder: (context, index) => SizedBox(height: 12),
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final schedule = mySchedules[index];
                         return OpenContainer(
@@ -84,14 +84,14 @@ class SchedulePage extends StatelessWidget {
                                 Theme.of(context).scaffoldBackgroundColor,
                             closedElevation: 0,
                             closedBuilder: (context, action) => BorderBox(
-                                  child: _ScheduleCard(
+                                  child: ScheduleCard(
                                     schedule: schedule,
                                     onDelete: () =>
                                         scheduleCubit.removeSchedule(schedule),
                                   ),
                                 ),
                             openBuilder: (context, action) =>
-                                ShowSchedulePage(params: schedule));
+                                ShowScheduleScreen(params: schedule));
                       },
                     ),
                   ),
@@ -103,7 +103,7 @@ class SchedulePage extends StatelessWidget {
             onPressed: () async {
               final newSchedule = await Navigator.push(
                 context,
-                AddSchedulePage.route(),
+                AddScheduleScreen.route(),
               );
               if (newSchedule == null) return;
               scheduleCubit.addSchedule(newSchedule);
@@ -119,57 +119,6 @@ class SchedulePage extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _ScheduleCard extends StatelessWidget {
-  final ScheduleModel schedule;
-  final VoidCallback onDelete;
-
-  const _ScheduleCard({
-    required this.schedule,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      spacing: 15,
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            schedule.requestType.icon,
-            color: Theme.of(context).colorScheme.primary,
-            size: 24,
-          ),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 4,
-            children: [
-              Text(
-                schedule.queryValue,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(schedule.requestType.text,
-                  style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ),
-        ),
-        IconButton(
-          onPressed: onDelete,
-          icon: Icon(Icons.delete_outline),
-        ),
-      ],
     );
   }
 }

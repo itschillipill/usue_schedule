@@ -1,1 +1,1 @@
-void $platformInit(){}
+void $platformInit() {}

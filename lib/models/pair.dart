@@ -47,7 +47,7 @@ class Pair {
 
   Pair filterByGroup(String groupName) {
     final filtered =
-        schedulePairs.where((sp) => sp.cleanGroup==groupName).toList();
+        schedulePairs.where((sp) => sp.cleanGroup == groupName).toList();
 
     return Pair(
       number: number,
