@@ -34,15 +34,16 @@ class App extends StatelessWidget {
         BlocProvider(create: (_) => deps.scheduleCubit),
         BlocProvider(create: (_) => deps.settingsCubit),
       ],
-      child: BlocBuilder<SettingsCubit, SettingsState>(
-        builder: (context, state) {
+      child: BlocSelector<SettingsCubit, SettingsState, ThemeMode>(
+        selector: (state) => state.themeMode,
+        builder: (context, themeMode) {
           return MaterialApp(
             navigatorKey: MessageServise.navigatorKey,
             scaffoldMessengerKey: MessageServise.scaffoldMessengerKey,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
-            themeMode: state.themeMode,
+            themeMode: themeMode,
             home: AppGate(),
             builder: (context, child) {
               return MediaQuery(
