@@ -4,6 +4,7 @@ import 'package:usue_schedule/models/request_type.dart';
 import 'package:usue_schedule/presentation/widgets/day_view.dart';
 import 'package:usue_schedule/presentation/widgets/filter_button.dart';
 import 'package:usue_schedule/presentation/widgets/load_view.dart';
+import '../core/theme/schedule_styles.dart';
 import '../models/schedule_model.dart';
 import '../models/schedule_response.dart';
 import '../services/api.dart';
@@ -41,14 +42,16 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   List<String> _availableGroups = [];
   String? _selectedTeacherFilter;
   List<String> _availableTeachers = [];
-  Map<String, Color> _groupColors = {};
-  Map<String, Color> _generatedColors = {};
+  final Map<String, Color> _groupColors = {};
 
   ScheduleResponse? _lastResponse;
   String? _error;
   bool _isLoading = false;
 
   StreamSubscription<ScheduleResponse?>? _subscription;
+
+  bool get _isFiltered =>
+      _selectedGroupFilter != null || _selectedTeacherFilter != null;
 
   @override
   void initState() {
@@ -98,29 +101,16 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   }
 
   void _loadSchedule() {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    if (widget.params.requestType == RequestType.audience) {
-      _apiService.search(
-        (
-          _isDayView ? _selectedDate : _selectedWeek.first,
-          _isDayView ? _selectedDate : _selectedWeek.last,
-          widget.params.requestType,
-          widget.params.queryValue.replaceAll(RegExp(r'[^0-9]'), ''),
-        ),
-      );
-    } else {
-      _apiService.search(
-        (
-          _isDayView ? _selectedDate : _selectedWeek.first,
-          _isDayView ? _selectedDate : _selectedWeek.last,
-          widget.params.requestType,
-          widget.params.queryValue,
-        ),
-      );
-    }
+    final start = _isDayView ? _selectedDate : _selectedWeek.first;
+    final end = _isDayView ? _selectedDate : _selectedWeek.last;
+
+    final query = widget.params.requestType == RequestType.audience
+        ? widget.params.queryValue.replaceAll(RegExp(r'[^0-9]'), '')
+        : widget.params.queryValue;
+
+    _apiService.search((start, end, widget.params.requestType, query));
   }
 
   void _extractGroupsAndTeachersFromResponse(ScheduleResponse response) {
@@ -142,27 +132,19 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   }
 
   void _generateGroupColors() {
-    final colorList = [
-      Colors.blue.shade400,
-      Colors.green.shade400,
-      Colors.orange.shade400,
-      Colors.purple.shade400,
-      Colors.red.shade400,
-      Colors.teal.shade400,
-      Colors.pink.shade400,
-      Colors.indigo.shade400,
-    ];
-
-    _generatedColors = {};
-    for (var i = 0; i < _availableGroups.length; i++) {
-      _generatedColors[_availableGroups[i]] = colorList[i % colorList.length];
-    }
-
-    _groupColors = {..._generatedColors};
-    if (_selectedGroupFilter != null &&
-        _generatedColors.containsKey(_selectedGroupFilter)) {
-      _groupColors[_selectedGroupFilter!] = Colors.amber.shade600;
-    }
+    _groupColors
+      ..clear()
+      ..addEntries(
+        _availableGroups.asMap().entries.map((entry) {
+          final index = entry.key;
+          final group = entry.value;
+          return MapEntry(
+              group,
+              identical(group, _selectedGroupFilter)
+                  ? Colors.amber.shade600
+                  : ScheduleStyles.getGroupColor(index));
+        }),
+      );
   }
 
   void _onDateSelected(DateTime date) {
@@ -176,17 +158,14 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
     _loadSchedule();
   }
 
-  void _navigateToPrevious() {
-    _selectedDate = _selectedDate.subtract(Duration(days: _isDayView ? 1 : 7));
+  void _shiftDate(int days) {
+    _selectedDate = _selectedDate.add(Duration(days: days));
     _updateWeekDates();
     _loadSchedule();
   }
 
-  void _navigateToNext() {
-    _selectedDate = _selectedDate.add(Duration(days: _isDayView ? 1 : 7));
-    _updateWeekDates();
-    _loadSchedule();
-  }
+  void _navigateToPrevious() => _shiftDate(_isDayView ? -1 : -7);
+  void _navigateToNext() => _shiftDate(_isDayView ? 1 : 7);
 
   void _toggleFilter({required String? group, required String? teacher}) {
     _selectedGroupFilter = _selectedGroupFilter == group ? null : group;
@@ -210,6 +189,7 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
           headerSliverBuilder: (context, _) {
             return [
               SliverAppBar(
+                actionsPadding: EdgeInsets.symmetric(horizontal: 4),
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -233,7 +213,7 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
                     availableGroups: _availableGroups,
                     availableTeachers: _availableTeachers,
                     requestType: widget.params.requestType,
-                    generatedColors: _generatedColors,
+                    generatedColors: _groupColors,
                     toggleFilter: _toggleFilter,
                   ),
                   PopupMenuButton<String>(
@@ -280,54 +260,37 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   }
 
   Widget _buildBody() {
-    if (_isLoading) {
-      return LoadView();
-    }
-
+    if (_isLoading) return LoadView();
     if (_error != null) {
-      return ErrorView(
-        error: _error!,
-        onRetry: _loadSchedule,
-      );
+      return ErrorView(error: _error!, onRetry: _loadSchedule);
     }
-
     if (_lastResponse == null) {
-      return const Center(
-        child: Text('Загрузка данных...'),
-      );
+      return const Center(child: Text('Загрузка данных...'));
     }
 
-    final data = _lastResponse!;
-    final filteredData = data
+    final filteredData = _lastResponse!
         .filterResponseByGroup(_selectedGroupFilter)
         .filterResponseByTeacher(_selectedTeacherFilter);
 
-    if (_isDayView) {
-      return DayView(
-        data: filteredData,
-        isFiltered:
-            (_selectedGroupFilter != null || _selectedTeacherFilter != null),
-        selectedDate: _selectedDate,
-        groupColors: _groupColors,
-        buildEmptyState: BuildEmptyState(
-          isFiltered:
-              (_selectedGroupFilter != null || _selectedTeacherFilter != null),
-          isDayView: true,
-          clearFilters: clearFilters,
-        ),
-      );
-    } else {
-      return WeekView(
-        buildEmptyState: BuildEmptyState(
-          isFiltered:
-              (_selectedGroupFilter != null || _selectedTeacherFilter != null),
-          isDayView: _isDayView,
-          clearFilters: clearFilters,
-        ),
-        data: filteredData,
-        selectedWeek: _selectedWeek,
-        groupColors: _groupColors,
-      );
-    }
+    final emptyState = BuildEmptyState(
+      isFiltered: _isFiltered,
+      isDayView: _isDayView,
+      clearFilters: clearFilters,
+    );
+
+    return _isDayView
+        ? DayView(
+            data: filteredData,
+            isFiltered: _isFiltered,
+            selectedDate: _selectedDate,
+            groupColors: _groupColors,
+            buildEmptyState: emptyState,
+          )
+        : WeekView(
+            data: filteredData,
+            selectedWeek: _selectedWeek,
+            groupColors: _groupColors,
+            buildEmptyState: emptyState,
+          );
   }
 }

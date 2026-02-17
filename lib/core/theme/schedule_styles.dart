@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:usue_schedule/core/theme/app_pallete.dart';
 
 class ScheduleStyles {
   static BoxDecoration linearBackgroundDecoration(BuildContext context) {
@@ -13,6 +14,10 @@ class ScheduleStyles {
       ),
     );
   }
+
+  // Цвета для групп (учитывает тему)
+  static Color getGroupColor(int index) =>
+      AppPallete.groupColors[index % AppPallete.groupColors.length];
 
   static Color getLessonTypeColor(String type) {
     switch (type) {

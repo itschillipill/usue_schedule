@@ -576,12 +576,6 @@ extension ThemeExtension on BuildContext {
 
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 
-  // Цвета для групп (учитывает тему)
-  Color getGroupColor(int index) {
-    final colors = AppPallete.groupColors;
-    return colors[index % colors.length];
-  }
-
   // Цвет для текущей пары
   Color get currentPairColor => isDarkMode
       ? AppPallete.orange.withValues(alpha: 0.2)
