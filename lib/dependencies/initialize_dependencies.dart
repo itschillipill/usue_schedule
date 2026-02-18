@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:usue_schedule/cubit/settings_cubit.dart';
+import 'package:usue_schedule/controlles/settings_cubit.dart';
 
-import '../cubit/schedule.dart';
+import '../controlles/cache_provider.dart';
+import '../controlles/schedule_cubit.dart';
 import 'dependencies.dart';
 import 'platform/initialization_vm.dart'
     if (dart.library.html) 'platform/initialization_js.dart';
@@ -36,6 +37,7 @@ List<(String, _InitializationStep)> get _initializationSteps => [
 
           deps.scheduleCubit = MyScheduleCubit(prefs: prefs);
           deps.settingsCubit = SettingsCubit(prefs: prefs);
+          deps.cacheProvider = CacheProvider();
         }
       ),
       //("Fake Waiting",(_)=> Future.delayed(Duration(seconds: 2)))

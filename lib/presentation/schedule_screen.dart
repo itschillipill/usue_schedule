@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/theme/schedule_styles.dart';
-import '../cubit/schedule.dart';
+import '../controlles/schedule_cubit.dart';
 import 'widgets/borde_box.dart';
 import 'add_schedule_screen.dart';
 import 'show_schedule_screen.dart';

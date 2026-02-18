@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:usue_schedule/core/constants.dart';
-import 'package:usue_schedule/cubit/settings_cubit.dart';
+import 'package:usue_schedule/controlles/settings_cubit.dart';
 import 'package:usue_schedule/presentation/widgets/borde_box.dart';
 
 import '../core/theme/schedule_styles.dart';
+import 'cache_manager_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -102,18 +104,12 @@ class SettingsScreen extends StatelessWidget {
               icon: Icons.storage,
               title: 'Управление данными',
               children: [
-                _buildSettingTile(
-                  context,
-                  icon: Icons.delete_sweep,
-                  title: 'Очистить кэш',
-                  subtitle: 'Удалить данные расписаний',
-                  onTap: () => _showCacheClearDialog(
-                    context,
-                    onClear: () async {
-                      await settingsCubit.prefs.clear();
-                    },
-                  ),
-                ),
+                _buildSettingTile(context,
+                    icon: Icons.delete_sweep,
+                    title: 'Очистить кэш',
+                    subtitle: 'Удалить данные расписаний',
+                    onTap: () =>
+                        Navigator.push(context, CacheManagerScreen.route())),
               ],
             ),
             SizedBox(height: 5),
@@ -135,30 +131,6 @@ class SettingsScreen extends StatelessWidget {
                   title: 'Оценить приложение',
                   subtitle: 'Оставьте отзыв в магазине',
                   onTap: _rateApp,
-                  trailing: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.amber.shade400, Colors.orange],
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.star, size: 14, color: Colors.white),
-                        SizedBox(width: 4),
-                        Text(
-                          'Оценить',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
                 _buildSettingTile(
                   context,
@@ -334,49 +306,6 @@ class SettingsScreen extends StatelessWidget {
             ],
           ],
         ),
-      ),
-    );
-  }
-
-  Future<void> _showCacheClearDialog(BuildContext context,
-      {VoidCallback? onClear}) async {
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.delete_sweep, color: Colors.orange),
-            SizedBox(width: 12),
-            Text('Очистить кэш'),
-          ],
-        ),
-        content: const Text(
-          'Вы уверены, что хотите очистить кэш приложения? '
-          'Это удалит сохраненные расписания.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              onClear?.call();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Кэш успешно очищен'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Очистить'),
-          ),
-        ],
       ),
     );
   }
@@ -622,9 +551,13 @@ class SettingsScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              final url = Uri.parse(Constants.telegramContact);
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url);
+              try {
+                await launchUrlString(Constants.telegramContact);
+              } on Object catch (error, stackTrace) {
+                Error.safeToString(error);
+                stackTrace.toString();
+                rethrow;
+              } finally {
                 if (context.mounted) Navigator.pop(context);
               }
             },

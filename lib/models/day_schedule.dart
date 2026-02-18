@@ -3,13 +3,11 @@ import 'pair.dart';
 class DaySchedule {
   final String date;
   final String weekDay;
-  final bool isCurrentDate;
-  final List<Pair> pairs;
+  final Iterable<Pair> pairs;
 
   DaySchedule({
     required this.date,
     required this.weekDay,
-    required this.isCurrentDate,
     required this.pairs,
   });
 
@@ -17,13 +15,15 @@ class DaySchedule {
     return DaySchedule(
       date: json['date'] as String? ?? '',
       weekDay: json['weekDay'] as String? ?? '',
-      isCurrentDate: (json['isCurrentDate'] as int? ?? 0) == 1,
       pairs: (json['pairs'] as List<dynamic>?)
               ?.map((e) => Pair.fromJson(e))
               .toList() ??
           [],
     );
   }
+
+  DaySchedule empty() => DaySchedule(
+      date: date, weekDay: weekDay, pairs: []);
 
   List<Pair> get nonEmptyPairs =>
       pairs.where((p) => p.schedulePairs.isNotEmpty).toList();
@@ -66,7 +66,6 @@ class DaySchedule {
     return DaySchedule(
       date: date,
       weekDay: weekDay,
-      isCurrentDate: isCurrentDate,
       pairs: filteredPairs,
     );
   }
@@ -77,7 +76,6 @@ class DaySchedule {
     return DaySchedule(
       date: date,
       weekDay: weekDay,
-      isCurrentDate: isCurrentDate,
       pairs: filteredPairs,
     );
   }
@@ -86,8 +84,7 @@ class DaySchedule {
     return {
       'date': date,
       'weekDay': weekDay,
-      'isCurrentDate': isCurrentDate ? 1 : 0,
-      'pairs': pairs.map((e) => e.toJson()).toList(),
+      'pairs': nonEmptyPairs.map((e) => e.toJson()).toList(),
     };
   }
 }

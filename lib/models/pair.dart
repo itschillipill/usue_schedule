@@ -1,15 +1,14 @@
+import 'pair_time.dart';
 import 'schedule_pair.dart';
 
 class Pair {
   final int number;
   final String time;
-  final bool isCurrentPair;
   final List<SchedulePair> schedulePairs;
 
   Pair({
     required this.number,
     required this.time,
-    required this.isCurrentPair,
     required this.schedulePairs,
   });
 
@@ -17,7 +16,6 @@ class Pair {
     return Pair(
       number: json['N'] as int? ?? 1,
       time: json['time'] as String? ?? '',
-      isCurrentPair: (json['isCurrentPair'] as int? ?? 0) == 1,
       schedulePairs: (json['schedulePairs'] as List<dynamic>?)
               ?.map((e) => SchedulePair.fromJson(e))
               .toList() ??
@@ -32,6 +30,8 @@ class Pair {
     }
     return ('', '');
   }
+
+  bool isCurrentPair(DateTime date) => PairTime.isCurrentPair(number, date: date);
 
   List<String> getAllGroups() {
     return schedulePairs.map((sp) => sp.group).toSet().toList();
@@ -52,7 +52,6 @@ class Pair {
     return Pair(
       number: number,
       time: time,
-      isCurrentPair: isCurrentPair,
       schedulePairs: filtered,
     );
   }
@@ -64,7 +63,6 @@ class Pair {
     return Pair(
       number: number,
       time: time,
-      isCurrentPair: isCurrentPair,
       schedulePairs: filtered,
     );
   }
@@ -73,7 +71,6 @@ class Pair {
     return {
       'N': number,
       'time': time,
-      'isCurrentPair': isCurrentPair ? 1 : 0,
       'schedulePairs': schedulePairs.map((e) => e.toJson()).toList(),
     };
   }

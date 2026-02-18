@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:usue_schedule/presentation/widgets/borde_box.dart';
 
+import '../../core/utils/date_utils.dart';
 import '../../models/day_schedule.dart';
 
 class DayHeader extends StatelessWidget {
@@ -12,7 +13,7 @@ class DayHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dayName = day.weekDay.isNotEmpty ? day.weekDay : date.toString();
-    bool isCurrent = day.isCurrentDate;
+    bool isCurrent = DateTimeUtils.isToday(date);
 
     return BorderBox(
       padding: const EdgeInsets.all(8),

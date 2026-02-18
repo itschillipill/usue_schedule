@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
 import 'core/theme/theme.dart';
-import 'cubit/settings_cubit.dart';
+import 'controlles/settings_cubit.dart';
 import 'dependencies/widgets/intialization.dart';
 import 'presentation/app_gate.dart';
 import 'presentation/splash_screen.dart';

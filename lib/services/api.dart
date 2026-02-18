@@ -3,7 +3,9 @@ import 'dart:math' show Random;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' show debugPrint;
 import 'package:rxdart/rxdart.dart';
+import 'package:usue_schedule/models/schedule_model.dart';
 
+import '../controlles/cache_provider.dart';
 import '../models/request_type.dart';
 import '../models/schedule_response.dart';
 
@@ -17,10 +19,11 @@ typedef Params = (
 // Сервис для работы с API
 class ApiService {
   final _querySubject = PublishSubject<Params>();
+  final CacheProvider? cacheProvider;
   final Dio _dio = Dio();
   final String _baseUrl = 'https://www.usue.ru/schedule/';
 
-  ApiService() {
+  ApiService({this.cacheProvider}) {
     _dio.options.headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -56,40 +59,50 @@ class ApiService {
     required String queryValue,
   }) async {
     try {
-      // Форматируем даты в нужный формат
-      final formattedStartDate = _formatDate(startDate);
-      final formattedEndDate = _formatDate(endDate);
-
-      // Генерируем timestamp (как в примере)
-      final timestamp = _generateTimestamp();
-
-      // Параметры запроса
-      final params = {
-        't': timestamp,
-        'action': 'show',
-        'startDate': formattedStartDate,
-        'endDate': formattedEndDate,
-        requestType.query: queryValue,
-      };
-
-      debugPrint('Запрос к API: $_baseUrl');
-      debugPrint('Параметры: $params');
-
-      // Выполняем запрос
-      final response = await _dio.get(
-        _baseUrl,
-        queryParameters: params,
-      );
-
-      // Парсим ответ
-      if (response.statusCode == 200) {
-        final scheduleResponse =
-            ScheduleResponse.parseFromApiResponse(response.data);
-        debugPrint(
-            'Получено ${scheduleResponse.schedules.length} дней расписания');
-        return scheduleResponse;
+      final response = await cacheProvider?.getSchedule(
+          ScheduleModel(requestType: requestType, queryValue: queryValue),
+          startDate,
+          endDate);
+      if (response != null) {
+        return response;
       } else {
-        throw Exception('Ошибка API: ${response.statusCode}');
+        // Форматируем даты в нужный формат
+        final formattedStartDate = _formatDate(startDate);
+        final formattedEndDate = _formatDate(endDate);
+        // Генерируем timestamp (как в примере)
+        final timestamp = _generateTimestamp();
+
+        // Параметры запроса
+        final params = {
+          't': timestamp,
+          'action': 'show',
+          'startDate': formattedStartDate,
+          'endDate': formattedEndDate,
+          requestType.query: queryValue,
+        };
+
+        debugPrint('Запрос к API: $_baseUrl');
+        debugPrint('Параметры: $params');
+
+        // Выполняем запрос
+        final response = await _dio.get(
+          _baseUrl,
+          queryParameters: params,
+        );
+
+        // Парсим ответ
+        if (response.statusCode == 200) {
+          final scheduleResponse =
+              ScheduleResponse.parseFromApiResponse(response.data);
+          debugPrint(
+              'Получено ${scheduleResponse.schedules.length} дней расписания');
+          cacheProvider?.saveSchedule(
+              ScheduleModel(requestType: requestType, queryValue: queryValue),
+              scheduleResponse);
+          return scheduleResponse;
+        } else {
+          throw Exception('Ошибка API: ${response.statusCode}');
+        }
       }
     } catch (e) {
       debugPrint('Ошибка при получении расписания: $e');

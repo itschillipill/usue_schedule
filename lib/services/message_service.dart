@@ -38,7 +38,9 @@ class MessageServise {
                   children: [
                     const CircularProgressIndicator(),
                     if (message != null)
-                      Text(message, style: const TextStyle(fontSize: 16, color: Colors.white)),
+                      Text(message,
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.white)),
                   ],
                 ),
               ),

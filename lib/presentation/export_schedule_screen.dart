@@ -44,7 +44,7 @@ class _ExportScheduleScreenState extends State<ExportScheduleScreen> {
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 6));
   ExportFormat _selectedFormat = ExportFormat.ics;
-  bool shareAfterSavig = true;
+  bool shareAfterSavig = false;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +75,7 @@ class _ExportScheduleScreenState extends State<ExportScheduleScreen> {
                   title: Text("Поделиться после экспорта"),
                   value: shareAfterSavig,
                   onChanged: (v) => setState(() => shareAfterSavig = v)),
-              _buildExportButton(context),
+              _buildExportButton(),
             ],
           ),
         ),
@@ -212,7 +212,7 @@ class _ExportScheduleScreenState extends State<ExportScheduleScreen> {
     );
   }
 
-  Widget _buildExportButton(BuildContext context) {
+  Widget _buildExportButton() {
     return SizedBox(
       width: double.infinity,
       child: FilledButton.icon(
@@ -310,6 +310,7 @@ class _ExportScheduleScreenState extends State<ExportScheduleScreen> {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
+                  duration: Durations.extralong1,
                   content: Text(
                       'Еще не реализован экспорт в формат ${_selectedFormat.label}..'),
                   backgroundColor: Theme.of(context).colorScheme.primary,

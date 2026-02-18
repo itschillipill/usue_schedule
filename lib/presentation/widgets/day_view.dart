@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
-import 'package:usue_schedule/core/constants.dart';
-import 'package:usue_schedule/core/utils/date_utils.dart';
 import 'package:usue_schedule/presentation/widgets/borde_box.dart';
 import '../../models/pair.dart';
+import '../../models/pair_time.dart';
 import '../../models/schedule_response.dart';
 
 import '../../models/day_schedule.dart';
@@ -34,7 +33,6 @@ class DayView extends StatelessWidget {
       orElse: () => DaySchedule(
         date: selectedDateStr,
         weekDay: DateFormat('EEEE').format(selectedDate),
-        isCurrentDate: DateTimeUtils.isToday(selectedDate),
         pairs: [],
       ),
     );
@@ -54,7 +52,7 @@ class DayView extends StatelessWidget {
         children: [
           DayHeader(day: daySchedule, date: selectedDate),
           ...daySchedule.nonEmptyPairs.map(
-            (pair) => _TimelineLessonCard(pair: pair, groupColors: groupColors),
+            (pair) => _TimelineLessonCard(pair: pair, groupColors: groupColors, dateTime: selectedDate,),
           ),
         ],
       ),
@@ -65,14 +63,17 @@ class DayView extends StatelessWidget {
 class _TimelineLessonCard extends StatelessWidget {
   final Pair pair;
   final Map<String, Color> groupColors;
+  final DateTime dateTime;
 
   const _TimelineLessonCard({
     required this.pair,
     required this.groupColors,
+    required this.dateTime
   });
 
   @override
   Widget build(BuildContext context) {
+    bool isCurrent = pair.isCurrentPair(dateTime);
     return BorderBox(
       padding: const EdgeInsets.symmetric(horizontal: 5),
       child: Column(
@@ -90,7 +91,7 @@ class _TimelineLessonCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    (Constants.pairTimes[pair.number] ?? pair.time).toString(),
+                    (PairTime.defaultPairTimes[pair.number] ?? pair.time).toString(),
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
@@ -106,7 +107,7 @@ class _TimelineLessonCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                if (pair.isCurrentPair)
+                if (isCurrent)
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

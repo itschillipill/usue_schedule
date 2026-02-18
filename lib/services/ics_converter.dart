@@ -1,10 +1,10 @@
 // lib/services/ics/converter.dart
 import 'package:flutter/foundation.dart' show debugPrint;
-import 'package:usue_schedule/core/constants.dart';
 
 import '../core/utils/date_utils.dart' as date_utils;
 import '../models/i_calendar_event.dart';
 import '../models/pair.dart';
+import '../models/pair_time.dart';
 import '../models/schedule_pair.dart';
 import '../models/schedule_response.dart';
 
@@ -56,7 +56,7 @@ class ICalendarConverter {
       final timeRange = _parseTimeRange(pair.time);
       if (timeRange == null) return null;
 
-      final PairTime pairTime = Constants.pairTimes[pair.number] ??
+      final PairTime pairTime = PairTime.defaultPairTimes[pair.number] ??
           PairTime(start: (0, 0), end: (0, 0));
 
       // Создаем DateTime объекты
