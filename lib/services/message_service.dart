@@ -15,13 +15,13 @@ class MessageServise {
     final context = navigatorKey.currentContext;
     if (context == null) return;
 
-    final overlayState = Overlay.of(context);
+    final overlayState = navigatorKey.currentState?.overlay;
 
     _loadingOverlay = OverlayEntry(
       builder: (_) => Stack(
         children: [
           ModalBarrier(
-            color: Colors.black.withValues(alpha: 0.4),
+            color: Colors.black.withValues(alpha: 0.6),
             dismissible: false,
           ),
           Material(
@@ -38,7 +38,7 @@ class MessageServise {
                   children: [
                     const CircularProgressIndicator(),
                     if (message != null)
-                      Text(message, style: const TextStyle(fontSize: 16)),
+                      Text(message, style: const TextStyle(fontSize: 16, color: Colors.white)),
                   ],
                 ),
               ),
@@ -48,7 +48,7 @@ class MessageServise {
       ),
     );
 
-    overlayState.insert(_loadingOverlay!);
+    overlayState?.insert(_loadingOverlay!);
   }
 
   static void _hideLoading() {
