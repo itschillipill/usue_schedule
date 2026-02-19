@@ -64,7 +64,8 @@ final class CacheManager implements CacheServiceBase {
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
     }
-    SessionLogger.instance.log(name, "Cache directory initialized: ${cacheDir.path}");
+    SessionLogger.instance
+        .log(name, "Cache directory initialized: ${cacheDir.path}");
   }
 
   Future<void> _loadActiveModels() async {
@@ -133,9 +134,11 @@ final class CacheManager implements CacheServiceBase {
     await file.writeAsString(jsonEncode(cacheData));
     await _saveActiveModels();
 
-    SessionLogger.instance.debug(name, "Расписание успешно сохранено в кеш", extra: {
-      "✅ Сохранено":"${response.schedules.length} дней в кэш для ${model.displayName}",
-      "📊 Всего дней в кэше":"${cacheData['days_count']}"
+    SessionLogger.instance
+        .debug(name, "Расписание успешно сохранено в кеш", extra: {
+      "✅ Сохранено":
+          "${response.schedules.length} дней в кэш для ${model.displayName}",
+      "📊 Всего дней в кэше": "${cacheData['days_count']}"
     });
   }
 
@@ -175,11 +178,13 @@ final class CacheManager implements CacheServiceBase {
 
       _activeModels[model.cacheKey] = model;
       await _saveActiveModels();
-      SessionLogger.instance.log(name, '📦 Загружено ${days.length} дней из кэша для ${model.displayName}');
+      SessionLogger.instance.log(name,
+          '📦 Загружено ${days.length} дней из кэша для ${model.displayName}');
 
       return ScheduleResponse(schedules: days);
-    } catch (e,s) {
-      SessionLogger.instance.error(name, "❌ Ошибка чтения кэша", error: e, stackTrace: s);
+    } catch (e, s) {
+      SessionLogger.instance
+          .error(name, "❌ Ошибка чтения кэша", error: e, stackTrace: s);
       return null;
     }
   }
@@ -323,7 +328,7 @@ final class CacheManager implements CacheServiceBase {
     }
     _activeModels.clear();
     await _saveActiveModels();
-    SessionLogger.instance.log(name,'🗑️ Весь кэш очищен');
+    SessionLogger.instance.log(name, '🗑️ Весь кэш очищен');
   }
 
   @override

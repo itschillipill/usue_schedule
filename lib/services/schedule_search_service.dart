@@ -38,7 +38,8 @@ class ScheduleSearchService {
           a.queryValue == b.queryValue && a.requestType == b.requestType)
       .switchMap((model) => Stream.fromFuture(_search(model)).onErrorResume(
             (err, st) {
-              SessionLogger.instance.error(name,"Ошибка поиска расписаний", error: err, stackTrace: st);
+              SessionLogger.instance.error(name, "Ошибка поиска расписаний",
+                  error: err, stackTrace: st);
               return Stream.value([]);
             },
           ));
@@ -84,7 +85,8 @@ class ScheduleSearchService {
               ))
           .toList();
     } catch (error, stackTrace) {
-      SessionLogger.instance.error(name, "Ошибка загрузки", error: error, stackTrace: stackTrace);
+      SessionLogger.instance
+          .error(name, "Ошибка загрузки", error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

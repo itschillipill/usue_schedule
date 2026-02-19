@@ -98,7 +98,8 @@ class FileService {
       encoding: const Utf8Codec(allowMalformed: false),
     );
 
-    SessionLogger.instance.debug(name,"📊 Создано событий: ${calendar.events.length}\n📁 Путь: ${file.path}");
+    SessionLogger.instance.debug(name,
+        "📊 Создано событий: ${calendar.events.length}\n📁 Путь: ${file.path}");
 
     return file.path;
   }

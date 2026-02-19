@@ -32,21 +32,21 @@ class LogEntry {
     this.extra,
   }) : timestamp = DateTime.now();
 
-   @override
+  @override
   String toString() {
     final time = timestamp.toIso8601String();
     final levelStr = level.name.toUpperCase();
-    final extraStr = extra != null && extra!.isNotEmpty 
+    final extraStr = extra != null && extra!.isNotEmpty
         ? '\n${extra!.entries.map((e) => '${e.key} : ${e.value}').join(',\n')}'
         : '';
-    
+
     if (error != null) {
       final stack = stackTrace?.toString() ?? '';
       return '[$time][$levelStr] |$category| $message$extraStr -> $error\n$stack';
     }
     return '[$time][$levelStr] |$category| $message$extraStr';
   }
-  }
+}
 
 class SessionLogger implements MyObserver {
   static SessionLogger? _instance;
@@ -61,7 +61,7 @@ class SessionLogger implements MyObserver {
     _instance ??= SessionLogger._internal(
       config ?? LoggerConfig.debugConfig,
     );
-    
+
     return _instance!;
   }
 
@@ -115,7 +115,8 @@ class SessionLogger implements MyObserver {
       category: name,
       message: message ?? 'Error occurred',
       error: error,
-      stackTrace: _config.has(LoggerConfig.captureStackTraces) ? stackTrace : null,
+      stackTrace:
+          _config.has(LoggerConfig.captureStackTraces) ? stackTrace : null,
     ));
   }
 
@@ -155,7 +156,8 @@ class SessionLogger implements MyObserver {
     ));
   }
 
-  void error(String category, String message, {Object? error, StackTrace? stackTrace}) {
+  void error(String category, String message,
+      {Object? error, StackTrace? stackTrace}) {
     _log(LogEntry(
       level: LogLevel.error,
       category: category,
@@ -180,10 +182,10 @@ class SessionLogger implements MyObserver {
 
   // Управление логами
   List<LogEntry> getLogs() => List.unmodifiable(_logs);
-  
+
   List<LogEntry> getLogsByLevel(LogLevel level) =>
       _logs.where((log) => log.level == level).toList();
-  
+
   List<LogEntry> getLogsByCategory(String category) =>
       _logs.where((log) => log.category == category).toList();
 

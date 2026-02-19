@@ -48,7 +48,8 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   @override
   void onChange(Change<SettingsState> change) {
-    SessionLogger.instance.onTransition(name, change.currentState, change.nextState);
+    SessionLogger.instance
+        .onTransition(name, change.currentState, change.nextState);
     super.onChange(change);
   }
 

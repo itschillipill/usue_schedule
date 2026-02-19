@@ -46,14 +46,14 @@ class DateTimeUtils {
 
   // Парсить дату из строки формата "dd.mm.yyyy"
   static DateTime? parseDate(String dateString) {
-      final parts = dateString.split('.');
-      if (parts.length == 3) {
-        return DateTime(
-          int.parse(parts[2]),
-          int.parse(parts[1]),
-          int.parse(parts[0]),
-        );
-      }
+    final parts = dateString.split('.');
+    if (parts.length == 3) {
+      return DateTime(
+        int.parse(parts[2]),
+        int.parse(parts[1]),
+        int.parse(parts[0]),
+      );
+    }
     return null;
   }
 

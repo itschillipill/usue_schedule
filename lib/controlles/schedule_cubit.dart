@@ -31,7 +31,7 @@ class MyScheduleState {
 class MyScheduleCubit extends Cubit<MyScheduleState> {
   final SharedPreferences prefs;
 
-  static const String name="MyScheduleCubit";
+  static const String name = "MyScheduleCubit";
 
   final mySchedulesKey = "mySchedules";
   final currentScheduleKey = "currentSchedule";
@@ -48,7 +48,8 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
 
   @override
   void onChange(Change<MyScheduleState> change) {
-    SessionLogger.instance.onTransition(name, change.currentState, change.nextState);
+    SessionLogger.instance
+        .onTransition(name, change.currentState, change.nextState);
     super.onChange(change);
   }
 
@@ -61,8 +62,7 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
           .map((e) => ScheduleModel.fromJson(jsonDecode(e)))
           .toList();
     }
-    emit(
-        state.copyWith(schedules: schedules));
+    emit(state.copyWith(schedules: schedules));
   }
 
   void addSchedule(ScheduleModel schedule) {

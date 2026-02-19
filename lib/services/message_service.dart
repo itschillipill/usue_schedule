@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:usue_schedule/core/utils/logger/session_logger.dart';
 
 class MessageServise {
-  static String name="MessageServise";
+  static String name = "MessageServise";
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
@@ -85,7 +85,8 @@ class MessageServise {
         onSuccess?.call(result);
       }
     } catch (e, stackTrace) {
-      SessionLogger.instance.error(name, "Error in showLoading", error: e, stackTrace: stackTrace);
+      SessionLogger.instance.error(name, "Error in showLoading",
+          error: e, stackTrace: stackTrace);
       onError?.call(e, stackTrace);
     } finally {
       _hideLoading();

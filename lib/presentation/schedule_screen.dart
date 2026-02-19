@@ -34,31 +34,52 @@ class ScheduleScreen extends StatelessWidget {
                 if (mySchedules.isEmpty)
                   Expanded(
                     child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 80,
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            "Расписаний пока нет",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 8,
+                          children: [
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              size: 80,
                             ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            "Добавьте первое расписание",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
+                            SizedBox(height: 2),
+                            Text(
+                              "Расписаний пока нет",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                        ],
+                            Text(
+                              "Добавьте первое расписание",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                      onPressed: () async {
+                                        final newSchedule =
+                                            await Navigator.push(
+                                          context,
+                                          AddScheduleScreen.route(),
+                                        );
+                                        if (newSchedule == null) return;
+                                        scheduleCubit.addSchedule(newSchedule);
+                                      },
+                                      child: Text("+")),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   )
@@ -66,9 +87,24 @@ class ScheduleScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 16),
-                    child: Text(
-                      "Мои расписания",
-                      style: Theme.of(context).textTheme.titleLarge,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Мои расписания",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        ElevatedButton(
+                            onPressed: () async {
+                              final newSchedule = await Navigator.push(
+                                context,
+                                AddScheduleScreen.route(),
+                              );
+                              if (newSchedule == null) return;
+                              scheduleCubit.addSchedule(newSchedule);
+                            },
+                            child: Text("+"))
+                      ],
                     ),
                   ),
                   Expanded(
@@ -97,24 +133,6 @@ class ScheduleScreen extends StatelessWidget {
                   ),
                 ]
               ],
-            ),
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () async {
-              final newSchedule = await Navigator.push(
-                context,
-                AddScheduleScreen.route(),
-              );
-              if (newSchedule == null) return;
-              scheduleCubit.addSchedule(newSchedule);
-            },
-            icon: Icon(Icons.add, size: 24),
-            label: Text(
-              "Добавить",
-            ),
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
             ),
           ),
         );

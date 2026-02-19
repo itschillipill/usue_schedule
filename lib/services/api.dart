@@ -49,7 +49,9 @@ class ApiService {
       .debounceTime(const Duration(milliseconds: 300))
       .switchMap(
           (model) => Stream.fromFuture(_search(model)).onErrorResume((err, st) {
-                SessionLogger.instance.error(name, "Ошибка поиска расписания с параметрами: $model", error: err, stackTrace: st);
+                SessionLogger.instance.error(
+                    name, "Ошибка поиска расписания с параметрами: $model",
+                    error: err, stackTrace: st);
                 return Stream.value(null);
               }));
 
@@ -94,10 +96,8 @@ class ApiService {
           requestType.query: queryValue,
         };
 
-        SessionLogger.instance.debug(name, "Отправляем запрос к API", extra: {
-          "Путь":_baseUrl,
-          "Параметры":params.toString()
-        });
+        SessionLogger.instance.debug(name, "Отправляем запрос к API",
+            extra: {"Путь": _baseUrl, "Параметры": params.toString()});
 
         // Выполняем запрос
         final response = await _dio.get(
@@ -109,7 +109,8 @@ class ApiService {
         if (response.statusCode == 200) {
           final scheduleResponse =
               ScheduleResponse.parseFromApiResponse(response.data);
-          SessionLogger.instance.log(name, 'Получено ${scheduleResponse.schedules.length} дней расписания');
+          SessionLogger.instance.log(name,
+              'Получено ${scheduleResponse.schedules.length} дней расписания');
           cacheProvider?.saveSchedule(
               ScheduleModel(requestType: requestType, queryValue: queryValue),
               scheduleResponse);
@@ -119,7 +120,8 @@ class ApiService {
         }
       }
     } catch (e, st) {
-      SessionLogger.instance.error(name, 'Ошибка при получении расписания', error: e, stackTrace: st);
+      SessionLogger.instance.error(name, 'Ошибка при получении расписания',
+          error: e, stackTrace: st);
       rethrow;
     }
   }

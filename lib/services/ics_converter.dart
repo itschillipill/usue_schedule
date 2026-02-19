@@ -110,7 +110,8 @@ class ICalendarConverter {
         },
       );
     } catch (e) {
-      SessionLogger.instance.error(name, "Ошибка конвертации пары в событие", error: e);
+      SessionLogger.instance
+          .error(name, "Ошибка конвертации пары в событие", error: e);
       return null;
     }
   }

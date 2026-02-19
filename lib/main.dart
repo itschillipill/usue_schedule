@@ -20,8 +20,9 @@ void main() => runZonedGuarded(() async {
             initialization: initialization(),
             child: const App()),
       );
-    }, (error, stackTrace) => SessionLogger.instance.onError("Main", error, stackTrace)
-    );
+    },
+        (error, stackTrace) =>
+            SessionLogger.instance.onError("Main", error, stackTrace));
 
 class App extends StatelessWidget {
   const App({super.key});
