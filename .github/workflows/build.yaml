@@ -1,77 +1,77 @@
-# name: Build Apk
+name: Build Apk
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 
-# permissions:
-#   contents: write
+permissions:
+  contents: write
 
-# jobs:
-#   build:
-#    runs-on: ubuntu-latest
+jobs:
+  build:
+   runs-on: ubuntu-latest
 
-#   steps:
-#       - uses: actions/checkout@v4
+  steps:
+      - uses: actions/checkout@v4
 
-#       - uses: actions/setup-java@v4
-#         with:
-#           distribution: temurin
-#           java-version: 17
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-#       - uses: subosito/flutter-action@v2
-#         with:
-#           flutter-version: '3.38.6'
-#           cache: true
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.6'
+          cache: true
 
-#       - name: Cache Gradle & Android SDK/NDK
-#         uses: actions/cache@v4
-#         with:
-#           path: |
-#             ~/.gradle
-#             ~/.android
-#             /usr/local/lib/android/sdk
-#           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/pubspec.lock') }}
-#           restore-keys: |
-#             ${{ runner.os }}-gradle-
+      - name: Cache Gradle & Android SDK/NDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle
+            ~/.android
+            /usr/local/lib/android/sdk
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-#       - name: Get Flutter dependencies
-#         run: flutter pub get
+      - name: Get Flutter dependencies
+        run: flutter pub get
 
-#       - name: Prepare keystore
-#         env:
-#           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-#           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-#           STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-#           ENCODED_KEYSTORE: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
-#         run: |
-#           mkdir -p android/app
-#           echo "$ENCODED_KEYSTORE" | base64 --decode > android/app/upload-keystore.jks
-#           cat > android/key.properties <<EOF
-#           storePassword=$STORE_PASSWORD
-#           keyPassword=$KEY_PASSWORD
-#           keyAlias=$KEY_ALIAS
-#           storeFile=upload-keystore.jks
-#           EOF
+      - name: Prepare keystore
+        env:
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ENCODED_KEYSTORE: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p android/app
+          echo "$ENCODED_KEYSTORE" | base64 --decode > android/app/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=upload-keystore.jks
+          EOF
 
-#       - name: Build APK (split per ABI)
-#         run: |
-#           flutter build apk \
-#             --release \
-#             --split-per-abi \
+      - name: Build APK (split per ABI)
+        run: |
+          flutter build apk \
+            --release \
+            --split-per-abi \
 
-#       - name: Generate tag
-#         id: tag
-#         run: |
-#           TAG="build-$(date +'%Y-%m-%d-%H-%M')"
-#           echo "tag=$TAG" >> $GITHUB_OUTPUT
+      - name: Generate tag
+        id: tag
+        run: |
+          TAG="build-$(date +'%Y-%m-%d-%H-%M')"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
-#       - name: Create GitHub Release
-#         uses: softprops/action-gh-release@v2
-#         with:
-#           tag_name: ${{ steps.tag.outputs.tag }}
-#           name: Release ${{ steps.tag.outputs.tag }}
-#           files: |
-#             build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-#             build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Release ${{ steps.tag.outputs.tag }}
+          files: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
