@@ -1,8 +1,11 @@
 import 'dart:async' show TimeoutException, FutureOr;
 
 import 'package:flutter/material.dart';
+import 'package:usue_schedule/core/utils/logger/session_logger.dart';
 
 class MessageServise {
+  static String name="MessageServise";
+
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
   static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
@@ -82,8 +85,7 @@ class MessageServise {
         onSuccess?.call(result);
       }
     } catch (e, stackTrace) {
-      debugPrint('Error in showLoading: $e');
-      debugPrint('Stack trace: $stackTrace');
+      SessionLogger.instance.error(name, "Error in showLoading", error: e, stackTrace: stackTrace);
       onError?.call(e, stackTrace);
     } finally {
       _hideLoading();

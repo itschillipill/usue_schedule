@@ -22,8 +22,7 @@ class DaySchedule {
     );
   }
 
-  DaySchedule empty() => DaySchedule(
-      date: date, weekDay: weekDay, pairs: []);
+  DaySchedule empty() => DaySchedule(date: date, weekDay: weekDay, pairs: []);
 
   List<Pair> get nonEmptyPairs =>
       pairs.where((p) => p.schedulePairs.isNotEmpty).toList();

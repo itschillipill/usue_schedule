@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:usue_schedule/core/utils/logger/session_logger.dart';
 import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
 import 'core/theme/theme.dart';
 import 'controlles/settings_cubit.dart';
@@ -19,9 +20,8 @@ void main() => runZonedGuarded(() async {
             initialization: initialization(),
             child: const App()),
       );
-    }, (error, stackTrace) {
-      // TODO: itschillipill/ log error
-    });
+    }, (error, stackTrace) => SessionLogger.instance.onError("Main", error, stackTrace)
+    );
 
 class App extends StatelessWidget {
   const App({super.key});

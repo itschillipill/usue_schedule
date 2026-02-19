@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:usue_schedule/models/day_schedule.dart';
+import '../core/utils/logger/session_logger.dart';
 import '../models/schedule_response.dart';
 
 import '../../models/schedule_model.dart';
@@ -40,6 +40,8 @@ abstract class CacheServiceBase {
 }
 
 final class CacheManager implements CacheServiceBase {
+  static String name = "CacheManager";
+
   static final CacheManager _instance = CacheManager._internal();
   factory CacheManager() => _instance;
   CacheManager._internal();
@@ -52,6 +54,7 @@ final class CacheManager implements CacheServiceBase {
     _prefs = await SharedPreferences.getInstance();
     await _initCacheDirectory();
     await _loadActiveModels();
+    SessionLogger.instance.onCreate(name);
   }
 
   Future<void> _initCacheDirectory() async {
@@ -61,7 +64,7 @@ final class CacheManager implements CacheServiceBase {
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
     }
-    debugPrint("Cache directory: ${cacheDir.path}");
+    SessionLogger.instance.log(name, "Cache directory initialized: ${cacheDir.path}");
   }
 
   Future<void> _loadActiveModels() async {
@@ -130,9 +133,10 @@ final class CacheManager implements CacheServiceBase {
     await file.writeAsString(jsonEncode(cacheData));
     await _saveActiveModels();
 
-    debugPrint(
-        '✅ Сохранено ${response.schedules.length} дней в кэш для ${model.displayName}');
-    debugPrint('📊 Всего дней в кэше: ${cacheData['days_count']}');
+    SessionLogger.instance.debug(name, "Расписание успешно сохранено в кеш", extra: {
+      "✅ Сохранено":"${response.schedules.length} дней в кэш для ${model.displayName}",
+      "📊 Всего дней в кэше":"${cacheData['days_count']}"
+    });
   }
 
   @override
@@ -170,14 +174,12 @@ final class CacheManager implements CacheServiceBase {
       }
 
       _activeModels[model.cacheKey] = model;
-      await file.writeAsString(jsonEncode(cacheData));
       await _saveActiveModels();
-      debugPrint(
-          '📦 Загружено ${days.length} дней из кэша для ${model.displayName}');
+      SessionLogger.instance.log(name, '📦 Загружено ${days.length} дней из кэша для ${model.displayName}');
 
       return ScheduleResponse(schedules: days);
-    } catch (e) {
-      debugPrint('❌ Ошибка чтения кэша: $e');
+    } catch (e,s) {
+      SessionLogger.instance.error(name, "❌ Ошибка чтения кэша", error: e, stackTrace: s);
       return null;
     }
   }
@@ -225,7 +227,7 @@ final class CacheManager implements CacheServiceBase {
 
     _activeModels.remove(model.cacheKey);
     await _saveActiveModels();
-    debugPrint('🗑️ Очищен кэш для ${model.displayName}');
+    SessionLogger.instance.log(name, '🗑️ Очищен кэш для ${model.displayName}');
   }
 
   @override
@@ -286,7 +288,6 @@ final class CacheManager implements CacheServiceBase {
     }
   }
 
-  // Остальные методы без изменений...
   @override
   Future<void> clearOldCache(
       {Duration olderThan = const Duration(days: 30)}) async {
@@ -304,7 +305,6 @@ final class CacheManager implements CacheServiceBase {
 
           if (lastUpdated.isBefore(cutoff)) {
             await file.delete();
-            debugPrint('🗑️ Удален старый кэш: ${file.path}');
           }
         } catch (e) {
           // Если не можем прочитать - удаляем
@@ -323,7 +323,7 @@ final class CacheManager implements CacheServiceBase {
     }
     _activeModels.clear();
     await _saveActiveModels();
-    debugPrint('🗑️ Весь кэш очищен');
+    SessionLogger.instance.log(name,'🗑️ Весь кэш очищен');
   }
 
   @override
@@ -345,6 +345,7 @@ final class CacheManager implements CacheServiceBase {
 }
 
 extension DateStringExtension on String {
+  /// приведение строки в [DateTime]
   DateTime toDateTime() {
     final parts = split('.');
     if (parts.length != 3) {

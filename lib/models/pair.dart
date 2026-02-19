@@ -31,7 +31,8 @@ class Pair {
     return ('', '');
   }
 
-  bool isCurrentPair(DateTime date) => PairTime.isCurrentPair(number, date: date);
+  bool isCurrentPair(DateTime date) =>
+      PairTime.isCurrentPair(number, date: date);
 
   List<String> getAllGroups() {
     return schedulePairs.map((sp) => sp.group).toSet().toList();

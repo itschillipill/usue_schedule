@@ -2,44 +2,58 @@ import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:usue_schedule/core/utils/logger/session_logger.dart';
 import 'package:usue_schedule/models/schedule_model.dart';
 
 class MyScheduleState {
-  final ScheduleModel? currentSchedule;
   final List<ScheduleModel> schedules;
 
-  MyScheduleState({required this.currentSchedule, required this.schedules});
+  MyScheduleState({required this.schedules});
 
   factory MyScheduleState.initial() {
     return MyScheduleState(
-      currentSchedule: null,
       schedules: [],
     );
   }
 
   MyScheduleState copyWith({
-    ScheduleModel? currentSchedule,
     List<ScheduleModel>? schedules,
   }) {
     return MyScheduleState(
-      currentSchedule: currentSchedule ?? this.currentSchedule,
       schedules: schedules ?? this.schedules,
     );
   }
+
+  @override
+  String toString() => "MyScheduleState(schedules: ${schedules.toString()})";
 }
 
 class MyScheduleCubit extends Cubit<MyScheduleState> {
   final SharedPreferences prefs;
 
+  static const String name="MyScheduleCubit";
+
   final mySchedulesKey = "mySchedules";
   final currentScheduleKey = "currentSchedule";
   MyScheduleCubit({required this.prefs}) : super(MyScheduleState.initial()) {
     _loadSchedules();
+    SessionLogger.instance.onCreate(name);
+  }
+
+  @override
+  void onError(Object error, StackTrace stackTrace) {
+    SessionLogger.instance.onError(name, error, stackTrace);
+    super.onError(error, stackTrace);
+  }
+
+  @override
+  void onChange(Change<MyScheduleState> change) {
+    SessionLogger.instance.onTransition(name, change.currentState, change.nextState);
+    super.onChange(change);
   }
 
   void _loadSchedules() async {
     List<ScheduleModel> schedules = <ScheduleModel>[];
-    ScheduleModel? currentSchedule;
     final List<String> schedulesString =
         prefs.getStringList(mySchedulesKey) ?? [];
     if (schedulesString.isNotEmpty) {
@@ -47,12 +61,8 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
           .map((e) => ScheduleModel.fromJson(jsonDecode(e)))
           .toList();
     }
-    final currentString = prefs.getString(currentScheduleKey);
-    if (currentString != null) {
-      currentSchedule = ScheduleModel.fromJson(jsonDecode(currentString));
-    }
     emit(
-        state.copyWith(schedules: schedules, currentSchedule: currentSchedule));
+        state.copyWith(schedules: schedules));
   }
 
   void addSchedule(ScheduleModel schedule) {
@@ -61,11 +71,6 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
     prefs.setStringList(
         mySchedulesKey, schedules.map((e) => jsonEncode(e.toJson())).toList());
     emit(state.copyWith(schedules: schedules));
-  }
-
-  void setCurrentSchedule(ScheduleModel schedule) {
-    prefs.setString(currentScheduleKey, jsonEncode(schedule.toJson()));
-    emit(state.copyWith(currentSchedule: schedule));
   }
 
   void removeSchedule(ScheduleModel schedule) {

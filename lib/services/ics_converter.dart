@@ -1,5 +1,4 @@
-// lib/services/ics/converter.dart
-import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:usue_schedule/core/utils/logger/session_logger.dart';
 
 import '../core/utils/date_utils.dart' as date_utils;
 import '../models/i_calendar_event.dart';
@@ -9,6 +8,8 @@ import '../models/schedule_pair.dart';
 import '../models/schedule_response.dart';
 
 class ICalendarConverter {
+  static String name = "ICalendarConverter";
+
   // Основной метод - один календарь для преподавателя
   static ICalendar convertScheduleToCalendar(
     ScheduleResponse schedule,
@@ -109,7 +110,7 @@ class ICalendarConverter {
         },
       );
     } catch (e) {
-      debugPrint('Ошибка конвертации пары в событие: $e');
+      SessionLogger.instance.error(name, "Ошибка конвертации пары в событие", error: e);
       return null;
     }
   }
@@ -269,7 +270,7 @@ class ICalendarConverter {
         DateTime(now.year, now.month, now.day, endHour, endMinute),
       );
     } catch (e) {
-      debugPrint('Ошибка парсинга времени: $e');
+      SessionLogger.instance.error(name, "Ошибка парсинга времени", error: e);
       return null;
     }
   }

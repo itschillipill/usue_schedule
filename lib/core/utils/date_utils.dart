@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart' show debugPrint;
-
 class DateTimeUtils {
   // Получить дату начала недели (понедельник)
   static DateTime getStartOfWeek(DateTime date) {
@@ -48,7 +46,6 @@ class DateTimeUtils {
 
   // Парсить дату из строки формата "dd.mm.yyyy"
   static DateTime? parseDate(String dateString) {
-    try {
       final parts = dateString.split('.');
       if (parts.length == 3) {
         return DateTime(
@@ -57,9 +54,6 @@ class DateTimeUtils {
           int.parse(parts[0]),
         );
       }
-    } catch (e) {
-      debugPrint('Ошибка парсинга даты: $e');
-    }
     return null;
   }
 

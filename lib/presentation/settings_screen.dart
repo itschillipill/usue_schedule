@@ -8,6 +8,7 @@ import 'package:usue_schedule/controlles/settings_cubit.dart';
 import 'package:usue_schedule/presentation/widgets/borde_box.dart';
 
 import '../core/theme/schedule_styles.dart';
+import '../dependencies/widgets/dependencies_scope.dart';
 import 'cache_manager_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -16,7 +17,6 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SettingsCubit settingsCubit = context.watch<SettingsCubit>();
-    ThemeMode themeMode = settingsCubit.state.themeMode;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -47,7 +47,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                       dropdownColor: theme.colorScheme.surface,
-                      value: themeMode,
+                      value: settingsCubit.state.themeMode,
                       onChanged: settingsCubit.setThemeMode,
                       items: [
                         DropdownMenuItem(
@@ -107,9 +107,17 @@ class SettingsScreen extends StatelessWidget {
                 _buildSettingTile(context,
                     icon: Icons.delete_sweep,
                     title: 'Очистить кэш',
-                    subtitle: 'Удалить данные расписаний',
-                    onTap: () =>
-                        Navigator.push(context, CacheManagerScreen.route())),
+                    subtitle: 'Удалить данные расписаний', onTap: () {
+                  final cacheProvider =
+                      DependenciesScope.of(context).apiService.cacheProvider;
+                  if (cacheProvider != null) {
+                    Navigator.push(
+                        context, CacheManagerScreen.route(cacheProvider));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Кеш не обнаружен.")));
+                  }
+                }),
               ],
             ),
             SizedBox(height: 5),
@@ -159,14 +167,16 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.bug_report,
                   title: 'Сообщить об ошибке',
                   subtitle: 'Нашли баг? Сообщите нам',
-                  onTap: () => _reportBug(context),
+                  onTap: () async =>
+                      await launchUrlString(Constants.telegramContact),
                 ),
                 _buildSettingTile(
                   context,
                   icon: Icons.group,
                   title: 'Другие проекты',
                   subtitle: 'Посмотреть другие приложения',
-                  onTap: _showOtherProjects,
+                  onTap: () async =>
+                      await launchUrlString(Constants.developerLinkRuStore),
                 ),
               ],
             ),
@@ -529,50 +539,6 @@ class SettingsScreen extends StatelessWidget {
 
     if (await canLaunchUrl(email)) {
       await launchUrl(email);
-    }
-  }
-
-  Future<void> _reportBug(BuildContext context) async {
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Сообщить об ошибке'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-                'Нашли что-то? Опишите проблему, которую вы обнаружили по телеграмм.'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                await launchUrlString(Constants.telegramContact);
-              } on Object catch (error, stackTrace) {
-                Error.safeToString(error);
-                stackTrace.toString();
-                rethrow;
-              } finally {
-                if (context.mounted) Navigator.pop(context);
-              }
-            },
-            child: const Text('Открыть'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showOtherProjects() async {
-    final url = Uri.parse(Constants.developerLinkRuStore);
-
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
     }
   }
 }

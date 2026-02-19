@@ -1,11 +1,14 @@
+import 'dart:io' show HttpClient;
 import 'dart:math' show Random;
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart' show debugPrint;
+import 'package:dio/io.dart' show IOHttpClientAdapter;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:rxdart/rxdart.dart';
 import 'package:usue_schedule/models/schedule_model.dart';
 
 import '../controlles/cache_provider.dart';
+import '../core/utils/logger/session_logger.dart';
 import '../models/request_type.dart';
 import '../models/schedule_response.dart';
 
@@ -18,6 +21,8 @@ typedef Params = (
 
 // Сервис для работы с API
 class ApiService {
+  static const String name = "ApiService";
+
   final _querySubject = PublishSubject<Params>();
   final CacheProvider? cacheProvider;
   final Dio _dio = Dio();
@@ -30,13 +35,21 @@ class ApiService {
     };
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
+
+    if (kDebugMode) {
+      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+        final client = HttpClient();
+        client.badCertificateCallback = (cert, host, port) => true;
+        return client;
+      };
+    }
   }
 
   late final Stream<ScheduleResponse?> results = _querySubject
       .debounceTime(const Duration(milliseconds: 300))
       .switchMap(
           (model) => Stream.fromFuture(_search(model)).onErrorResume((err, st) {
-                debugPrint('Ошибка поиска: $err');
+                SessionLogger.instance.error(name, "Ошибка поиска расписания с параметрами: $model", error: err, stackTrace: st);
                 return Stream.value(null);
               }));
 
@@ -81,8 +94,10 @@ class ApiService {
           requestType.query: queryValue,
         };
 
-        debugPrint('Запрос к API: $_baseUrl');
-        debugPrint('Параметры: $params');
+        SessionLogger.instance.debug(name, "Отправляем запрос к API", extra: {
+          "Путь":_baseUrl,
+          "Параметры":params.toString()
+        });
 
         // Выполняем запрос
         final response = await _dio.get(
@@ -94,8 +109,7 @@ class ApiService {
         if (response.statusCode == 200) {
           final scheduleResponse =
               ScheduleResponse.parseFromApiResponse(response.data);
-          debugPrint(
-              'Получено ${scheduleResponse.schedules.length} дней расписания');
+          SessionLogger.instance.log(name, 'Получено ${scheduleResponse.schedules.length} дней расписания');
           cacheProvider?.saveSchedule(
               ScheduleModel(requestType: requestType, queryValue: queryValue),
               scheduleResponse);
@@ -104,8 +118,8 @@ class ApiService {
           throw Exception('Ошибка API: ${response.statusCode}');
         }
       }
-    } catch (e) {
-      debugPrint('Ошибка при получении расписания: $e');
+    } catch (e, st) {
+      SessionLogger.instance.error(name, 'Ошибка при получении расписания', error: e, stackTrace: st);
       rethrow;
     }
   }

@@ -1,5 +1,5 @@
 import 'dart:async' show Timer;
-import 'package:flutter/foundation.dart' show ChangeNotifier, debugPrint;
+import 'package:flutter/foundation.dart' show ChangeNotifier;
 
 class TimeTicker extends ChangeNotifier {
   TimeTicker() {
@@ -10,14 +10,13 @@ class TimeTicker extends ChangeNotifier {
 
   void _start() {
     _timer = Timer.periodic(const Duration(minutes: 1), (_) {
-      debugPrint("TimeTicker worked!");
       notifyListeners();
     });
   }
 
   DateTime get now => DateTime.now();
 
- @override
+  @override
   void dispose() {
     _timer.cancel();
     super.dispose();

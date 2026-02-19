@@ -22,7 +22,7 @@ class PairTime {
   factory PairTime.fromStrings(String startTime, String endTime) {
     final startParts = startTime.split(':').map(int.parse).toList();
     final endParts = endTime.split(':').map(int.parse).toList();
-    
+
     return PairTime(
       start: (startParts[0], startParts[1]),
       end: (endParts[0], endParts[1]),
@@ -33,10 +33,10 @@ class PairTime {
   bool isCurrent() {
     final now = DateTime.now();
     final currentMinutes = now.hour * 60 + now.minute;
-    
+
     final startMinutes = start.$1 * 60 + start.$2;
     final endMinutes = end.$1 * 60 + end.$2;
-    
+
     return currentMinutes >= startMinutes && currentMinutes < endMinutes;
   }
 
@@ -44,8 +44,8 @@ class PairTime {
     // Проверяем, что сегодня
     final now = DateTime.now();
     if (date != null) {
-      if (date.year != now.year || 
-          date.month != now.month || 
+      if (date.year != now.year ||
+          date.month != now.month ||
           date.day != now.day) {
         return false;
       }
@@ -61,6 +61,6 @@ class PairTime {
   @override
   String toString() {
     return '${start.$1}:${start.$2.toString().padLeft(2, '0')}-'
-           '${end.$1}:${end.$2.toString().padLeft(2, '0')}';
+        '${end.$1}:${end.$2.toString().padLeft(2, '0')}';
   }
 }

@@ -27,17 +27,12 @@ class ShowScheduleScreen extends StatefulWidget {
 
   const ShowScheduleScreen({super.key, required this.params});
 
-  // ShowScheduleScreen tickerOf(BuildContext context){
-  //   return context.findAncestorStateOfType<_ShowScheduleScreenState>()!._timeTicker;
-  // }
-
   @override
   State<ShowScheduleScreen> createState() => _ShowScheduleScreenState();
 }
 
 class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   late final ApiService _apiService;
- // late final TimeTicker _timeTicker;
 
   DateTime _selectedDate = DateTime.now();
   DateTime _weekStart = DateTime.now();
@@ -62,9 +57,7 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   @override
   void initState() {
     super.initState();
-    _apiService =
-        ApiService(cacheProvider: DependenciesScope.of(context).cacheProvider);
-  //  _timeTicker = TimeTicker();
+    _apiService = DependenciesScope.of(context).apiService;
     _updateWeekDates();
 
     _subscription = _apiService.results.listen(
@@ -97,7 +90,6 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   @override
   void dispose() {
     _subscription?.cancel();
-  //  _timeTicker.dispose();
     super.dispose();
   }
 

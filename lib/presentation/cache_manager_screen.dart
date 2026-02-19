@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
+import 'package:usue_schedule/controlles/cache_provider.dart';
 import '../models/schedule_model.dart';
 import '../models/request_type.dart';
 
 class CacheManagerScreen extends StatefulWidget {
-  static route() =>
-      MaterialPageRoute(builder: (context) => const CacheManagerScreen());
+  static route(CacheProvider cacheProvider) => MaterialPageRoute(
+      builder: (_) => CacheManagerScreen(
+            cacheProvider: cacheProvider,
+          ));
 
-  const CacheManagerScreen({super.key});
+  final CacheProvider cacheProvider;
+  const CacheManagerScreen({super.key, required this.cacheProvider});
 
   @override
   State<CacheManagerScreen> createState() => _CacheManagerScreenState();
 }
 
 class _CacheManagerScreenState extends State<CacheManagerScreen> {
-  late final cacheProvider = DependenciesScope.of(context).cacheProvider;
   List<ScheduleModel> _cachedModels = [];
   Map<String, int> _daysCount = {};
   Map<String, DateTime> _lastUpdated = {};
@@ -32,7 +34,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final available = await cacheProvider.getAvailableCache();
+      final available = await widget.cacheProvider.getAvailableCache();
       final models = <ScheduleModel>[];
       final daysCount = <String, int>{};
       final lastUpdated = <String, DateTime>{};
@@ -42,7 +44,8 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
           if (!models.contains(model)) {
             models.add(model);
             // Получаем количество дней для модели
-            final days = await cacheProvider.getAvailableDaysForModel(model);
+            final days =
+                await widget.cacheProvider.getAvailableDaysForModel(model);
             daysCount[model.cacheKey] = days.length;
             lastUpdated[model.cacheKey] = entry.key;
           }
@@ -58,7 +61,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
         return bTime.compareTo(aTime);
       });
 
-      _cacheSize = await cacheProvider.getCacheSizeFormatted();
+      _cacheSize = await widget.cacheProvider.getCacheSizeFormatted();
       setState(() {
         _cachedModels = models;
         _daysCount = daysCount;
@@ -105,7 +108,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
   }
 
   Future<void> _deleteModel(ScheduleModel model) async {
-    await cacheProvider.clearModelCache(model);
+    await widget.cacheProvider.clearModelCache(model);
     await _loadCacheInfo();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -120,7 +123,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
   Future<void> _deleteOldForModel(ScheduleModel model) async {
     // Удаляем старше 30 дней
     final cutoff = DateTime.now().subtract(const Duration(days: 30));
-    final days = await cacheProvider.getAvailableDaysForModel(model);
+    final days = await widget.cacheProvider.getAvailableDaysForModel(model);
 
     for (var day in days) {
       if (day.isBefore(cutoff)) {

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:usue_schedule/controlles/settings_cubit.dart';
+import 'package:usue_schedule/core/utils/logger/session_logger.dart';
+import 'package:usue_schedule/services/api.dart';
 
 import '../controlles/cache_provider.dart';
 import '../controlles/schedule_cubit.dart';
@@ -23,6 +25,7 @@ mixin InitializeDependencies {
       final percent = (currentStep * 100 ~/ totalSteps).clamp(0, 100);
       onProgress?.call(percent, step.$1);
       await step.$2(dependencies);
+      SessionLogger.instance.debug("Initialization", step.$1);
     }
     return dependencies;
   }
@@ -31,13 +34,13 @@ mixin InitializeDependencies {
 List<(String, _InitializationStep)> get _initializationSteps => [
       ("Platform initialization", (_) => $platformInit()),
       (
-        ("Cubits initialization"),
+        ("Initialization"),
         (deps) async {
           final prefs = await SharedPreferences.getInstance();
 
           deps.scheduleCubit = MyScheduleCubit(prefs: prefs);
           deps.settingsCubit = SettingsCubit(prefs: prefs);
-          deps.cacheProvider = CacheProvider();
+          deps.apiService = ApiService(cacheProvider: CacheProvider());
         }
       ),
       //("Fake Waiting",(_)=> Future.delayed(Duration(seconds: 2)))

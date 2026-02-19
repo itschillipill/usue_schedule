@@ -2,16 +2,18 @@ import 'dart:convert' show Utf8Codec;
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../core/utils/logger/session_logger.dart';
 import '../models/export_format.dart';
 import '../models/schedule_response.dart';
 import 'ics_converter.dart';
 
 class FileService {
+  static String name = "FileService";
+
   static Future<void> saveSchedule({
     required ScheduleResponse schedule,
     required ExportFormat format,
@@ -29,7 +31,7 @@ class FileService {
       ExportFormat.ics => await _saveAsICS(schedule, fileName, queryValue),
     };
 
-    debugPrint("✅ Файл сохранён: $path");
+    SessionLogger.instance.debug(name, "✅ Файл сохранён: $path");
 
     if (shareAfterSave) {
       await _shareFile(path, format);
@@ -38,8 +40,6 @@ class FileService {
 
   static Future<void> _handleAndroidPermissions() async {
     final info = await DeviceInfoPlugin().androidInfo;
-
-    debugPrint("📱 Android SDK: ${info.version.sdkInt}");
 
     if (info.version.sdkInt <= 28) {
       final status = await Permission.storage.request();
@@ -74,7 +74,7 @@ class FileService {
     String? fileName,
     String? queryValue,
   ) async {
-    debugPrint("📅 Экспорт в iCalendar (.ics)");
+    SessionLogger.instance.debug(name, "📅 Экспорт в iCalendar (.ics)");
 
     String baseName = fileName ?? 'Расписание_УрГЭУ';
     if (queryValue != null && queryValue.isNotEmpty) {
@@ -98,8 +98,7 @@ class FileService {
       encoding: const Utf8Codec(allowMalformed: false),
     );
 
-    debugPrint("📊 Создано событий: ${calendar.events.length}");
-    debugPrint("📁 Путь: ${file.path}");
+    SessionLogger.instance.debug(name,"📊 Создано событий: ${calendar.events.length}\n📁 Путь: ${file.path}");
 
     return file.path;
   }
@@ -108,8 +107,6 @@ class FileService {
     ScheduleResponse schedule,
     String? fileName,
   ) async {
-    debugPrint("📄 Экспорт в PDF");
-
     final dir = await _getSaveDirectory();
     final name = _sanitizeFileName(fileName ?? 'schedule.pdf');
     final file = File('$dir/$name');
@@ -123,8 +120,6 @@ class FileService {
     ScheduleResponse schedule,
     String? fileName,
   ) async {
-    debugPrint("📊 Экспорт в Excel");
-
     final dir = await _getSaveDirectory();
     final name = _sanitizeFileName(fileName ?? 'schedule.xlsx');
     final file = File('$dir/$name');
@@ -154,8 +149,6 @@ class FileService {
         text: 'Экспорт расписания в ${format.name}',
       ),
     );
-
-    debugPrint("📤 Файл отправлен");
   }
 
   static String _sanitizeFileName(String fileName) {

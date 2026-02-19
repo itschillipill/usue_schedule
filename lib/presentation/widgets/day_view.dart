@@ -52,7 +52,11 @@ class DayView extends StatelessWidget {
         children: [
           DayHeader(day: daySchedule, date: selectedDate),
           ...daySchedule.nonEmptyPairs.map(
-            (pair) => _TimelineLessonCard(pair: pair, groupColors: groupColors, dateTime: selectedDate,),
+            (pair) => _TimelineLessonCard(
+              pair: pair,
+              groupColors: groupColors,
+              dateTime: selectedDate,
+            ),
           ),
         ],
       ),
@@ -65,11 +69,8 @@ class _TimelineLessonCard extends StatelessWidget {
   final Map<String, Color> groupColors;
   final DateTime dateTime;
 
-  const _TimelineLessonCard({
-    required this.pair,
-    required this.groupColors,
-    required this.dateTime
-  });
+  const _TimelineLessonCard(
+      {required this.pair, required this.groupColors, required this.dateTime});
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +92,8 @@ class _TimelineLessonCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    (PairTime.defaultPairTimes[pair.number] ?? pair.time).toString(),
+                    (PairTime.defaultPairTimes[pair.number] ?? pair.time)
+                        .toString(),
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
