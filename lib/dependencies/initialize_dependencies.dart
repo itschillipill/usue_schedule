@@ -41,7 +41,8 @@ List<(String, _InitializationStep)> get _initializationSteps => [
 
           deps.scheduleCubit = MyScheduleCubit(prefs: prefs);
           deps.settingsCubit = SettingsCubit(prefs: prefs);
-          deps.apiService = ApiService(cacheProvider: kIsWeb?null:CacheProvider());
+          deps.apiService =
+              ApiService(cacheProvider: kIsWeb ? null : CacheProvider());
         }
       ),
       //("Fake Waiting",(_)=> Future.delayed(Duration(seconds: 2)))

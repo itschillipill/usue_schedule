@@ -108,7 +108,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
   }
 
   Future<void> _deleteModel(Iterable<ScheduleModel> models) async {
-    for(final model in models){
+    for (final model in models) {
       await widget.cacheProvider.clearModelCache(model);
     }
 
@@ -185,11 +185,11 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                 title: 'Удалить выбранное',
                 message: 'Удалить кэш для ${_selectedModels.length} элементов?',
                 onConfirm: () async {
-                    final model = _cachedModels.where(
-                      (m) => _selectedModels.contains(m.cacheKey),
-                    );
-                    await _deleteModel(model);
-                  
+                  final model = _cachedModels.where(
+                    (m) => _selectedModels.contains(m.cacheKey),
+                  );
+                  await _deleteModel(model);
+
                   setState(() => _selectedModels.clear());
                 },
               ),
