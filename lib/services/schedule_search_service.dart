@@ -2,7 +2,7 @@ import 'dart:io' show HttpClient;
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:rxdart/rxdart.dart';
 import 'package:usue_schedule/core/utils/logger/session_logger.dart';
 
@@ -23,7 +23,7 @@ class ScheduleSearchService {
     ));
 
     // Отключаем проверку сертификата (ТОЛЬКО ДЛЯ РАЗРАБОТКИ!)
-    if (kDebugMode) {
+    if (kDebugMode && !kIsWeb) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
         client.badCertificateCallback = (cert, host, port) => true;
@@ -77,8 +77,8 @@ class ScheduleSearchService {
       return data
           .map((e) => ScheduleModel(
                 queryValue: switch (type) {
-                  RequestType.teacher =>
-                    (e as Map<String, dynamic>)["label"].toString(),
+                  RequestType.teacher when e is Map<String, dynamic> =>
+                    e["label"].toString(),
                   _ => e.toString(),
                 },
                 requestType: type,

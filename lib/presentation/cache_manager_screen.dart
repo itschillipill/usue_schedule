@@ -107,13 +107,16 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     }
   }
 
-  Future<void> _deleteModel(ScheduleModel model) async {
-    await widget.cacheProvider.clearModelCache(model);
+  Future<void> _deleteModel(Iterable<ScheduleModel> models) async {
+    for(final model in models){
+      await widget.cacheProvider.clearModelCache(model);
+    }
+
     await _loadCacheInfo();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Кэш для "${model.displayName}" удален'),
+          content: Text('Удалено "${models.length}" кэшей'),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -182,12 +185,11 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                 title: 'Удалить выбранное',
                 message: 'Удалить кэш для ${_selectedModels.length} элементов?',
                 onConfirm: () async {
-                  for (var key in _selectedModels) {
-                    final model = _cachedModels.firstWhere(
-                      (m) => m.cacheKey == key,
+                    final model = _cachedModels.where(
+                      (m) => _selectedModels.contains(m.cacheKey),
                     );
                     await _deleteModel(model);
-                  }
+                  
                   setState(() => _selectedModels.clear());
                 },
               ),
@@ -416,7 +418,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                               title: 'Удалить кэш',
                               message:
                                   'Удалить сохраненное расписание для "${model.displayName}"?',
-                              onConfirm: () => _deleteModel(model),
+                              onConfirm: () => _deleteModel([model]),
                             ),
                             icon: const Icon(Icons.delete_outline, size: 18),
                             label: const Text('Удалить'),
