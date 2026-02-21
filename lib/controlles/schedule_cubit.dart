@@ -66,23 +66,22 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
   }
 
   void addSchedule(ScheduleModel schedule) {
-    if(!state.schedules.contains(schedule)){
-    final List<ScheduleModel> schedules = List.from(state.schedules)
-      ..add(schedule);
-      prefs.setStringList(
-        mySchedulesKey, schedules.map((e) => jsonEncode(e.toJson())).toList());
-    emit(state.copyWith(schedules: schedules));
+    if (!state.schedules.contains(schedule)) {
+      final List<ScheduleModel> schedules = List.from(state.schedules)
+        ..add(schedule);
+      prefs.setStringList(mySchedulesKey,
+          schedules.map((e) => jsonEncode(e.toJson())).toList());
+      emit(state.copyWith(schedules: schedules));
     }
-    
   }
 
   void removeSchedule(ScheduleModel schedule) {
     final List<ScheduleModel> schedules = List.from(state.schedules)
       ..remove(schedule);
-    if(schedules.length == state.schedules.length){
-      prefs.setStringList(
-        mySchedulesKey, schedules.map((e) => jsonEncode(e.toJson())).toList());
-    emit(state.copyWith(schedules: schedules));
+    if (schedules.length == state.schedules.length) {
+      prefs.setStringList(mySchedulesKey,
+          schedules.map((e) => jsonEncode(e.toJson())).toList());
+      emit(state.copyWith(schedules: schedules));
     }
   }
 }

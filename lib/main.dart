@@ -9,6 +9,7 @@ import 'core/theme/theme.dart';
 import 'controlles/settings_cubit.dart';
 import 'dependencies/widgets/intialization.dart';
 import 'presentation/app_gate.dart';
+import 'presentation/init_error_screen.dart';
 import 'presentation/splash_screen.dart';
 import 'services/message_service.dart';
 
@@ -17,7 +18,7 @@ void main() => runZonedGuarded(() async {
       runApp(
         DependenciesScope(
             splashScreen: const SplashScreen(),
-            initialization: initialization(),
+            initialization: initialization(onError: $handleInitError),
             child: const App()),
       );
     },
@@ -61,4 +62,19 @@ class App extends StatelessWidget {
       ),
     );
   }
+}
+
+void $handleInitError(Object error, StackTrace stackTrace) async {
+  SessionLogger.instance.onError("Initialization", error, stackTrace);
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      home: InitializationErrorScreen(
+        error: error,
+        stackTrace: stackTrace,
+      ),
+    ),
+  );
 }

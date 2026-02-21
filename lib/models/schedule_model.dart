@@ -1,9 +1,6 @@
 import 'request_type.dart';
 
-// lib/models/schedule_model.dart
-import 'package:equatable/equatable.dart';
-
-class ScheduleModel extends Equatable {
+class ScheduleModel {
   final RequestType requestType;
   final String queryValue;
 
@@ -67,5 +64,12 @@ class ScheduleModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [requestType, queryValue];
+  int get hashCode => queryValue.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ScheduleModel &&
+          runtimeType == other.runtimeType &&
+          queryValue == other.queryValue;
 }

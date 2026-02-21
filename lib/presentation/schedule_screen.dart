@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -109,27 +108,31 @@ class ScheduleScreen extends StatelessWidget {
                   ),
                   Expanded(
                     child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      itemCount: mySchedules.length,
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final schedule = mySchedules[index];
-                        return OpenContainer(
-                            closedColor:
-                                Theme.of(context).scaffoldBackgroundColor,
-                            closedElevation: 0,
-                            closedBuilder: (context, action) => BorderBox(
-                                  child: ScheduleCard(
-                                    schedule: schedule,
-                                    onDelete: () =>
-                                        scheduleCubit.removeSchedule(schedule),
-                                  ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        itemCount: mySchedules.length,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final schedule = mySchedules[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ShowScheduleScreen(params: schedule),
                                 ),
-                            openBuilder: (context, action) =>
-                                ShowScheduleScreen(params: schedule));
-                      },
-                    ),
+                              );
+                            },
+                            child: BorderBox(
+                              child: ScheduleCard(
+                                schedule: schedule,
+                                onDelete: () =>
+                                    scheduleCubit.removeSchedule(schedule),
+                              ),
+                            ),
+                          );
+                        }),
                   ),
                 ]
               ],
