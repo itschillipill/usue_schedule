@@ -1,16 +1,71 @@
-# usue_schedule
+# 🎓 Расписание УрГЭУ
 
-A new Flutter project.
+[![Flutter Version](https://img.shields.io/badge/Flutter-3.x-blue.svg)](https://flutter.dev)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/itschillipill/usue_schedule/pulls)
 
-## Getting Started
+> Мобильное приложение для просмотра расписания Уральского государственного экономического университета (УрГЭУ), разработанное с учетом пожеланий преподавателей.
 
-This project is a starting point for a Flutter application.
+## Статус проекта
 
-A few resources to get you started if this is your first Flutter project:
+**Проект находится в активной разработке!** 
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Мы приветствуем любые идеи, предложения и contributions. Если вы хотите помочь проекту стать лучше - присоединяйтесь!
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## ✨ Особенности
+
+- Поиск расписания по:
+  -  Преподавателям
+  -  Группам
+  -  Аудиториям
+-  Просмотр на день или неделю
+-  Цветовая маркировка разных групп
+-  Избранное для быстрого доступа
+-  Кэширование для оффлайн-доступа
+-  Темная тема
+-  Экспорт в iCalendar (.ics)
+-  Подготовка к печати с разделением по дням
+-  Фильтры расписаний
+
+
+## 📦 Установка
+
+```bash
+# Клонируйте репозиторий
+git clone https://github.com/itschillipill/usue_schedule.git
+
+# Перейдите в папку проекта
+cd usue_schedule
+
+# Установите зависимости
+flutter pub get
+
+# Запустите приложение
+flutter run
+```
+
+### 💡 Сообщить об ошибке или предложить идею
+Нашли баг? [Создайте issue](https://github.com/itschillipill/usue_schedule/issues/new) с описанием проблемы и шагами для воспроизведения.
+
+### 🔧 Отправить Pull Request
+1. Форкните репозиторий
+2. Создайте ветку для фичи (`git checkout -b feature/amazing-feature`)
+3. Закоммитьте изменения (`git commit -m 'Add amazing feature'`)
+4. Запушьте в ветку (`git push origin feature/amazing-feature`)
+5. Откройте Pull Request
+
+## 📋 Планы развития
+
+- [ ] Google Calendar синхронизация
+- [ ] Push-уведомления о парах
+- [ ] Виджеты для главного экрана
+- [ ] Экспорт в PDF
+- [ ] Экспорт в EXCEL
+
+## 📄 Лицензия
+
+MIT License - используйте как хотите, но помните об авторских правах!
+
+**⭐ Если проект вам полезен, поставьте звездочку на GitHub!**
+
+*Сделано с ❤️ для преподавателей и студентов УрГЭУ*
