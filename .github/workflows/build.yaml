@@ -39,6 +39,9 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
 
+      - name: Run tests
+        run: flutter test
+
       - name: Prepare keystore
         env:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
