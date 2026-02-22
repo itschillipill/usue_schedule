@@ -1,4 +1,6 @@
-class SchedulePair {
+import 'package:equatable/equatable.dart';
+
+class SchedulePair extends Equatable{
   final String subject;
   final String teacher;
   final String group;
@@ -8,7 +10,7 @@ class SchedulePair {
   final int groupId;
   final int pairId;
 
-  SchedulePair({
+  const SchedulePair({
     required this.subject,
     required this.teacher,
     required this.group,
@@ -28,7 +30,7 @@ class SchedulePair {
       comment: json['comm'] as String? ?? '',
       teacherId: json['prepod_id'] as int? ?? 0,
       groupId: json['group_id'] as int? ?? 0,
-      pairId: json['par_id'] as int? ?? 0,
+      pairId: json['pair_id'] as int? ?? 0,
     );
   }
 
@@ -71,6 +73,9 @@ class SchedulePair {
       'par_id': pairId,
     };
   }
+
+  @override
+  List<Object?> get props => [subject, teacher, group, audience, comment, teacherId, groupId, pairId];
 }
 
 extension X on List<SchedulePair> {

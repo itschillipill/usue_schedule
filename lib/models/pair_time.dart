@@ -1,4 +1,4 @@
-class PairTime {
+class PairTime{
   final (int hour, int minute) start;
   final (int hour, int minute) end;
 
