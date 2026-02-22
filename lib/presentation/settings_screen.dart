@@ -28,7 +28,7 @@ class SettingsScreen extends StatelessWidget {
       body: DecoratedBox(
         decoration: ScheduleStyles.linearBackgroundDecoration(context),
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(12),
           children: [
             _buildSection(
               context,
@@ -440,7 +440,7 @@ class SettingsScreen extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const TextSpan(
-                  text: 'Проприетарная (закрытая)',
+                  text: 'MIT',
                   style: TextStyle(color: Colors.grey),
                 ),
               ])),

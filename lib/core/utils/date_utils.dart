@@ -14,16 +14,15 @@ class DateTimeUtils {
 
   // Форматировать дату для отображения
   static String formatDate(DateTime date, {bool showWeekday = true}) {
-    final weekday = _getWeekdayName(date.weekday);
+    final weekday = getWeekdayName(date.weekday);
     final dateStr = '${date.day.toString().padLeft(2, '0')}.'
         '${date.month.toString().padLeft(2, '0')}.'
         '${date.year}';
-
     return showWeekday ? '$weekday, $dateStr' : dateStr;
   }
 
   // Получить название дня недели на русском
-  static String _getWeekdayName(int weekday) {
+  static String getWeekdayName(int weekday) {
     switch (weekday) {
       case 1:
         return 'Понедельник';

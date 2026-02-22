@@ -44,7 +44,6 @@ class CacheProvider extends ChangeNotifier {
   Future<ScheduleResponse?> getSchedule(
       ScheduleModel model, DateTime start, DateTime end) async {
     final result = await _cacheManager.getSchedule(model, start, end);
-    await refreshCacheInfo();
     return result;
   }
 

@@ -64,6 +64,10 @@ class ScheduleModel {
   }
 
   @override
+  String toString() =>
+      "ScheduleModel(requestType: ${requestType.name}, value: $queryValue)";
+
+  @override
   int get hashCode => queryValue.hashCode;
 
   @override

@@ -1,5 +1,8 @@
 import 'dart:convert' show jsonDecode;
 
+import 'package:usue_schedule/core/utils/date_utils.dart';
+
+import '../services/cache_service.dart';
 import 'day_schedule.dart';
 
 class ScheduleResponse {
@@ -44,6 +47,21 @@ class ScheduleResponse {
     } else {
       throw FormatException('Некорректный формат данных от API');
     }
+  }
+
+  ScheduleResponse cut(DateTime startDate, DateTime endDate) {
+    final normalizedStart =
+        DateTime(startDate.year, startDate.month, startDate.day);
+    final normalizedEnd = DateTime(endDate.year, endDate.month, endDate.day);
+
+    final filteredSchedules = schedules.where((day) {
+      final dayDate = day.date.toDateTime(); // используем ваш метод парсинга
+      return dayDate
+              .isAfter(normalizedStart.subtract(const Duration(days: 1))) &&
+          dayDate.isBefore(normalizedEnd.add(const Duration(days: 1)));
+    }).toList();
+
+    return ScheduleResponse(schedules: filteredSchedules);
   }
 
   // Получить все уникальные группы из расписания
@@ -109,5 +127,47 @@ class ScheduleResponse {
   factory ScheduleResponse.fromJsonString(String jsonString) {
     final json = jsonDecode(jsonString);
     return ScheduleResponse.fromJson(json['schedules']);
+  }
+}
+
+extension ScheduleResponseFiller on ScheduleResponse {
+  /// Заполняет пропущенные даты в указанном диапазоне пустыми днями
+  ScheduleResponse fillEmptyDates(DateTime firstDate, DateTime lastDate,
+      {bool skip = false}) {
+    if (schedules.isEmpty || skip) return this;
+
+    // Нормализуем даты (без времени)
+    final normalizedStart =
+        DateTime(firstDate.year, firstDate.month, firstDate.day);
+    final normalizedEnd = DateTime(lastDate.year, lastDate.month, lastDate.day);
+
+    // Создаем Map существующих дней для быстрого доступа
+    // КЛЮЧ: дата в формате API "dd.mm.yyyy"
+    final existingDays = <String, DaySchedule>{};
+    for (var day in schedules) {
+      existingDays[day.date] = day;
+    }
+
+    final filledSchedules = <DaySchedule>[];
+
+    // Проходим по всем датам в диапазоне от первой до последней
+    for (var date = normalizedStart;
+        date.isBefore(normalizedEnd.add(const Duration(days: 1)));
+        date = date.add(const Duration(days: 1))) {
+      final apiDateStr =
+          DateTimeUtils.formatDate(date, showWeekday: false); // "dd.mm.yyyy"
+      final weekDay = DateTimeUtils.getWeekdayName(date.weekday);
+
+      if (existingDays.containsKey(apiDateStr)) {
+        filledSchedules.add(existingDays[apiDateStr]!);
+      } else {
+        filledSchedules.add(DaySchedule(
+          date: apiDateStr,
+          weekDay: weekDay,
+          pairs: [],
+        ));
+      }
+    }
+    return ScheduleResponse(schedules: filledSchedules);
   }
 }

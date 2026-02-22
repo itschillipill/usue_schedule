@@ -185,10 +185,10 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                 title: 'Удалить выбранное',
                 message: 'Удалить кэш для ${_selectedModels.length} элементов?',
                 onConfirm: () async {
-                  final model = _cachedModels.where(
+                  final models = _cachedModels.where(
                     (m) => _selectedModels.contains(m.cacheKey),
                   );
-                  await _deleteModel(model);
+                  await _deleteModel(models);
 
                   setState(() => _selectedModels.clear());
                 },
@@ -452,7 +452,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 20),
@@ -484,7 +484,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

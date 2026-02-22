@@ -22,13 +22,16 @@ typedef Params = (
 // Сервис для работы с API
 class ApiService {
   static const String name = "ApiService";
+  static const int deafultPrefetchDays = 30;
+  final int _prefetchDays;
 
   final _querySubject = PublishSubject<Params>();
   final CacheProvider? cacheProvider;
   final Dio _dio = Dio();
   final String _baseUrl = 'https://www.usue.ru/schedule/';
 
-  ApiService({this.cacheProvider}) {
+  ApiService({this.cacheProvider, int prefetchDays = deafultPrefetchDays})
+      : _prefetchDays = prefetchDays {
     _dio.options.headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -73,6 +76,9 @@ class ApiService {
     required RequestType requestType,
     required String queryValue,
   }) async {
+    SessionLogger.instance.debug(name, "Получение расписания", extra: {
+      "Период": "${_formatDate(startDate)} - ${_formatDate(endDate)}"
+    });
     try {
       final response = await cacheProvider?.getSchedule(
           ScheduleModel(requestType: requestType, queryValue: queryValue),
@@ -81,10 +87,20 @@ class ApiService {
       if (response != null) {
         return response;
       } else {
+        final end = endDate
+            // если нет в кеше, но при этом сам кеш сеществует,
+            // за ранне загружаем месячное расписание но показываем только нужное
+            .add(Duration(days: cacheProvider == null ? 0 : _prefetchDays));
+
+        final start = startDate
+            // делаем тоже самое и на неделю назад тоже (для страховки)
+            .subtract(Duration(days: cacheProvider == null ? 0 : 7));
+
         // Форматируем даты в нужный формат
-        final formattedStartDate = _formatDate(startDate);
-        final formattedEndDate = _formatDate(endDate);
-        // Генерируем timestamp (как в примере)
+        final formattedEndDate = _formatDate(end);
+        final formattedStartDate = _formatDate(start);
+
+        // Генерируем timestamp (как в на официальном сайте)
         final timestamp = _generateTimestamp();
 
         // Параметры запроса
@@ -113,8 +129,9 @@ class ApiService {
               'Получено ${scheduleResponse.schedules.length} дней расписания');
           cacheProvider?.saveSchedule(
               ScheduleModel(requestType: requestType, queryValue: queryValue),
-              scheduleResponse);
-          return scheduleResponse;
+              scheduleResponse.fillEmptyDates(start, end,
+                  skip: requestType != RequestType.audience));
+          return scheduleResponse.cut(startDate, endDate);
         } else {
           throw Exception('Ошибка API: ${response.statusCode}');
         }
