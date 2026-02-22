@@ -18,7 +18,9 @@ class DaySchedule extends Equatable {
       date: json['date'] as String? ?? '',
       weekDay: json['weekDay'] as String? ?? '',
       pairs: (json['pairs'] as List<dynamic>?)
-              ?.map((e) => Pair.fromJson(e)).toList() ?? [],
+              ?.map((e) => Pair.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 

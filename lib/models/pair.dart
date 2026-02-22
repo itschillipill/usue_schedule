@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'pair_time.dart';
 import 'schedule_pair.dart';
 
-class Pair extends Equatable{
+class Pair extends Equatable {
   final int number;
   final String time;
   final List<SchedulePair> schedulePairs;

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class SchedulePair extends Equatable{
+class SchedulePair extends Equatable {
   final String subject;
   final String teacher;
   final String group;
@@ -75,7 +75,8 @@ class SchedulePair extends Equatable{
   }
 
   @override
-  List<Object?> get props => [subject, teacher, group, audience, comment, teacherId, groupId, pairId];
+  List<Object?> get props =>
+      [subject, teacher, group, audience, comment, teacherId, groupId, pairId];
 }
 
 extension X on List<SchedulePair> {

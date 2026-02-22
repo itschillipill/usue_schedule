@@ -6,7 +6,7 @@ import 'package:usue_schedule/core/utils/date_utils.dart';
 import '../services/cache_service.dart';
 import 'day_schedule.dart';
 
-class ScheduleResponse extends Equatable{
+class ScheduleResponse extends Equatable {
   final List<DaySchedule> schedules;
 
   const ScheduleResponse({required this.schedules});

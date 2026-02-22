@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'request_type.dart';
 
-class ScheduleModel extends Equatable{
+class ScheduleModel extends Equatable {
   final RequestType requestType;
   final String queryValue;
 
