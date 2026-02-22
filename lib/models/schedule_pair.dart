@@ -70,7 +70,7 @@ class SchedulePair extends Equatable {
       'comm': comment,
       'prepod_id': teacherId,
       'group_id': groupId,
-      'par_id': pairId,
+      'pair_id': pairId,
     };
   }
 
