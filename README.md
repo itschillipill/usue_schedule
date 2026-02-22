@@ -1,7 +1,7 @@
 # 🎓 Расписание УрГЭУ
 
 [![Flutter Version](https://img.shields.io/badge/Flutter-3.x-blue.svg)](https://flutter.dev)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/itschillipill/usue_schedule/pulls)
 
 > Мобильное приложение для просмотра расписания Уральского государственного экономического университета (УрГЭУ), разработанное для удобства преподователей и студентов.
