@@ -1,14 +1,15 @@
 import 'dart:convert' show jsonDecode;
 
+import 'package:equatable/equatable.dart';
 import 'package:usue_schedule/core/utils/date_utils.dart';
 
 import '../services/cache_service.dart';
 import 'day_schedule.dart';
 
-class ScheduleResponse {
+class ScheduleResponse extends Equatable {
   final List<DaySchedule> schedules;
 
-  ScheduleResponse({required this.schedules});
+  const ScheduleResponse({required this.schedules});
 
   factory ScheduleResponse.fromJson(List<dynamic> json) {
     return ScheduleResponse(
@@ -128,6 +129,9 @@ class ScheduleResponse {
     final json = jsonDecode(jsonString);
     return ScheduleResponse.fromJson(json['schedules']);
   }
+
+  @override
+  List<Object?> get props => [schedules];
 }
 
 extension ScheduleResponseFiller on ScheduleResponse {

@@ -1,12 +1,14 @@
+import 'package:equatable/equatable.dart';
+
 import 'pair_time.dart';
 import 'schedule_pair.dart';
 
-class Pair {
+class Pair extends Equatable {
   final int number;
   final String time;
   final List<SchedulePair> schedulePairs;
 
-  Pair({
+  const Pair({
     required this.number,
     required this.time,
     required this.schedulePairs,
@@ -75,4 +77,7 @@ class Pair {
       'schedulePairs': schedulePairs.map((e) => e.toJson()).toList(),
     };
   }
+
+  @override
+  List<Object?> get props => [number, time, schedulePairs];
 }

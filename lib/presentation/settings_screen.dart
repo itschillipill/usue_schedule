@@ -440,7 +440,7 @@ class SettingsScreen extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const TextSpan(
-                  text: 'MIT',
+                  text: 'BSD 3-Clause',
                   style: TextStyle(color: Colors.grey),
                 ),
               ])),

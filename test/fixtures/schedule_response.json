@@ -1,0 +1,1106 @@
+[
+    {
+      "date": "23.02.2026",
+      "weekDay": "Понедельник",
+      "isCurrentDate": 0,
+      "pairs": [
+        {
+          "N": 1,
+          "time": "8:30-10:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 2,
+          "time": "10:10-11:40",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 3,
+          "time": "11:50-13:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 4,
+          "time": "13:50-15:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 5,
+          "time": "15:30-17:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 6,
+          "time": "17:10-18:40",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 7,
+          "time": "18:50-20:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 8,
+          "time": "20:30-22:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 9,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 10,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 11,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 12,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 13,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 14,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 15,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 16,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 17,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 18,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        }
+      ]
+    },
+    {
+      "date": "24.02.2026",
+      "weekDay": "Вторник",
+      "isCurrentDate": 0,
+      "pairs": [
+        {
+          "N": 1,
+          "time": "8:30-10:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 2,
+          "time": "10:10-11:40",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Алгоритмы и вычислительные методы оптимизации (Лаб.раб.)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИВТ-23-1 (2 п/гр.)",
+              "aud": "338TV",
+              "comm": "10.10-11.40 INDO",
+              "prepod_id": 2788,
+              "group_id": 18375,
+              "par_id": 2
+            }
+          ]
+        },
+        {
+          "N": 3,
+          "time": "11:50-13:20",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Алгоритмы и вычислительные методы оптимизации (Лаб.раб.)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИВТ-23-1 (2 п/гр.)",
+              "aud": "338TV",
+              "comm": "12.10-13.40 INDO",
+              "prepod_id": 2788,
+              "group_id": 18375,
+              "par_id": 3
+            }
+          ]
+        },
+        {
+          "N": 4,
+          "time": "13:50-15:20",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Иммитационное моделирование международных бизнес-процессов (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "М-ВЭД-24",
+              "aud": "668",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 18733,
+              "par_id": 4
+            }
+          ]
+        },
+        {
+          "N": 5,
+          "time": "15:30-17:00",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Имитационное моделирование экономических процессов (Экзамен)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИНО ЗБ ПОАС-24",
+              "aud": "615/1",
+              "comm": "15.30-17.00 INDO",
+              "prepod_id": 2788,
+              "group_id": 18789,
+              "par_id": 5
+            }
+          ]
+        },
+        {
+          "N": 6,
+          "time": "17:10-18:40",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Имитационное моделирование экономических процессов (Экзамен)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИНО ЗБ ПОАС-24",
+              "aud": "615/1",
+              "comm": "17.10-18.40 INDO",
+              "prepod_id": 2788,
+              "group_id": 18789,
+              "par_id": 6
+            }
+          ]
+        },
+        {
+          "N": 7,
+          "time": "18:50-20:20",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "БУА-24",
+              "aud": "668",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19015,
+              "par_id": 7
+            },
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "ВТД-24",
+              "aud": "668",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19014,
+              "par_id": 7
+            },
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "КБ-24",
+              "aud": "668",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19013,
+              "par_id": 7
+            },
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "ЭБ-24",
+              "aud": "668",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 18709,
+              "par_id": 7
+            },
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "ЭП-24",
+              "aud": "668",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19012,
+              "par_id": 7
+            }
+          ]
+        },
+        {
+          "N": 8,
+          "time": "20:30-22:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 9,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 10,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 11,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 12,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 13,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 14,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 15,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 16,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 17,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 18,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        }
+      ]
+    },
+    {
+      "date": "25.02.2026",
+      "weekDay": "Среда",
+      "isCurrentDate": 0,
+      "pairs": [
+        {
+          "N": 1,
+          "time": "8:30-10:00",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Теория систем и системный анализ (Лаб.раб.)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИДО ЗБ ПИ-23п СБ",
+              "aud": "ИДО",
+              "comm": "8.30-10.00 CDE",
+              "prepod_id": 2788,
+              "group_id": 18626,
+              "par_id": 1
+            }
+          ]
+        },
+        {
+          "N": 2,
+          "time": "10:10-11:40",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Теория систем и системный анализ (Лаб.раб.)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИДО ЗБ ПИ-23п СБ",
+              "aud": "ИДО",
+              "comm": "10.10-11.40 CDE",
+              "prepod_id": 2788,
+              "group_id": 18626,
+              "par_id": 2
+            }
+          ]
+        },
+        {
+          "N": 3,
+          "time": "11:50-13:20",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Теория систем и системный анализ (Экзамен)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИДО ЗБ ПИ-23п СБ",
+              "aud": "ИДО",
+              "comm": "11.50-13.20 CDE",
+              "prepod_id": 2788,
+              "group_id": 18626,
+              "par_id": 3
+            }
+          ]
+        },
+        {
+          "N": 4,
+          "time": "13:50-15:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 5,
+          "time": "15:30-17:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 6,
+          "time": "17:10-18:40",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 7,
+          "time": "18:50-20:20",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Информационные системы и технологии (Лекция)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИВТ-ОЗИВТ(ППК)-25-1-у",
+              "aud": "Толк",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19310,
+              "par_id": 7
+            }
+          ]
+        },
+        {
+          "N": 8,
+          "time": "20:30-22:00",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Информационные системы и технологии (Лекция)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИВТ-ОЗИВТ(ППК)-25-1-у",
+              "aud": "Толк",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19310,
+              "par_id": 8
+            }
+          ]
+        },
+        {
+          "N": 9,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 10,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 11,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 12,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 13,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 14,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 15,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 16,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 17,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 18,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        }
+      ]
+    },
+    {
+      "date": "26.02.2026",
+      "weekDay": "Четверг",
+      "isCurrentDate": 0,
+      "pairs": [
+        {
+          "N": 1,
+          "time": "8:30-10:00",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Имитационное моделирование экономических процессов (Лаб.раб.)",
+              "teacher": "Кольева Н.С.",
+              "group": "ПИЭ-23-1",
+              "aud": "Толк",
+              "comm": "8.30-10.00 INDO",
+              "prepod_id": 2788,
+              "group_id": 18377,
+              "par_id": 1
+            }
+          ]
+        },
+        {
+          "N": 2,
+          "time": "10:10-11:40",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Имитационное моделирование экономических процессов (Лекция)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИВТ-23-1",
+              "aud": "Толк",
+              "comm": "10.10-11.40 INDO",
+              "prepod_id": 2788,
+              "group_id": 18375,
+              "par_id": 2
+            },
+            {
+              "subject": "Имитационное моделирование экономических процессов (Лекция)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИВТ-23-2",
+              "aud": "Толк",
+              "comm": "10.10-11.40 INDO",
+              "prepod_id": 2788,
+              "group_id": 18376,
+              "par_id": 2
+            },
+            {
+              "subject": "Имитационное моделирование экономических процессов (Лекция)",
+              "teacher": "Кольева Н.С.",
+              "group": "ПИЭ-23-1",
+              "aud": "Толк",
+              "comm": "10.10-11.40 INDO",
+              "prepod_id": 2788,
+              "group_id": 18377,
+              "par_id": 2
+            }
+          ]
+        },
+        {
+          "N": 3,
+          "time": "11:50-13:20",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "Мен-24",
+              "aud": "568",
+              "comm": "12.10-13.40 УМУ",
+              "prepod_id": 2788,
+              "group_id": 19017,
+              "par_id": 3
+            }
+          ]
+        },
+        {
+          "N": 4,
+          "time": "13:50-15:20",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Имитационное моделирование экономических процессов (Лаб.раб.)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИВТ-23-1",
+              "aud": "Толк",
+              "comm": "13.50-15.20 INDO",
+              "prepod_id": 2788,
+              "group_id": 18375,
+              "par_id": 4
+            }
+          ]
+        },
+        {
+          "N": 5,
+          "time": "15:30-17:00",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Имитационное моделирование экономических процессов (Лаб.раб.)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИВТ-23-2",
+              "aud": "Толк",
+              "comm": "15.30-17.00 INDO",
+              "prepod_id": 2788,
+              "group_id": 18376,
+              "par_id": 5
+            }
+          ]
+        },
+        {
+          "N": 6,
+          "time": "17:10-18:40",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 7,
+          "time": "18:50-20:20",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Академическая задолженность (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "ОЗИВТ-25-3-у",
+              "aud": "Толк",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19362,
+              "par_id": 7
+            }
+          ]
+        },
+        {
+          "N": 8,
+          "time": "20:30-22:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 9,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 10,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 11,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 12,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 13,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 14,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 15,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 16,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 17,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 18,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        }
+      ]
+    },
+    {
+      "date": "27.02.2026",
+      "weekDay": "Пятница",
+      "isCurrentDate": 0,
+      "pairs": [
+        {
+          "N": 1,
+          "time": "8:30-10:00",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "ИМ-24",
+              "aud": "660 TV",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19019,
+              "par_id": 1
+            },
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "Мар-24",
+              "aud": "660 TV",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19018,
+              "par_id": 1
+            },
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "ММ-24",
+              "aud": "660 TV",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 19020,
+              "par_id": 1
+            },
+            {
+              "subject": "Статистика (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "ТД-24-1",
+              "aud": "660 TV",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 18707,
+              "par_id": 1
+            }
+          ]
+        },
+        {
+          "N": 2,
+          "time": "10:10-11:40",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 3,
+          "time": "11:50-13:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 4,
+          "time": "13:50-15:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 5,
+          "time": "15:30-17:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 6,
+          "time": "17:10-18:40",
+          "isCurrentPair": 0,
+          "schedulePairs": [
+            {
+              "subject": "Моделирование рисковых ситуаций (Пересдача)",
+              "teacher": "Кольева Н.С.",
+              "group": "ЭБ-23-1",
+              "aud": "553",
+              "comm": "",
+              "prepod_id": 2788,
+              "group_id": 18371,
+              "par_id": 6
+            }
+          ]
+        },
+        {
+          "N": 7,
+          "time": "18:50-20:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 8,
+          "time": "20:30-22:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 9,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 10,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 11,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 12,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 13,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 14,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 15,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 16,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 17,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 18,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        }
+      ]
+    },
+    {
+      "date": "28.02.2026",
+      "weekDay": "Суббота",
+      "isCurrentDate": 0,
+      "pairs": [
+        {
+          "N": 1,
+          "time": "8:30-10:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 2,
+          "time": "10:10-11:40",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 3,
+          "time": "11:50-13:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 4,
+          "time": "13:50-15:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 5,
+          "time": "15:30-17:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 6,
+          "time": "17:10-18:40",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 7,
+          "time": "18:50-20:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 8,
+          "time": "20:30-22:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 9,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 10,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 11,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 12,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 13,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 14,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 15,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 16,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 17,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 18,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        }
+      ]
+    },
+    {
+      "date": "01.03.2026",
+      "weekDay": "Воскресенье",
+      "isCurrentDate": 0,
+      "pairs": [
+        {
+          "N": 1,
+          "time": "8:30-10:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 2,
+          "time": "10:10-11:40",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 3,
+          "time": "11:50-13:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 4,
+          "time": "13:50-15:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 5,
+          "time": "15:30-17:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 6,
+          "time": "17:10-18:40",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 7,
+          "time": "18:50-20:20",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 8,
+          "time": "20:30-22:00",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 9,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 10,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 11,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 12,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 13,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 14,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 15,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 16,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 17,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        },
+        {
+          "N": 18,
+          "time": "-",
+          "isCurrentPair": 0,
+          "schedulePairs": []
+        }
+      ]
+    }
+  ]

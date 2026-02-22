@@ -1,11 +1,13 @@
+import 'package:equatable/equatable.dart';
+
 import 'pair.dart';
 
-class DaySchedule {
+class DaySchedule extends Equatable {
   final String date;
   final String weekDay;
   final Iterable<Pair> pairs;
 
-  DaySchedule({
+  const DaySchedule({
     required this.date,
     required this.weekDay,
     required this.pairs,
@@ -24,39 +26,39 @@ class DaySchedule {
 
   DaySchedule empty() => DaySchedule(date: date, weekDay: weekDay, pairs: []);
 
-  List<Pair> get nonEmptyPairs =>
-      pairs.where((p) => p.schedulePairs.isNotEmpty).toList();
+  Iterable<Pair> get nonEmptyPairs =>
+      pairs.where((p) => p.schedulePairs.isNotEmpty);
 
   bool get hasPairs => nonEmptyPairs.isNotEmpty;
 
-  List<String> getAllGroups() {
+  Iterable<String> getAllGroups() {
     final groups = <String>{};
     for (var pair in pairs) {
       for (var group in pair.getAllGroups()) {
         groups.add(group);
       }
     }
-    return groups.toList();
+    return groups;
   }
 
-  List<String> getAllTeachers() {
+  Iterable<String> getAllTeachers() {
     final teachers = <String>{};
     for (var pair in pairs) {
       for (var teacher in pair.getAllTeachers()) {
         teachers.add(teacher);
       }
     }
-    return teachers.toList();
+    return teachers;
   }
 
-  List<String> getAllAudiences() {
+  Iterable<String> getAllAudiences() {
     final audiences = <String>{};
     for (var pair in pairs) {
       for (var audience in pair.getAllAudiences()) {
         audiences.add(audience);
       }
     }
-    return audiences.toList();
+    return audiences;
   }
 
   DaySchedule filterByGroup(String groupName) {
@@ -86,4 +88,7 @@ class DaySchedule {
       'pairs': nonEmptyPairs.map((e) => e.toJson()).toList(),
     };
   }
+
+  @override
+  List<Object?> get props => [date, weekDay, pairs];
 }
