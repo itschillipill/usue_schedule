@@ -15,12 +15,13 @@ class ScheduleSearchService {
   late final Dio _dio;
   final _querySubject = PublishSubject<ScheduleModel>();
 
-  ScheduleSearchService() {
-    _dio = Dio(BaseOptions(
-      baseUrl: 'https://www.usue.ru',
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-    ));
+  ScheduleSearchService({Dio? dio}) {
+    _dio = dio ??
+        Dio(BaseOptions(
+          baseUrl: 'https://www.usue.ru',
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ));
 
     // Отключаем проверку сертификата (ТОЛЬКО ДЛЯ РАЗРАБОТКИ!)
     if (kDebugMode && !kIsWeb) {

@@ -27,11 +27,17 @@ class ApiService {
 
   final _querySubject = PublishSubject<Params>();
   final CacheProvider? cacheProvider;
-  final Dio _dio = Dio();
+  late final Dio _dio;
   final String _baseUrl = 'https://www.usue.ru/schedule/';
 
-  ApiService({this.cacheProvider, int prefetchDays = deafultPrefetchDays})
-      : _prefetchDays = prefetchDays {
+  ApiService(
+      {this.cacheProvider, Dio? dio, int prefetchDays = deafultPrefetchDays})
+      : _prefetchDays = prefetchDays,
+        _dio = dio ?? Dio() {
+    _configureDio();
+  }
+
+  void _configureDio() {
     _dio.options.headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -39,6 +45,7 @@ class ApiService {
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
 
+    // Отключаем проверку сертификата (ТОЛЬКО ДЛЯ РАЗРАБОТКИ!)
     if (kDebugMode && !kIsWeb) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
