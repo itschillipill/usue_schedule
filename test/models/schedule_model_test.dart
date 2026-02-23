@@ -57,7 +57,6 @@ void main() {
     });
   });
 
-
   group("ScheduleModel - serialization", () {
     test("toJson returns correct map", () {
       final model = ScheduleModel.group("ИВТ-23-1");
@@ -79,7 +78,6 @@ void main() {
       expect(restored, equals(original));
     });
   });
-
 
   group("ScheduleModel - toString", () {
     test("toString returns readable string", () {

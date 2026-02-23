@@ -13,15 +13,13 @@ void main() {
       'test/fixtures/schedule_response.json',
     ).readAsString();
 
-    pair = ScheduleResponse
-        .parseFromApiResponse(jsonString)
+    pair = ScheduleResponse.parseFromApiResponse(jsonString)
         .schedules[1]
         .pairs
         .elementAt(1);
   });
 
   group("Pair model tests", () {
-
     test("number parsed correctly", () {
       expect(pair.number, 2);
     });
@@ -41,7 +39,8 @@ void main() {
         "time": "10:10-11:40",
         "schedulePairs": [
           {
-            "subject": "Алгоритмы и вычислительные методы оптимизации (Лаб.раб.)",
+            "subject":
+                "Алгоритмы и вычислительные методы оптимизации (Лаб.раб.)",
             "teacher": "Кольева Н.С.",
             "group": "ИВТ-23-1 (2 п/гр.)",
             "aud": "338TV",

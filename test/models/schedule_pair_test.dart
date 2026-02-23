@@ -13,8 +13,7 @@ void main() {
       'test/fixtures/schedule_response.json',
     ).readAsString();
 
-    schedulePair = ScheduleResponse
-        .parseFromApiResponse(jsonString)
+    schedulePair = ScheduleResponse.parseFromApiResponse(jsonString)
         .schedules[1]
         .pairs
         .elementAt(1)
@@ -34,8 +33,7 @@ void main() {
     });
   });
 
-
-group("SchedulePair - serialization", () {
+  group("SchedulePair - serialization", () {
     test("toJson returns correct map", () {
       final json = schedulePair.toJson();
 
@@ -58,7 +56,6 @@ group("SchedulePair - serialization", () {
 
   group("SchedulePair - cleanGroup", () {
     test("removes subgroup suffix", () {
-
       expect(schedulePair.cleanGroup, 'ИВТ-23-1');
     });
   });
@@ -107,7 +104,6 @@ group("SchedulePair - serialization", () {
 
   group("SchedulePair - isSubgroup", () {
     test("true when subgroup exists", () {
-
       expect(schedulePair.isSubgroup, true);
     });
   });
