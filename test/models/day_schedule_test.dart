@@ -60,7 +60,7 @@ void main() {
               "comm": "13.50-15.20 CDE",
               "prepod_id": 1626,
               "group_id": 18933,
-              "pair_id": 4
+              "par_id": 4
             },
             {
               "subject": "Бизнес-планирование ИТ-инфраструктуры (Лаб.раб.)",
@@ -70,7 +70,7 @@ void main() {
               "comm": "13.50-15.20 CDE",
               "prepod_id": 1626,
               "group_id": 18929,
-              "pair_id": 4
+              "par_id": 4
             }
           ]
         },
@@ -87,7 +87,7 @@ void main() {
               "comm": "15.30-17.00 INDO",
               "prepod_id": 1626,
               "group_id": 18126,
-              "pair_id": 5
+              "par_id": 5
             }
           ]
         },

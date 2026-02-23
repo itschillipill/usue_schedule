@@ -30,7 +30,7 @@ class SchedulePair extends Equatable {
       comment: json['comm'] as String? ?? '',
       teacherId: json['prepod_id'] as int? ?? 0,
       groupId: json['group_id'] as int? ?? 0,
-      pairId: json['pair_id'] as int? ?? 0,
+      pairId: json['par_id'] as int? ?? 0,
     );
   }
 
@@ -70,7 +70,7 @@ class SchedulePair extends Equatable {
       'comm': comment,
       'prepod_id': teacherId,
       'group_id': groupId,
-      'pair_id': pairId,
+      'par_id': pairId,
     };
   }
 
