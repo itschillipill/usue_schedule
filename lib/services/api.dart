@@ -34,7 +34,9 @@ class ApiService {
       {this.cacheProvider, Dio? dio, int prefetchDays = deafultPrefetchDays})
       : _prefetchDays = prefetchDays,
         _dio = dio ?? Dio() {
-    _configureDio();
+    if (dio == null) {
+      _configureDio();
+    }
   }
 
   void _configureDio() {
