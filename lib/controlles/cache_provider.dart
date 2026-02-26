@@ -7,14 +7,15 @@ import '../services/cache_service.dart';
 class CacheProvider extends ChangeNotifier {
   final CacheManager _cacheManager = CacheManager();
   bool _isInitialized = false;
+  String? cacheDir;
   Map<DateTime, Set<ScheduleModel>> _availableCache = {};
 
-  CacheProvider() {
+  CacheProvider({this.cacheDir}) {
     _initialize();
   }
 
   Future<void> _initialize() async {
-    await _cacheManager.init();
+    await _cacheManager.init(cacheDir: cacheDir);
     _isInitialized = true;
     await refreshCacheInfo();
   }

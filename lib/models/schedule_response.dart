@@ -17,28 +17,6 @@ class ScheduleResponse extends Equatable {
     );
   }
 
-  ScheduleResponse filterResponseByGroup(String? selectedGroupFilter) {
-    if (selectedGroupFilter == null) return this;
-
-    return ScheduleResponse(
-      schedules: schedules
-          .map((day) => day.filterByGroup(selectedGroupFilter))
-          .where((day) => day.hasPairs)
-          .toList(),
-    );
-  }
-
-  ScheduleResponse filterResponseByTeacher(String? selectedTeacherFilter) {
-    if (selectedTeacherFilter == null) return this;
-
-    return ScheduleResponse(
-      schedules: schedules
-          .map((day) => day.filterByTeacher(selectedTeacherFilter))
-          .where((day) => day.hasPairs)
-          .toList(),
-    );
-  }
-
   // Метод для парсинга из API ответа
   static ScheduleResponse parseFromApiResponse(dynamic responseData) {
     if (responseData is String) {
@@ -99,7 +77,8 @@ class ScheduleResponse extends Equatable {
   }
 
   // Отфильтровать по группе
-  ScheduleResponse filterByGroup(String groupName) {
+  ScheduleResponse filterByGroup([String? groupName]) {
+    if (groupName == null) return this;
     return ScheduleResponse(
       schedules: schedules
           .map((day) => day.filterByGroup(groupName))
@@ -109,7 +88,8 @@ class ScheduleResponse extends Equatable {
   }
 
   // Отфильтровать по преподавателю
-  ScheduleResponse filterByTeacher(String teacherName) {
+  ScheduleResponse filterByTeacher([String? teacherName]) {
+    if (teacherName == null) return this;
     return ScheduleResponse(
       schedules: schedules
           .map((day) => day.filterByTeacher(teacherName))

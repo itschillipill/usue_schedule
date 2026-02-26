@@ -14,6 +14,8 @@ class ICalendarEvent {
   final List<String>? attendees;
   final Map<String, String>? customProperties;
 
+  static const String timeZoneId = 'Europe/Yekaterinburg';
+
   ICalendarEvent({
     required this.start,
     required this.end,
@@ -39,13 +41,17 @@ class ICalendarEvent {
     final buffer = StringBuffer();
 
     buffer.writeln('BEGIN:VEVENT');
-
     buffer.writeln('UID:$uid');
-    buffer.writeln('DTSTAMP:${_formatDateTime(created ?? DateTime.now())}');
-    buffer.writeln(
-        'DTSTART${isAllDay ? ';VALUE=DATE' : ''}:${_formatDateTime(start)}');
-    buffer.writeln(
-        'DTEND${isAllDay ? ';VALUE=DATE' : ''}:${_formatDateTime(end)}');
+    buffer.writeln('DTSTAMP:${_formatUtc(DateTime.now())}');
+
+    if (isAllDay) {
+      buffer.writeln('DTSTART;VALUE=DATE:${_formatDate(start)}');
+      buffer.writeln('DTEND;VALUE=DATE:${_formatDate(end)}');
+    } else {
+      buffer.writeln('DTSTART;TZID=$timeZoneId:${_formatLocalDateTime(start)}');
+      buffer.writeln('DTEND;TZID=$timeZoneId:${_formatLocalDateTime(end)}');
+    }
+
     buffer.writeln('SUMMARY:${_escapeText(summary)}');
 
     if (description != null && description!.isNotEmpty) {
@@ -61,7 +67,7 @@ class ICalendarEvent {
     }
 
     if (lastModified != null) {
-      buffer.writeln('LAST-MODIFIED:${_formatDateTime(lastModified!)}');
+      buffer.writeln('LAST-MODIFIED:${_formatUtc(lastModified!)}');
     }
 
     if (status != null && status!.isNotEmpty) {
@@ -85,11 +91,20 @@ class ICalendarEvent {
     }
 
     buffer.write('END:VEVENT');
-
     return buffer.toString();
   }
 
-  String _formatDateTime(DateTime dt) {
+  String _formatLocalDateTime(DateTime dt) {
+    final local = dt.toLocal();
+    return '${local.year}'
+        '${local.month.toString().padLeft(2, '0')}'
+        '${local.day.toString().padLeft(2, '0')}'
+        'T${local.hour.toString().padLeft(2, '0')}'
+        '${local.minute.toString().padLeft(2, '0')}'
+        '${local.second.toString().padLeft(2, '0')}';
+  }
+
+  String _formatUtc(DateTime dt) {
     final utc = dt.toUtc();
     return '${utc.year}'
         '${utc.month.toString().padLeft(2, '0')}'
@@ -97,6 +112,12 @@ class ICalendarEvent {
         'T${utc.hour.toString().padLeft(2, '0')}'
         '${utc.minute.toString().padLeft(2, '0')}'
         '${utc.second.toString().padLeft(2, '0')}Z';
+  }
+
+  String _formatDate(DateTime dt) {
+    return '${dt.year}'
+        '${dt.month.toString().padLeft(2, '0')}'
+        '${dt.day.toString().padLeft(2, '0')}';
   }
 
   String _escapeText(String text) {
@@ -112,18 +133,16 @@ class ICalendar {
   final String productId;
   final String version;
   final String calendarName;
-  final String timezone;
   final List<ICalendarEvent> events;
-  final DateTime? created;
   final String? method;
+
+  static const String timeZoneId = 'Europe/Yekaterinburg';
 
   ICalendar({
     this.productId = '-//УрГЭУ//Расписание//RU',
     this.version = '2.0',
     this.calendarName = 'Расписание УрГЭУ',
-    this.timezone = 'Europe/Yekaterinburg',
     required this.events,
-    this.created,
     this.method,
   });
 
@@ -135,16 +154,16 @@ class ICalendar {
     buffer.writeln('PRODID:$productId');
     buffer.writeln('CALSCALE:GREGORIAN');
     buffer.writeln('METHOD:${method ?? 'PUBLISH'}');
-
     buffer.writeln('X-WR-CALNAME:$calendarName');
+    buffer.writeln('X-WR-TIMEZONE:$timeZoneId');
 
     buffer.writeln('BEGIN:VTIMEZONE');
-    buffer.writeln('TZID:$timezone');
+    buffer.writeln('TZID:$timeZoneId');
     buffer.writeln('BEGIN:STANDARD');
-    buffer.writeln('DTSTART:16010101T030000');
-    buffer.writeln('TZOFFSETFROM:+0400');
-    buffer.writeln('TZOFFSETTO:+0300');
-    buffer.writeln('TZNAME:MSK');
+    buffer.writeln('DTSTART:19700101T000000');
+    buffer.writeln('TZOFFSETFROM:+0500');
+    buffer.writeln('TZOFFSETTO:+0500');
+    buffer.writeln('TZNAME:+05');
     buffer.writeln('END:STANDARD');
     buffer.writeln('END:VTIMEZONE');
 

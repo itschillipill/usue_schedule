@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:usue_schedule/presentation/widgets/schedule_card.dart';
 import '../models/request_type.dart';
 import '../models/schedule_model.dart';
 import '../services/schedule_search_service.dart';
@@ -96,7 +97,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                             children: [
                               Icon(
                                 type.icon,
-                                color: Theme.of(context).colorScheme.primary,
+                                color: type.color,
                               ),
                               Text(type.text),
                             ],
@@ -180,17 +181,16 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                       final item = items[index];
                       final isSelected = selected == item;
 
-                      return _ResultItem(
-                        item: item,
-                        isSelected: isSelected,
-                        onTap: () {
-                          setState(() {
-                            selected = item;
-                            _controller.text = item.queryValue;
+                      return ScheduleCard(
+                          scheduleModel: item,
+                          isSelected: isSelected,
+                          onTap: () {
+                            setState(() {
+                              selected = item;
+                              _controller.text = item.queryValue;
+                            });
+                            _focusNode.unfocus();
                           });
-                          _focusNode.unfocus();
-                        },
-                      );
                     },
                   );
                 },
@@ -262,87 +262,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ResultItem extends StatelessWidget {
-  final ScheduleModel item;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ResultItem({
-    required this.item,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Colors.grey[200]!,
-          width: 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            spacing: 12,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  item.requestType.icon,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 20,
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 4,
-                  children: [
-                    Text(
-                      item.queryValue,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(item.requestType.text,
-                        style: Theme.of(context).textTheme.bodySmall),
-                  ],
-                ),
-              ),
-              if (isSelected)
-                Icon(
-                  Icons.check_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 24,
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }

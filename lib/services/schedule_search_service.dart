@@ -24,7 +24,7 @@ class ScheduleSearchService {
         ));
 
     // Отключаем проверку сертификата (ТОЛЬКО ДЛЯ РАЗРАБОТКИ!)
-    if (kDebugMode && !kIsWeb) {
+    if (dio == null && kDebugMode && !kIsWeb) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
         client.badCertificateCallback = (cert, host, port) => true;

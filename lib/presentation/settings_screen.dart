@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:usue_schedule/core/constants.dart';
 import 'package:usue_schedule/controlles/settings_cubit.dart';
-import 'package:usue_schedule/presentation/widgets/borde_box.dart';
+import 'package:usue_schedule/presentation/widgets/custom_list_tile.dart';
 
 import '../core/theme/schedule_styles.dart';
 import '../dependencies/widgets/dependencies_scope.dart';
@@ -19,6 +19,21 @@ class SettingsScreen extends StatelessWidget {
     final SettingsCubit settingsCubit = context.watch<SettingsCubit>();
     final theme = Theme.of(context);
 
+    Widget buildSettingTile({
+      IconData? icon,
+      required String title,
+      String? subtitle,
+      VoidCallback? onTap,
+      Widget? trailing,
+    }) =>
+        CustomListTile(
+            mainColor: theme.colorScheme.primary,
+            title: title,
+            subTitle: subtitle,
+            leadingIcon: icon,
+            trailing: trailing,
+            onTap: onTap);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Настройки'),
@@ -28,120 +43,88 @@ class SettingsScreen extends StatelessWidget {
       body: DecoratedBox(
         decoration: ScheduleStyles.linearBackgroundDecoration(context),
         child: ListView(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           children: [
             _buildSection(
               context,
               icon: Icons.palette,
               title: 'Внешний вид',
               children: [
-                BorderBox(
-                  child: ListTile(
-                    title: const Text('Тема приложения'),
-                    trailing: DropdownButton<ThemeMode>(
-                      underline: const SizedBox.shrink(),
-                      isDense: true,
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      dropdownColor: theme.colorScheme.surface,
-                      value: settingsCubit.state.themeMode,
-                      onChanged: settingsCubit.setThemeMode,
-                      items: [
-                        DropdownMenuItem(
-                          value: ThemeMode.light,
-                          child: Row(
-                            spacing: 8,
-                            children: [
-                              Icon(
-                                Icons.light_mode,
-                                size: 18,
-                                color: Colors.orange,
-                              ),
-                              const Text('Светлая'),
-                            ],
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: ThemeMode.dark,
-                          child: Row(
-                            spacing: 8,
-                            children: [
-                              Icon(
-                                Icons.dark_mode,
-                                size: 18,
-                                color: Colors.blueGrey,
-                              ),
-                              const Text('Тёмная'),
-                            ],
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: ThemeMode.system,
-                          child: Row(
-                            spacing: 8,
-                            children: [
-                              Icon(
-                                Icons.settings_suggest,
-                                size: 18,
-                                color: theme.colorScheme.primary,
-                              ),
-                              const Text('Системная'),
-                            ],
-                          ),
-                        ),
-                      ],
+                buildSettingTile(
+                  title: 'Тема приложения',
+                  trailing: DropdownButton<ThemeMode>(
+                    underline: const SizedBox.shrink(),
+                    focusColor: Colors.transparent,
+                    isDense: true,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: theme.colorScheme.onSurface,
                     ),
+                    borderRadius: BorderRadius.circular(12),
+                    dropdownColor: theme.colorScheme.surface,
+                    value: settingsCubit.state.themeMode,
+                    onChanged: settingsCubit.setThemeMode,
+                    items: ThemeMode.values
+                        .map((e) => DropdownMenuItem(
+                              value: e,
+                              child: Row(
+                                spacing: 8,
+                                children: [
+                                  Icon(
+                                    e.params.icon,
+                                    size: 18,
+                                    color: e.params.color,
+                                  ),
+                                  Text(e.params.text),
+                                ],
+                              ),
+                            ))
+                        .toList(),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 5),
             _buildSection(
               context,
               icon: Icons.storage,
               title: 'Управление данными',
               children: [
-                _buildSettingTile(context,
+                buildSettingTile(
                     icon: Icons.delete_sweep,
                     title: 'Очистить кэш',
-                    subtitle: 'Удалить данные расписаний', onTap: () {
-                  final cacheProvider =
-                      DependenciesScope.of(context).apiService.cacheProvider;
-                  if (cacheProvider != null) {
-                    Navigator.push(
-                        context, CacheManagerScreen.route(cacheProvider));
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Кеш не обнаружен.")));
-                  }
-                }),
+                    subtitle: 'Удалить данные расписаний',
+                    onTap: () {
+                      final cacheProvider = DependenciesScope.of(context)
+                          .apiService
+                          .cacheProvider;
+                      if (cacheProvider != null) {
+                        Navigator.push(
+                            context, CacheManagerScreen.route(cacheProvider));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Кеш не обнаружен.")));
+                      }
+                    }),
               ],
             ),
-            SizedBox(height: 5),
             _buildSection(
               context,
               icon: Icons.info,
               title: 'О приложении',
               children: [
-                _buildSettingTile(
-                  context,
+                buildSettingTile(
                   icon: Icons.info_outline,
                   title: 'О приложении',
                   subtitle: 'Версия, лицензия, разработчики',
                   onTap: () => _showAboutDialog(context),
                 ),
-                _buildSettingTile(
-                  context,
+                buildSettingTile(
                   icon: Icons.star,
                   title: 'Оценить приложение',
                   subtitle: 'Оставьте отзыв в магазине',
                   onTap: _rateApp,
                 ),
-                _buildSettingTile(
-                  context,
+                buildSettingTile(
                   icon: Icons.share,
                   title: 'Поделиться приложением',
                   subtitle: 'Рекомендовать друзьям',
@@ -149,29 +132,25 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 5),
             _buildSection(
               context,
               icon: Icons.contact_support,
               title: 'Контакты и поддержка',
               children: [
-                _buildSettingTile(
-                  context,
+                buildSettingTile(
                   icon: Icons.email,
                   title: 'Обратная связь',
                   subtitle: 'Написать разработчикам',
                   onTap: () => _sendEmail(context),
                 ),
-                _buildSettingTile(
-                  context,
+                buildSettingTile(
                   icon: Icons.bug_report,
                   title: 'Сообщить об ошибке',
-                  subtitle: 'Нашли баг? Сообщите нам',
+                  subtitle: 'Нашли баг? Сообщите нам через Telegram',
                   onTap: () async =>
                       await launchUrlString(Constants.telegramContact),
                 ),
-                _buildSettingTile(
-                  context,
+                buildSettingTile(
                   icon: Icons.group,
                   title: 'Другие проекты',
                   subtitle: 'Посмотреть другие приложения',
@@ -180,9 +159,10 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 2),
             Center(
               child: Column(
+                spacing: 4,
                 children: [
                   Text(
                     Constants.appName,
@@ -191,14 +171,12 @@ class SettingsScreen extends StatelessWidget {
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 4),
                   Text(
                     'Версия ${Constants.version} • Сборка ${Constants.buildNumber}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
-                  const SizedBox(height: 8),
                   Text(
                     Constants.sign,
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -216,107 +194,44 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildSection(
     BuildContext context, {
-    required IconData icon,
+    IconData? icon,
     required String title,
     required List<Widget> children,
   }) {
     final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            spacing: 10,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-              child: Icon(
-                icon,
-                size: 20,
-                color: theme.colorScheme.primary,
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        ...children.map((child) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: child,
-            )),
-      ],
-    );
-  }
-
-  Widget _buildSettingTile(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    Widget? trailing,
-  }) {
-    final theme = Theme.of(context);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: BorderBox(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                size: 22,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (trailing != null) ...[
-              const SizedBox(width: 12),
-              trailing,
             ],
-          ],
+          ),
         ),
-      ),
+        ...children,
+      ],
     );
   }
 
@@ -335,6 +250,7 @@ class SettingsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
+            spacing: 5,
             children: [
               Text(
                 Constants.appName,
@@ -345,38 +261,6 @@ class SettingsScreen extends StatelessWidget {
                   color: Colors.blue,
                 ),
               ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border:
-                      Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.orange.shade700,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Важное примечание',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.orange.shade800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
               RichText(
                 text: TextSpan(
                   style: TextStyle(
@@ -394,37 +278,35 @@ class SettingsScreen extends StatelessWidget {
                       text: 'Сборка: ',
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    TextSpan(text: '${Constants.buildNumber}\n\n'),
-                    const TextSpan(
-                      text: 'Это приложение является ',
+                    TextSpan(text: Constants.buildNumber),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border:
+                      Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.orange.shade700,
+                      size: 20,
                     ),
-                    TextSpan(
-                      text: 'неофициальным клиентом ',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blue,
+                    Expanded(
+                      child: Text(
+                        'Важное примечание',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.orange.shade800,
+                        ),
                       ),
-                    ),
-                    const TextSpan(
-                      text: 'для просмотра расписания УрГЭУ (USUE) '
-                          'и было создано в рамках учебного проекта.\n\n',
-                    ),
-                    const TextSpan(
-                      text: 'Статус: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const TextSpan(text: 'Студенческий проект\n'),
-                    const TextSpan(
-                      text: 'Разработчик: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(text: '${Constants.author}\n'),
-                    const TextSpan(
-                      text: 'Источник данных: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const TextSpan(
-                      text: 'Официальный сайт расписания УрГЭУ\n',
                     ),
                   ],
                 ),
@@ -432,14 +314,48 @@ class SettingsScreen extends StatelessWidget {
               RichText(
                   text: TextSpan(children: [
                 const TextSpan(
-                  text: '⚖️ ',
-                  style: TextStyle(fontSize: 16),
+                  text: 'Это приложение является ',
                 ),
                 const TextSpan(
-                  text: 'Лицензия: ',
+                  text: 'неофициальным клиентом ',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue,
+                  ),
+                ),
+                const TextSpan(
+                  text: 'для просмотра расписания УрГЭУ (USUE) '
+                      'и было создано в рамках учебного проекта.\n',
+                ),
+                const TextSpan(
+                  text: 'Статус: ',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const TextSpan(text: 'Студенческий проект\n'),
+                const TextSpan(
+                  text: 'Разработчик: ',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                TextSpan(text: '${Constants.author}\n'),
+                const TextSpan(
+                  text: 'Источник данных: ',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const TextSpan(
+                  text: 'Официальный сайт расписания УрГЭУ',
+                ),
+              ])),
+              RichText(
+                  text: const TextSpan(children: [
+                TextSpan(
+                  text: '⚖️ ',
+                  style: TextStyle(fontSize: 16),
+                ),
+                TextSpan(
+                  text: 'Лицензия: ',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                TextSpan(
                   text: 'BSD 3-Clause',
                   style: TextStyle(color: Colors.grey),
                 ),
@@ -470,7 +386,6 @@ class SettingsScreen extends StatelessWidget {
                                 color: Colors.blue.shade700,
                               ),
                             ),
-                            const SizedBox(height: 2),
                             Text(
                               Constants.usueScheduleLink,
                               style: TextStyle(
@@ -539,6 +454,23 @@ class SettingsScreen extends StatelessWidget {
 
     if (await canLaunchUrl(email)) {
       await launchUrl(email);
+    }
+  }
+}
+
+extension on ThemeMode {
+  ({String text, Color color, IconData icon}) get params {
+    switch (this) {
+      case ThemeMode.light:
+        return (text: 'Светлая', color: Colors.orange, icon: Icons.light_mode);
+      case ThemeMode.dark:
+        return (text: 'Тёмная', color: Colors.blueGrey, icon: Icons.dark_mode);
+      case ThemeMode.system:
+        return (
+          text: 'Системная',
+          color: Colors.blue,
+          icon: Icons.settings_suggest
+        );
     }
   }
 }

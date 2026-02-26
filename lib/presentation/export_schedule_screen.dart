@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:usue_schedule/models/schedule_model.dart';
 import 'package:usue_schedule/services/file_service.dart';
 import 'package:usue_schedule/services/message_service.dart';
-import 'package:usue_schedule/presentation/widgets/borde_box.dart';
+import 'package:usue_schedule/presentation/widgets/border_box.dart';
 
 import '../models/export_format.dart';
 import '../models/request_type.dart';
@@ -287,8 +287,9 @@ class _ExportScheduleScreenState extends State<ExportScheduleScreen> {
           if (success == true && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
+                duration: Duration(seconds: 6),
                 content: Text(
-                    'Расписание успешно экспортировано в формат ${_selectedFormat.label}'),
+                    'Расписание успешно экспортировано в формат ${_selectedFormat.label}\nФайл находится в папке "Загрузки"'),
                 backgroundColor: Colors.green,
               ),
             );
@@ -350,6 +351,7 @@ class _ExportScheduleScreenState extends State<ExportScheduleScreen> {
               filteredResponse.schedules
                   .any((s) => s.pairs.any((p) => p.schedulePairs.isNotEmpty))) {
             await FileService.saveSchedule(
+              dateRange: DateTimeRange(start: _startDate, end: _endDate),
               schedule: filteredResponse,
               format: _selectedFormat,
               queryValue: widget.params.queryValue,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:usue_schedule/controlles/cache_provider.dart';
+import 'package:usue_schedule/services/message_service.dart';
 import '../models/schedule_model.dart';
-import '../models/request_type.dart';
 
 class CacheManagerScreen extends StatefulWidget {
   static route(CacheProvider cacheProvider) => MaterialPageRoute(
@@ -69,45 +69,19 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Ошибка загрузки кэша: $e')),
         );
       }
-    }
-  }
-
-  Future<void> _showDeleteConfirmation({
-    required String title,
-    required String message,
-    required VoidCallback onConfirm,
-  }) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Удалить'),
-          ),
-        ],
-      ),
-    );
-
-    if (result == true) {
-      onConfirm();
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
   Future<void> _deleteModel(Iterable<ScheduleModel> models) async {
+    _selectedModels.clear();
+
     for (final model in models) {
       await widget.cacheProvider.clearModelCache(model);
     }
@@ -123,38 +97,27 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     }
   }
 
-  Future<void> _deleteOldForModel(ScheduleModel model) async {
-    // Удаляем старше 30 дней
-    final cutoff = DateTime.now().subtract(const Duration(days: 30));
-    final days = await widget.cacheProvider.getAvailableDaysForModel(model);
+  // Future<void> _deleteOldForModel(ScheduleModel model) async {
+  //   // Удаляем старше 10 дней
+  //   final cutoff = DateTime.now().subtract(const Duration(days: 10));
+  //   final days = await widget.cacheProvider.getAvailableDaysForModel(model);
 
-    for (var day in days) {
-      if (day.isBefore(cutoff)) {
-        // TODO: реализовать удаление конкретного дня
-        // пока просто показываем заглушку
-      }
-    }
+  //   for (var day in days) {
+  //     if (day.isBefore(cutoff)) {
+  //       // TODO: реализовать удаление конкретного дня
+  //       // пока просто показываем заглушку
+  //     }
+  //   }
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Удаление старых данных будет в следующей версии'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  Color _getColorForType(RequestType type) {
-    switch (type) {
-      case RequestType.teacher:
-        return Colors.blue;
-      case RequestType.group:
-        return Colors.green;
-      case RequestType.audience:
-        return Colors.orange;
-    }
-  }
+  //   if (mounted) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Удаление старых данных будет в следующей версии'),
+  //         duration: Duration(seconds: 2),
+  //       ),
+  //     );
+  //   }
+  // }
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'никогда';
@@ -181,16 +144,14 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
           if (_selectedModels.isNotEmpty) ...[
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              onPressed: () => _showDeleteConfirmation(
+              onPressed: () => MessageServise.confirmAction(
                 title: 'Удалить выбранное',
                 message: 'Удалить кэш для ${_selectedModels.length} элементов?',
-                onConfirm: () async {
+                onOk: () async {
                   final models = _cachedModels.where(
                     (m) => _selectedModels.contains(m.cacheKey),
                   );
                   await _deleteModel(models);
-
-                  setState(() => _selectedModels.clear());
                 },
               ),
             ),
@@ -269,7 +230,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
       children: [
         // Статистика
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
             borderRadius: const BorderRadius.only(
@@ -305,20 +266,17 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
         // Список кэшированных моделей
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.all(16),
             itemCount: _cachedModels.length,
             itemBuilder: (context, index) {
               final model = _cachedModels[index];
               final isSelected = _selectedModels.contains(model.cacheKey);
 
               return Card(
-                margin: const EdgeInsets.only(bottom: 12),
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: isSelected
-                      ? BorderSide(
-                          color: Theme.of(context).primaryColor, width: 2)
+                      ? BorderSide(color: model.requestType.color, width: 2)
                       : BorderSide.none,
                 ),
                 child: Padding(
@@ -332,13 +290,13 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: _getColorForType(model.requestType)
+                              color: model.requestType.color
                                   .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
                               model.requestType.icon,
-                              color: _getColorForType(model.requestType),
+                              color: model.requestType.color,
                               size: 20,
                             ),
                           ),
@@ -366,6 +324,10 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                           ),
                           Checkbox(
                             value: isSelected,
+                            fillColor: isSelected
+                                ? WidgetStateProperty.all(
+                                    model.requestType.color)
+                                : null,
                             onChanged: (value) {
                               setState(() {
                                 if (value == true) {
@@ -401,34 +363,36 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                       const SizedBox(height: 16),
 
                       // Кнопки действий
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton.icon(
-                            onPressed: () => _deleteOldForModel(model),
-                            icon: const Icon(Icons.delete_sweep, size: 18),
-                            label: const Text('Удалить старые'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.orange.shade700,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton.icon(
-                            onPressed: () => _showDeleteConfirmation(
-                              title: 'Удалить кэш',
-                              message:
-                                  'Удалить сохраненное расписание для "${model.displayName}"?',
-                              onConfirm: () => _deleteModel([model]),
-                            ),
-                            icon: const Icon(Icons.delete_outline, size: 18),
-                            label: const Text('Удалить'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red.shade50,
-                              foregroundColor: Colors.red.shade700,
-                              elevation: 0,
-                            ),
-                          ),
-                        ],
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: _selectedModels.isEmpty
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                spacing: 8,
+                                children: [
+                                  // TextButton.icon(
+                                  //   onPressed: () => _deleteOldForModel(model),
+                                  //   icon: const Icon(Icons.delete_sweep, size: 18),
+                                  //   label: const Text('Удалить старые'),
+                                  //   style: TextButton.styleFrom(
+                                  //     foregroundColor: Colors.orange.shade700,
+                                  //   ),
+                                  // ),
+                                  ElevatedButton.icon(
+                                    onPressed: () => _deleteModel([model]),
+                                    icon: const Icon(Icons.delete_outline,
+                                        size: 18),
+                                    label: const Text('Удалить'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red.shade50,
+                                      foregroundColor: Colors.red.shade700,
+                                      elevation: 0,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
                       ),
                     ],
                   ),

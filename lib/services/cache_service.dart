@@ -50,16 +50,16 @@ final class CacheManager implements CacheServiceBase {
   final Map<String, ScheduleModel> _activeModels = {};
   late final SharedPreferences _prefs;
 
-  Future<void> init() async {
+  Future<void> init({String? cacheDir}) async {
     _prefs = await SharedPreferences.getInstance();
-    await _initCacheDirectory();
+    await _initCacheDirectory(cachePath: cacheDir);
     await _loadActiveModels();
     SessionLogger.instance.onCreate(name);
   }
 
-  Future<void> _initCacheDirectory() async {
+  Future<void> _initCacheDirectory({String? cachePath}) async {
     final dir = await getTemporaryDirectory();
-    _cacheDir = '${dir.path}/schedule_cache';
+    _cacheDir = cachePath ?? '${dir.path}/schedule_cache';
     final cacheDir = Directory(_cacheDir);
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
