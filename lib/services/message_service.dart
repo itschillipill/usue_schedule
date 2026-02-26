@@ -92,4 +92,35 @@ class MessageServise {
       _hideLoading();
     }
   }
+
+  static Future<void> confirmAction(
+      {required Function() onOk,
+      Function()? onCancel,
+      required String title,
+      required String message}) async {
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
+    bool? res = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Отмена")),
+            TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text("ОК")),
+          ],
+        );
+      },
+    );
+    if (res == true) {
+      onOk();
+    } else {
+      onCancel?.call();
+    }
+  }
 }

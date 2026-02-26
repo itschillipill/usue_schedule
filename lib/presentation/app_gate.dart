@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
+import 'add_schedule_screen.dart';
 import 'schedule_screen.dart';
 import 'settings_screen.dart';
 
@@ -19,6 +21,24 @@ class _AppGateState extends State<AppGate> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: screens[_selectedIndex],
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterDocked,
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: () async {
+                final newSchedule = await Navigator.push(
+                  context,
+                  AddScheduleScreen.route(),
+                );
+                if (newSchedule != null && context.mounted) {
+                  DependenciesScope.of(context)
+                      .scheduleCubit
+                      .addSchedule(newSchedule);
+                }
+              },
+              child: Icon(Icons.add),
+            )
+          : null,
       bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: (index) {

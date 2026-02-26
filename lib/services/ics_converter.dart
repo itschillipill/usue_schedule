@@ -16,7 +16,6 @@ class ICalendarConverter {
     String calendarName, {
     String? queryValue,
     bool splitByGroup = false, // Флаг для разделения по группам (если нужно)
-    String? timezone,
   }) {
     final events = <ICalendarEvent>[];
 
@@ -41,7 +40,6 @@ class ICalendarConverter {
 
     return ICalendar(
       calendarName: calendarName,
-      timezone: timezone ?? 'Europe/Yekaterinburg',
       events: events,
     );
   }

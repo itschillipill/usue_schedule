@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
-import 'package:usue_schedule/presentation/widgets/borde_box.dart';
+import 'package:usue_schedule/presentation/widgets/border_box.dart';
 import '../../models/pair.dart';
 import '../../models/pair_time.dart';
 import '../../models/schedule_response.dart';
 
 import '../../models/day_schedule.dart';
 import 'day_header.dart';
-import 'empty_day.dart';
 import 'schedule_item.dart';
 
 class DayView extends StatelessWidget {
   final ScheduleResponse data;
   final DateTime selectedDate;
   final Map<String, Color> groupColors;
-  final bool isFiltered;
   final Widget buildEmptyState;
 
   const DayView(
       {super.key,
-      required this.isFiltered,
       required this.data,
       required this.selectedDate,
       required this.groupColors,
@@ -37,13 +34,7 @@ class DayView extends StatelessWidget {
       ),
     );
 
-    if (!daySchedule.hasPairs) {
-      if (!isFiltered) {
-        return const EmptyDay();
-      } else {
-        return buildEmptyState;
-      }
-    }
+    if (!daySchedule.hasPairs) return buildEmptyState;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

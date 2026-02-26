@@ -76,12 +76,9 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
   }
 
   void removeSchedule(ScheduleModel schedule) {
-    final List<ScheduleModel> schedules = List.from(state.schedules)
-      ..remove(schedule);
-    if (schedules.length == state.schedules.length) {
-      prefs.setStringList(mySchedulesKey,
-          schedules.map((e) => jsonEncode(e.toJson())).toList());
-      emit(state.copyWith(schedules: schedules));
-    }
+    final schedules = state.schedules.where((e) => e != schedule).toList();
+    prefs.setStringList(
+        mySchedulesKey, schedules.map((e) => jsonEncode(e.toJson())).toList());
+    emit(MyScheduleState(schedules: schedules));
   }
 }

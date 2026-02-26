@@ -35,13 +35,11 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   late final ApiService _apiService;
 
   DateTime _selectedDate = DateTime.now();
-  DateTime _weekStart = DateTime.now();
   bool _isDayView = true;
   List<DateTime> _selectedWeek = [];
 
-  String? _selectedGroupFilter;
+  String? _selectedFilter;
   List<String> _availableGroups = [];
-  String? _selectedTeacherFilter;
   List<String> _availableTeachers = [];
   final Map<String, Color> _groupColors = {};
 
@@ -51,8 +49,7 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
 
   StreamSubscription<ScheduleResponse?>? _subscription;
 
-  bool get _isFiltered =>
-      _selectedGroupFilter != null || _selectedTeacherFilter != null;
+  bool get _isFiltered => _selectedFilter != null;
 
   @override
   void initState() {
@@ -62,26 +59,22 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
 
     _subscription = _apiService.results.listen(
       (response) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-            if (response != null) {
-              _lastResponse = response;
-              _error = null;
-              _extractGroupsAndTeachersFromResponse(response);
-            } else {
-              _error = 'Ошибка при загрузке данных';
-            }
-          });
-        }
+        setState(() {
+          _isLoading = false;
+          if (response != null) {
+            _lastResponse = response;
+            _error = null;
+            _extractGroupsAndTeachersFromResponse(response);
+          } else {
+            _error = 'Ошибка при загрузке данных';
+          }
+        });
       },
       onError: (error) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-            _error = error.toString();
-          });
-        }
+        setState(() {
+          _isLoading = false;
+          _error = error.toString();
+        });
       },
     );
     _loadSchedule();
@@ -94,11 +87,11 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   }
 
   void _updateWeekDates() {
-    _weekStart = _selectedDate.subtract(
+    final weekStart = _selectedDate.subtract(
       Duration(days: _selectedDate.weekday - 1),
     );
     _selectedWeek =
-        List.generate(7, (index) => _weekStart.add(Duration(days: index)));
+        List.generate(7, (index) => weekStart.add(Duration(days: index)));
   }
 
   void _loadSchedule() {
@@ -141,7 +134,7 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
           final group = entry.value;
           return MapEntry(
               group,
-              identical(group, _selectedGroupFilter)
+              identical(group, _selectedFilter)
                   ? Colors.amber.shade600
                   : ScheduleStyles.getGroupColor(index));
         }),
@@ -168,18 +161,14 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
   void _navigateToPrevious() => _shiftDate(_isDayView ? -1 : -7);
   void _navigateToNext() => _shiftDate(_isDayView ? 1 : 7);
 
-  void _toggleFilter({required String? group, required String? teacher}) {
-    _selectedGroupFilter = _selectedGroupFilter == group ? null : group;
-    _selectedTeacherFilter = _selectedTeacherFilter == teacher ? null : teacher;
+  void _toggleFilter({required String? filter}) {
+    _selectedFilter = filter;
     _generateGroupColors();
     setState(() {});
   }
 
   void clearFilters() {
-    setState(() {
-      _selectedGroupFilter = null;
-      _selectedTeacherFilter = null;
-    });
+    setState(() => _selectedFilter = null);
   }
 
   @override
@@ -209,8 +198,7 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
                 ),
                 actions: [
                   FilterButton(
-                    selectedGroupFilter: _selectedGroupFilter,
-                    selectedTeacherFilter: _selectedTeacherFilter,
+                    selectedFilter: _selectedFilter,
                     availableGroups: _availableGroups,
                     availableTeachers: _availableTeachers,
                     requestType: widget.params.requestType,
@@ -269,9 +257,11 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
       return const Center(child: Text('Загрузка данных...'));
     }
 
-    final filteredData = _lastResponse!
-        .filterResponseByGroup(_selectedGroupFilter)
-        .filterResponseByTeacher(_selectedTeacherFilter);
+    final filteredData = switch (widget.params.requestType) {
+      RequestType.group => _lastResponse!.filterByTeacher(_selectedFilter),
+      RequestType.teacher => _lastResponse!.filterByGroup(_selectedFilter),
+      _ => _lastResponse!,
+    };
 
     final emptyState = BuildEmptyState(
       isFiltered: _isFiltered,
@@ -282,7 +272,6 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
     return _isDayView
         ? DayView(
             data: filteredData,
-            isFiltered: _isFiltered,
             selectedDate: _selectedDate,
             groupColors: _groupColors,
             buildEmptyState: emptyState,

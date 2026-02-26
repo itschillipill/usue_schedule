@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:usue_schedule/presentation/widgets/borde_box.dart';
+import 'package:usue_schedule/presentation/widgets/border_box.dart';
 
 import '../../models/day_schedule.dart';
 

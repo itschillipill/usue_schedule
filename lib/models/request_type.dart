@@ -10,4 +10,14 @@ enum RequestType {
   final IconData icon;
   const RequestType(
       {required this.text, required this.query, required this.icon});
+
+  Color get color => switch (this) {
+        RequestType.group => Colors.green,
+        RequestType.audience => Colors.orange,
+        RequestType.teacher => Colors.blue,
+      };
+
+  bool get isGroup => this == RequestType.group;
+  bool get isAudience => this == RequestType.audience;
+  bool get isTeacher => this == RequestType.teacher;
 }
