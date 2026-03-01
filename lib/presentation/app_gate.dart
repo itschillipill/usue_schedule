@@ -12,49 +12,55 @@ class AppGate extends StatefulWidget {
 }
 
 class _AppGateState extends State<AppGate> {
-  int _selectedIndex = 0;
-  List<Widget> screens = [
+  final ValueNotifier<int> selectedIndex = ValueNotifier(0);
+
+  final List<Widget> screens = [
     ScheduleScreen(),
     SettingsScreen(),
   ];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: screens[_selectedIndex],
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniCenterDocked,
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton(
-              onPressed: () async {
-                final newSchedule = await Navigator.push(
-                  context,
-                  AddScheduleScreen.route(),
-                );
-                if (newSchedule != null && context.mounted) {
-                  DependenciesScope.of(context)
-                      .scheduleCubit
-                      .addSchedule(newSchedule);
-                }
-              },
-              child: Icon(Icons.add),
-            )
-          : null,
-      bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          type: BottomNavigationBarType.shifting,
-          selectedItemColor: Theme.of(context).colorScheme.primary,
-          unselectedItemColor: Colors.grey,
-          items: [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.list), label: "Расписания"),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.settings), label: "Настройки"),
-          ]),
+    return ValueListenableBuilder(
+          valueListenable: selectedIndex,
+          builder: (_, index, __)=> PopScope(
+        canPop: index == 0,
+        // ignore: deprecated_member_use
+        onPopInvoked: (_)=> selectedIndex.value = 0,
+        child: Scaffold(
+          body: screens[index],
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.miniCenterDocked,
+          floatingActionButton: index == 0
+              ? FloatingActionButton(
+                  onPressed: () async {
+                    final newSchedule = await Navigator.push(
+                      context,
+                      AddScheduleScreen.route(),
+                    );
+                    if (newSchedule != null && context.mounted) {
+                      DependenciesScope.of(context)
+                          .scheduleCubit
+                          .addSchedule(newSchedule);
+                    }
+                  },
+                  child: Icon(Icons.add),
+                )
+              : null,
+          bottomNavigationBar: BottomNavigationBar(
+              currentIndex: index,
+              onTap: (i)=> selectedIndex.value = i,
+              type: BottomNavigationBarType.shifting,
+              selectedItemColor: Theme.of(context).colorScheme.primary,
+              unselectedItemColor: Colors.grey,
+              items: [
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.list), label: "Расписания"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.settings), label: "Настройки"),
+              ]),
+        ),
+      ),
     );
   }
 }

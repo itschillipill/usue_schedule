@@ -312,54 +312,61 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
               RichText(
-                  text: TextSpan(children: [
-                const TextSpan(
-                  text: 'Это приложение является ',
-                ),
-                const TextSpan(
-                  text: 'неофициальным клиентом ',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blue,
-                  ),
-                ),
-                const TextSpan(
-                  text: 'для просмотра расписания УрГЭУ (USUE) '
-                      'и было создано в рамках учебного проекта.\n',
-                ),
-                const TextSpan(
-                  text: 'Статус: ',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const TextSpan(text: 'Студенческий проект\n'),
-                const TextSpan(
-                  text: 'Разработчик: ',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                TextSpan(text: '${Constants.author}\n'),
-                const TextSpan(
-                  text: 'Источник данных: ',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const TextSpan(
-                  text: 'Официальный сайт расписания УрГЭУ',
-                ),
-              ])),
+                  text: TextSpan(
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      children: [
+                    const TextSpan(
+                      text: 'Это приложение является ',
+                    ),
+                    const TextSpan(
+                      text: 'неофициальным клиентом ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    const TextSpan(
+                      text: 'для просмотра расписания УрГЭУ (USUE) '
+                          'и было создано в рамках учебного проекта.\n',
+                    ),
+                    const TextSpan(
+                      text: 'Статус: ',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const TextSpan(text: 'Студенческий проект\n'),
+                    const TextSpan(
+                      text: 'Разработчик: ',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    TextSpan(text: '${Constants.author}\n'),
+                    const TextSpan(
+                      text: 'Источник данных: ',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const TextSpan(
+                      text: 'Официальный сайт расписания УрГЭУ',
+                    ),
+                  ])),
               RichText(
-                  text: const TextSpan(children: [
-                TextSpan(
-                  text: '⚖️ ',
-                  style: TextStyle(fontSize: 16),
-                ),
-                TextSpan(
-                  text: 'Лицензия: ',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                TextSpan(
-                  text: 'BSD 3-Clause',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ])),
+                  text: TextSpan(
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface),
+                      children: const [
+                    TextSpan(
+                      text: '⚖️ ',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    TextSpan(
+                      text: 'Лицензия: ',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    TextSpan(
+                      text: 'BSD 3-Clause',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ])),
               GestureDetector(
                 onTap: () {
                   launchUrl(Uri.parse(Constants.usueScheduleLink));
@@ -388,6 +395,52 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             Text(
                               Constants.usueScheduleLink,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue.shade600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.open_in_new,
+                        size: 16,
+                        color: Colors.blue,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+               GestureDetector(
+                onTap: () {
+                  launchUrl(Uri.parse(Constants.githubLink));
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border:
+                        Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Исходный код приложения на GitHub',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade700,
+                              ),
+                            ),
+                            Text(
+                              Constants.githubLink,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.blue.shade600,
