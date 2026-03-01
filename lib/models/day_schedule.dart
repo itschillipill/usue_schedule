@@ -5,7 +5,7 @@ import 'pair.dart';
 class DaySchedule extends Equatable {
   final String date;
   final String weekDay;
-  final Iterable<Pair> pairs;
+  final List<Pair> pairs;
 
   const DaySchedule({
     required this.date,

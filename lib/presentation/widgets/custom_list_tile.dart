@@ -8,6 +8,8 @@ class CustomListTile extends StatelessWidget {
   final String? subTitle;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
   const CustomListTile({
     super.key,
     this.border = BorderSide.none,
@@ -16,6 +18,7 @@ class CustomListTile extends StatelessWidget {
     required this.title,
     this.subTitle,
     this.trailing,
+    this.onLongPress,
     this.onTap,
   });
 
@@ -23,6 +26,7 @@ class CustomListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Card(
         elevation: 0,
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
