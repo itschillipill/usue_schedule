@@ -18,39 +18,24 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final SettingsCubit settingsCubit = context.watch<SettingsCubit>();
     final theme = Theme.of(context);
-
-    Widget buildSettingTile({
-      IconData? icon,
-      required String title,
-      String? subtitle,
-      VoidCallback? onTap,
-      Widget? trailing,
-    }) =>
-        CustomListTile(
-            mainColor: theme.colorScheme.primary,
-            title: title,
-            subTitle: subtitle,
-            leadingIcon: icon,
-            trailing: trailing,
-            onTap: onTap);
+    final cacheProvider =
+        DependenciesScope.of(context).apiService.cacheProvider;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Настройки'),
         centerTitle: true,
-        elevation: 0,
       ),
       body: DecoratedBox(
         decoration: ScheduleStyles.linearBackgroundDecoration(context),
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 4),
           children: [
-            _buildSection(
-              context,
+            _Section(
               icon: Icons.palette,
               title: 'Внешний вид',
               children: [
-                buildSettingTile(
+                CustomListTile(
                   title: 'Тема приложения',
                   trailing: DropdownButton<ThemeMode>(
                     underline: const SizedBox.shrink(),
@@ -84,76 +69,67 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            _buildSection(
-              context,
-              icon: Icons.storage,
-              title: 'Управление данными',
-              children: [
-                buildSettingTile(
-                    icon: Icons.delete_sweep,
-                    title: 'Очистить кэш',
-                    subtitle: 'Удалить данные расписаний',
-                    onTap: () {
-                      final cacheProvider = DependenciesScope.of(context)
-                          .apiService
-                          .cacheProvider;
-                      if (cacheProvider != null) {
+            if (cacheProvider != null)
+              _Section(
+                icon: Icons.storage,
+                title: 'Управление данными',
+                children: [
+                  CustomListTile(
+                      leadingIcon: Icons.delete_sweep,
+                      title: 'Очистить кэш',
+                      subTitle: 'Удалить данные расписаний',
+                      onTap: () {
                         Navigator.push(
                             context, CacheManagerScreen.route(cacheProvider));
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Кеш не обнаружен.")));
-                      }
-                    }),
-              ],
-            ),
-            _buildSection(
-              context,
+                      }),
+                ],
+              ),
+            _Section(
               icon: Icons.info,
               title: 'О приложении',
               children: [
-                buildSettingTile(
-                  icon: Icons.info_outline,
+                CustomListTile(
+                  leadingIcon: Icons.info_outline,
                   title: 'О приложении',
-                  subtitle: 'Версия, лицензия, разработчики',
+                  subTitle: 'Версия, лицензия, разработчики',
                   onTap: () => _showAboutDialog(context),
                 ),
-                buildSettingTile(
-                  icon: Icons.star,
+                CustomListTile(
+                  leadingIcon: Icons.star,
                   title: 'Оценить приложение',
-                  subtitle: 'Оставьте отзыв в магазине',
-                  onTap: _rateApp,
+                  subTitle: 'Оставьте отзыв в магазине',
+                  onTap: () async =>
+                      await launchUrl(Uri.parse(Constants.appLinkRuStore)),
                 ),
-                buildSettingTile(
-                  icon: Icons.share,
+                CustomListTile(
+                  leadingIcon: Icons.share,
                   title: 'Поделиться приложением',
-                  subtitle: 'Рекомендовать друзьям',
+                  subTitle: 'Рекомендовать друзьям',
                   onTap: _shareApp,
                 ),
               ],
             ),
-            _buildSection(
-              context,
+            _Section(
               icon: Icons.contact_support,
               title: 'Контакты и поддержка',
               children: [
-                buildSettingTile(
-                  icon: Icons.email,
+                CustomListTile(
+                  leadingIcon: Icons.email,
                   title: 'Обратная связь',
-                  subtitle: 'Написать разработчикам',
+                  subTitle: 'Написать разработчикам',
                   onTap: () => _sendEmail(context),
                 ),
-                buildSettingTile(
-                  icon: Icons.bug_report,
+                CustomListTile(
+                  leadingIcon: Icons.bug_report,
                   title: 'Сообщить об ошибке',
-                  subtitle: 'Нашли баг? Сообщите нам через Telegram',
+                  subTitle: 'Нашли баг? Сообщите нам через Telegram',
                   onTap: () async =>
                       await launchUrlString(Constants.telegramContact),
                 ),
-                buildSettingTile(
-                  icon: Icons.group,
+                CustomListTile(
+                  leadingIcon: Icons.group,
                   title: 'Другие проекты',
-                  subtitle: 'Посмотреть другие приложения',
+                  subTitle: 'Посмотреть другие приложения',
                   onTap: () async =>
                       await launchUrlString(Constants.developerLinkRuStore),
                 ),
@@ -192,57 +168,14 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(
-    BuildContext context, {
-    IconData? icon,
-    required String title,
-    required List<Widget> children,
-  }) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            spacing: 10,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ),
-        ...children,
-      ],
-    );
-  }
-
   Future<void> _showAboutDialog(BuildContext context) async {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Row(
+          spacing: 10,
           children: [
             Icon(Icons.school, color: Colors.blue),
-            SizedBox(width: 12),
             Text('О приложении'),
           ],
         ),
@@ -328,26 +261,11 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                     const TextSpan(
-                      text: 'для просмотра расписания УрГЭУ (USUE) '
-                          'и было создано в рамках учебного проекта.\n',
-                    ),
-                    const TextSpan(
-                      text: 'Статус: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const TextSpan(text: 'Студенческий проект\n'),
-                    const TextSpan(
-                      text: 'Разработчик: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(text: '${Constants.author}\n'),
-                    const TextSpan(
-                      text: 'Источник данных: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const TextSpan(
-                      text: 'Официальный сайт расписания УрГЭУ',
-                    ),
+                        text:
+                            """для просмотра расписания УрГЭУ (USUE) и было создано в рамках учебного проекта.
+Статус: Студенческий проект
+Разработчик: ${Constants.author}
+Источник данных: Официальный сайт расписания УрГЭУ"""),
                   ])),
               RichText(
                   text: TextSpan(
@@ -355,110 +273,19 @@ class SettingsScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.onSurface),
                       children: const [
                     TextSpan(
-                      text: '⚖️ ',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    TextSpan(
-                      text: 'Лицензия: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      text: '⚖️ Лицензия: ',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     TextSpan(
                       text: 'BSD 3-Clause',
                       style: TextStyle(color: Colors.grey),
                     ),
                   ])),
-              GestureDetector(
-                onTap: () {
-                  launchUrl(Uri.parse(Constants.usueScheduleLink));
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border:
-                        Border.all(color: Colors.blue.withValues(alpha: 0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Офицальный сайт расписания',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blue.shade700,
-                              ),
-                            ),
-                            Text(
-                              Constants.usueScheduleLink,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue.shade600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.open_in_new,
-                        size: 16,
-                        color: Colors.blue,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  launchUrl(Uri.parse(Constants.githubLink));
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border:
-                        Border.all(color: Colors.blue.withValues(alpha: 0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Исходный код приложения на GitHub',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blue.shade700,
-                              ),
-                            ),
-                            Text(
-                              Constants.githubLink,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue.shade600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.open_in_new,
-                        size: 16,
-                        color: Colors.blue,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _LinkCard(
+                  'Офицальный сайт расписания', Constants.usueScheduleLink),
+              _LinkCard(
+                  'Исходный код приложения на GitHub', Constants.githubLink),
             ],
           ),
         ),
@@ -472,25 +299,9 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _rateApp() async {
-    await launchUrl(Uri.parse(Constants.appLinkRuStore));
-  }
-
   Future<void> _shareApp() async {
-    final text = '''
-📅 ${Constants.appName} - твое расписание в телефоне!
-
-Скачивай приложение для удобного просмотра расписания УрГЭУ:
-• Все группы, преподаватели, аудитории
-• Умные фильтры и поиск
-• Автообновление данных
-
-➡️ Ссылка: ${Constants.appLinkRuStore}
-
-Поделись с коллегами! 🎓''';
-
     await SharePlus.instance.share(ShareParams(
-      text: text,
+      text: Constants.shareText,
       subject: 'Удобное расписание УрГЭУ',
     ));
   }
@@ -509,6 +320,74 @@ class SettingsScreen extends StatelessWidget {
       await launchUrl(email);
     }
   }
+}
+
+class _Section extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final List<Widget> children;
+  const _Section(
+      {required this.icon, required this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(spacing: 10, children: [
+            Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Icon(icon, size: 20, color: theme.colorScheme.primary)),
+            Text(title,
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w600)),
+          ]),
+        ),
+        ...children,
+      ],
+    );
+  }
+}
+
+class _LinkCard extends StatelessWidget {
+  final String title;
+  final String url;
+  const _LinkCard(this.title, this.url);
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: () => launchUrl(Uri.parse(url)),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+              color: Colors.blue.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.withValues(alpha: 0.2))),
+          child: Row(children: [
+            Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Text(title,
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue.shade700)),
+                  Text(url,
+                      style: const TextStyle(fontSize: 12, color: Colors.blue),
+                      overflow: TextOverflow.ellipsis),
+                ])),
+            const Icon(Icons.open_in_new, size: 16, color: Colors.blue),
+          ]),
+        ),
+      );
 }
 
 extension on ThemeMode {

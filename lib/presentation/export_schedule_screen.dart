@@ -143,7 +143,8 @@ class _ExportScheduleScreenState extends State<ExportScheduleScreen> {
         }
       },
       onError: (e, st) {
-        MessageServise.showErrorSnack('Ошибка при экспорте: $e');
+        MessageServise.showErrorSnack('Ошибка при экспорте',
+            error: e, stackTrace: st);
       },
       fn: () async {
         final response = await widget.getResponse(

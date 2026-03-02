@@ -1,15 +1,28 @@
 class Constants {
-  static String appName = "Расписание УрГЭУ";
-  static String author = "Абдулвахобов Мехроб Мунимович";
-  static String appLinkRuStore =
+  static const String appName = "Расписание УрГЭУ";
+  static const String author = "Абдулвахобов Мехроб Мунимович";
+  static const String appLinkRuStore =
       "https://www.rustore.ru/catalog/app/com.flutter.m.usue_schedule";
-  static String githubLink = "https://github.com/itschillipill/usue_schedule";
-  static String developerLinkRuStore =
+  static const String githubLink =
+      "https://github.com/itschillipill/usue_schedule";
+  static const String developerLinkRuStore =
       "https://www.rustore.ru/catalog/developer/vsxmns";
-  static String version = "3.6.0";
-  static String buildNumber = "62";
-  static String usueScheduleLink = "https://www.usue.ru/raspisanie/";
-  static String devTeam = "Команда разработчиков Flutter development";
-  static String sign = "© 2026 Мехроб Мунимович";
-  static String telegramContact = "https://t.me/itschillipill";
+  static const String version = "3.6.0";
+  static const String buildNumber = "62";
+  static const String usueScheduleLink = "https://www.usue.ru/raspisanie/";
+  static const String devTeam = "Команда разработчиков Flutter development";
+  static const String sign = "© 2026 Мехроб Мунимович";
+  static const String telegramContact = "https://t.me/itschillipill";
+
+  static const String shareText = '''
+📅 $appName - твое расписание в телефоне!
+
+Скачивай приложение для удобного просмотра расписания УрГЭУ:
+• Все группы, преподаватели, аудитории
+• Умные фильтры и поиск
+• Автообновление данных
+
+➡️ Ссылка: $appLinkRuStore
+
+Поделись с коллегами! 🎓''';
 }

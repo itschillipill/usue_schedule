@@ -68,12 +68,9 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
         _lastUpdated = lastUpdated;
         _isLoading = false;
       });
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка загрузки кэша: $e')),
-        );
-      }
+    } catch (error, stackTrace) {
+      MessageServise.showErrorSnack('Ошибка загрузки кэша',
+          error: error, stackTrace: stackTrace);
     } finally {
       setState(() => _isLoading = false);
     }
@@ -86,15 +83,9 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
       await widget.cacheProvider.clearModelCache(model);
     }
 
-    await _loadCacheInfo();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Удалено "${models.length}" кэшей'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
+    await _loadCacheInfo().then((_) {
+      MessageServise.showSnackBar('Удалено ${models.length} кэшей');
+    });
   }
 
   // Future<void> _deleteOldForModel(ScheduleModel model) async {
@@ -107,15 +98,6 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
   //       // TODO: реализовать удаление конкретного дня
   //       // пока просто показываем заглушку
   //     }
-  //   }
-
-  //   if (mounted) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text('Удаление старых данных будет в следующей версии'),
-  //         duration: Duration(seconds: 2),
-  //       ),
-  //     );
   //   }
   // }
 
