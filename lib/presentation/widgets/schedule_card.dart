@@ -23,25 +23,21 @@ class ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ReorderableDragStartListener(
-      index: index,
-      enabled: index != -1,
-      child: CustomListTile(
-          mainColor: scheduleModel.requestType.color,
-          title: scheduleModel.queryValue,
-          subTitle: scheduleModel.requestType.text,
-          leadingIcon: scheduleModel.requestType.icon,
-          onTap: onTap,
-          onLongPress: onLongPress,
-          border: isSelected
-              ? BorderSide(color: scheduleModel.requestType.color)
-              : BorderSide.none,
-          trailing: isSelected
-              ? Icon(
-                  Icons.check_circle,
-                  color: scheduleModel.requestType.color,
-                )
-              : trailing),
-    );
+    return CustomListTile(
+        mainColor: scheduleModel.requestType.color,
+        title: scheduleModel.queryValue,
+        subTitle: scheduleModel.requestType.text,
+        leadingIcon: scheduleModel.requestType.icon,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        border: isSelected
+            ? BorderSide(color: scheduleModel.requestType.color)
+            : BorderSide.none,
+        trailing: isSelected
+            ? Icon(
+                Icons.check_circle,
+                color: scheduleModel.requestType.color,
+              )
+            : trailing);
   }
 }

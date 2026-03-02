@@ -413,7 +413,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-               GestureDetector(
+              GestureDetector(
                 onTap: () {
                   launchUrl(Uri.parse(Constants.githubLink));
                 },
