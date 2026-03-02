@@ -19,8 +19,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   String query = "";
   bool isTextFieldVisible = false;
 
-  bool get draggable => !isTextFieldVisible;
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -87,24 +85,23 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                               : SizedBox.shrink(),
                         ),
                         Expanded(
-                          child: ReorderableListView.builder(
-                              onReorder: scheduleCubit.reorderSchedules,
-                              buildDefaultDragHandles: false,
+                          child: ListView.builder(
                               itemCount: filtredSchedule.length,
                               itemBuilder: (context, index) {
-                                final schedule = filtredSchedule.elementAt(index);
+                                final schedule =
+                                    filtredSchedule.elementAt(index);
                                 return ScheduleCard(
                                   key: ValueKey(schedule.queryValue),
-                                  index: draggable ? index: -1,
                                   onTap: () {
                                     Navigator.push(
                                       context,
-                                      ShowScheduleScreen.route(params: schedule),
+                                      ShowScheduleScreen.route(
+                                          params: schedule),
                                     );
                                   },
                                   scheduleModel: schedule,
-                                  trailing:
-                                      _buildTrailingMenu(schedule, scheduleCubit),
+                                  trailing: _buildTrailingMenu(
+                                      schedule, scheduleCubit),
                                 );
                               }),
                         ),

@@ -65,7 +65,7 @@ class MessageServise {
   static FutureOr<void> showLoading<T>({
     String? message,
     required Future<T> Function() fn,
-    void Function(T value)? onSuccess,
+    void Function(T result)? onSuccess,
     void Function(Object e, StackTrace? stacktrace)? onError,
     Duration delay = const Duration(milliseconds: 500),
     Duration timeout = const Duration(seconds: 10),
@@ -92,6 +92,35 @@ class MessageServise {
       _hideLoading();
     }
   }
+
+  static void showSnackBar(String message,
+      {Color? color, Color? textColor, Duration? duration}) {
+    scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(
+        duration: duration ?? const Duration(seconds: 2),
+        content: Text(message, style: TextStyle(color: textColor)),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.fixed,
+      ),
+    );
+  }
+
+  static void showSuccessSnack(String message, {Duration? duration}) =>
+      showSnackBar(
+        message,
+        duration: duration,
+        color: Colors.green.shade600,
+        textColor: Colors.white,
+      );
+
+  static void showErrorSnack(String message,
+          {Duration duration = const Duration(seconds: 5)}) =>
+      showSnackBar(
+        message,
+        duration: duration,
+        color: Colors.red.shade600,
+        textColor: Colors.white,
+      );
 
   static Future<void> confirmAction(
       {required Function() onOk,

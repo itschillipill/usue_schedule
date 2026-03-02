@@ -22,13 +22,25 @@ class _AppGateState extends State<AppGate> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-          valueListenable: selectedIndex,
-          builder: (_, index, __)=> PopScope(
+      valueListenable: selectedIndex,
+      builder: (_, index, __) => PopScope(
         canPop: index == 0,
         // ignore: deprecated_member_use
-        onPopInvoked: (_)=> selectedIndex.value = 0,
+        onPopInvoked: (_) => selectedIndex.value = 0,
         child: Scaffold(
           body: screens[index],
+          bottomNavigationBar: BottomNavigationBar(
+              currentIndex: index,
+              onTap: (i) => selectedIndex.value = i,
+              type: BottomNavigationBarType.shifting,
+              selectedItemColor: Theme.of(context).colorScheme.primary,
+              unselectedItemColor: Colors.grey,
+              items: [
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.list), label: "Расписания"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.settings), label: "Настройки"),
+              ]),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.miniCenterDocked,
           floatingActionButton: index == 0
@@ -47,18 +59,6 @@ class _AppGateState extends State<AppGate> {
                   child: Icon(Icons.add),
                 )
               : null,
-          bottomNavigationBar: BottomNavigationBar(
-              currentIndex: index,
-              onTap: (i)=> selectedIndex.value = i,
-              type: BottomNavigationBarType.shifting,
-              selectedItemColor: Theme.of(context).colorScheme.primary,
-              unselectedItemColor: Colors.grey,
-              items: [
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.list), label: "Расписания"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.settings), label: "Настройки"),
-              ]),
         ),
       ),
     );
