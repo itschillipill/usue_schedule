@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomListTile extends StatelessWidget {
   final BorderSide border;
-  final Color mainColor;
+  final Color? mainColor;
   final IconData? leadingIcon;
   final String title;
   final String? subTitle;
@@ -14,7 +14,7 @@ class CustomListTile extends StatelessWidget {
   const CustomListTile(
       {super.key,
       this.border = BorderSide.none,
-      required this.mainColor,
+      this.mainColor,
       this.leadingIcon,
       required this.title,
       this.subTitle,
@@ -26,6 +26,7 @@ class CustomListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = mainColor ?? Theme.of(context).colorScheme.primary;
     return GestureDetector(
       onTap: onTap,
       onLongPress: onLongPress,
@@ -49,12 +50,12 @@ class CustomListTile extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: mainColor.withValues(alpha: 0.2),
+                      color: color.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       leadingIcon,
-                      color: mainColor,
+                      color: color,
                       size: 20,
                     ),
                   ),

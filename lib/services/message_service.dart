@@ -114,7 +114,9 @@ class MessageServise {
       );
 
   static void showErrorSnack(String message,
-          {Duration duration = const Duration(seconds: 5)}) =>
+          {Duration duration = const Duration(seconds: 5),
+          Object? error,
+          StackTrace? stackTrace}) =>
       showSnackBar(
         message,
         duration: duration,
