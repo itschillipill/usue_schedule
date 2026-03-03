@@ -64,7 +64,7 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
           if (response != null) {
             _lastResponse = response;
             _error = null;
-            _extractGroupsAndTeachersFromResponse(response);
+            _extractParamsFrom(response);
           } else {
             _error = 'Ошибка при загрузке данных';
           }
@@ -108,21 +108,9 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
     ));
   }
 
-  void _extractGroupsAndTeachersFromResponse(ScheduleResponse response) {
-    final groups = <String>{};
-    final teachers = <String>{};
-
-    for (var day in response.schedules) {
-      for (var pair in day.pairs) {
-        for (var schedulePair in pair.schedulePairs) {
-          groups.add(schedulePair.cleanGroup);
-          teachers.add(schedulePair.teacher);
-        }
-      }
-    }
-
-    _availableGroups = groups.toList()..sort();
-    _availableTeachers = teachers.toList()..sort();
+  void _extractParamsFrom(ScheduleResponse response) {
+    _availableGroups = response.getAllGroups();
+    _availableTeachers = response.getAllTeachers();
     _generateGroupColors();
   }
 
@@ -276,21 +264,18 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
       clearFilters: clearFilters,
     );
 
-    return RefreshIndicator(
-      onRefresh: () async => _loadSchedule(force: true),
-      child: _isDayView
-          ? DayView(
-              data: filteredData,
-              selectedDate: _selectedDate,
-              groupColors: _groupColors,
-              buildEmptyState: emptyState,
-            )
-          : WeekView(
-              data: filteredData,
-              selectedWeek: _selectedWeek,
-              groupColors: _groupColors,
-              buildEmptyState: emptyState,
-            ),
-    );
+    return _isDayView
+        ? DayView(
+            data: filteredData,
+            selectedDate: _selectedDate,
+            groupColors: _groupColors,
+            buildEmptyState: emptyState,
+          )
+        : WeekView(
+            data: filteredData,
+            selectedWeek: _selectedWeek,
+            groupColors: _groupColors,
+            buildEmptyState: emptyState,
+          );
   }
 }

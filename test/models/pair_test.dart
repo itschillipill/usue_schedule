@@ -77,7 +77,7 @@ void main() {
       final groups = pair.getAllGroups();
 
       expect(groups.length, 1);
-      expect(groups.first, "ИВТ-23-1 (2 п/гр.)");
+      expect(groups.first, "ИВТ-23-1");
     });
 
     test("getAllTeachers returns unique teachers", () {

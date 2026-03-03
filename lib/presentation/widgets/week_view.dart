@@ -205,7 +205,7 @@ class _CompactLessonCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      pair.schedulePairs.map((e) => e.teacher).join(", "),
+                      pair.schedulePairs.teachers.join(", "),
                       style: TextStyle(
                         fontSize: 12,
                       ),

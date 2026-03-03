@@ -36,17 +36,11 @@ class Pair extends Equatable {
   bool isCurrentPair(DateTime date) =>
       PairTime.isCurrentPair(number, date: date);
 
-  List<String> getAllGroups() {
-    return schedulePairs.map((sp) => sp.group).toSet().toList();
-  }
+  Iterable<String> getAllGroups() => schedulePairs.map((sp) => sp.cleanGroup);
 
-  List<String> getAllTeachers() {
-    return schedulePairs.map((sp) => sp.teacher).toSet().toList();
-  }
+  Iterable<String> getAllTeachers() => schedulePairs.map((sp) => sp.teacher);
 
-  List<String> getAllAudiences() {
-    return schedulePairs.map((sp) => sp.audience).toSet().toList();
-  }
+  Iterable<String> getAllAudiences() => schedulePairs.map((sp) => sp.audience);
 
   Pair filterByGroup(String groupName) {
     final filtered =
