@@ -94,17 +94,18 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
         List.generate(7, (index) => weekStart.add(Duration(days: index)));
   }
 
-  void _loadSchedule() {
+  void _loadSchedule({bool force = false}) {
     setState(() => _isLoading = true);
 
     final start = _isDayView ? _selectedDate : _selectedWeek.first;
     final end = _isDayView ? _selectedDate : _selectedWeek.last;
 
-    final query = widget.params.requestType == RequestType.audience
-        ? widget.params.queryValue.replaceAll(RegExp(r'[^0-9]'), '')
-        : widget.params.queryValue;
-
-    _apiService.search((start, end, widget.params.requestType, query));
+    _apiService.search((
+      startDate: start,
+      endDate: end,
+      scheduleModel: widget.params,
+      forceUpdate: force
+    ));
   }
 
   void _extractGroupsAndTeachersFromResponse(ScheduleResponse response) {
@@ -215,11 +216,17 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
                                 _apiService.getSchedule,
                               ));
                         }
+                        if (value == "force_update_schedule") {
+                          _loadSchedule(force: true);
+                        }
                       },
                       itemBuilder: (context) => [
                             PopupMenuItem(
                                 value: "export_schedule",
-                                child: Text("Экспорт расписания"))
+                                child: Text("Экспорт расписания")),
+                            PopupMenuItem(
+                                value: "force_update_schedule",
+                                child: Text("Обновить с сервером")),
                           ],
                       child: Icon(Icons.more_vert)),
                 ],
@@ -269,18 +276,21 @@ class _ShowScheduleScreenState extends State<ShowScheduleScreen> {
       clearFilters: clearFilters,
     );
 
-    return _isDayView
-        ? DayView(
-            data: filteredData,
-            selectedDate: _selectedDate,
-            groupColors: _groupColors,
-            buildEmptyState: emptyState,
-          )
-        : WeekView(
-            data: filteredData,
-            selectedWeek: _selectedWeek,
-            groupColors: _groupColors,
-            buildEmptyState: emptyState,
-          );
+    return RefreshIndicator(
+      onRefresh: () async => _loadSchedule(force: true),
+      child: _isDayView
+          ? DayView(
+              data: filteredData,
+              selectedDate: _selectedDate,
+              groupColors: _groupColors,
+              buildEmptyState: emptyState,
+            )
+          : WeekView(
+              data: filteredData,
+              selectedWeek: _selectedWeek,
+              groupColors: _groupColors,
+              buildEmptyState: emptyState,
+            ),
+    );
   }
 }

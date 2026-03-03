@@ -7,7 +7,6 @@ import 'package:usue_schedule/presentation/widgets/custom_list_tile.dart';
 import 'package:usue_schedule/services/file_service.dart';
 import 'package:usue_schedule/services/message_service.dart';
 import '../models/export_format.dart';
-import '../models/request_type.dart';
 import '../models/schedule_response.dart';
 
 class ExportScheduleScreen extends StatefulWidget {
@@ -16,8 +15,7 @@ class ExportScheduleScreen extends StatefulWidget {
     Future<ScheduleResponse> Function({
       required DateTime startDate,
       required DateTime endDate,
-      required RequestType requestType,
-      required String queryValue,
+      required ScheduleModel scheduleModel,
     }) getResponse,
   ) =>
       MaterialPageRoute(
@@ -35,8 +33,7 @@ class ExportScheduleScreen extends StatefulWidget {
   final Future<ScheduleResponse> Function({
     required DateTime startDate,
     required DateTime endDate,
-    required RequestType requestType,
-    required String queryValue,
+    required ScheduleModel scheduleModel,
   }) getResponse;
 
   @override
@@ -150,8 +147,7 @@ class _ExportScheduleScreenState extends State<ExportScheduleScreen> {
         final response = await widget.getResponse(
           startDate: _startDate,
           endDate: _endDate,
-          requestType: widget.params.requestType,
-          queryValue: widget.params.queryValue,
+          scheduleModel: widget.params,
         );
 
         final filtered = ScheduleResponse(
