@@ -12,12 +12,12 @@ import '../core/utils/logger/session_logger.dart';
 import '../models/request_type.dart';
 import '../models/schedule_response.dart';
 
-typedef Params = (
+typedef Params = ({
   DateTime startDate,
   DateTime endDate,
-  RequestType type,
-  String queryValue
-);
+  ScheduleModel scheduleModel,
+  bool forceUpdate,
+});
 
 // Сервис для работы с API
 class ApiService {
@@ -71,10 +71,10 @@ class ApiService {
 
   Future<ScheduleResponse?> _search(Params p) async {
     return getSchedule(
-      startDate: p.$1,
-      endDate: p.$2,
-      requestType: p.$3,
-      queryValue: p.$4,
+      startDate: p.startDate,
+      endDate: p.endDate,
+      scheduleModel: p.scheduleModel,
+      force: p.forceUpdate,
     );
   }
 
@@ -82,17 +82,17 @@ class ApiService {
   Future<ScheduleResponse> getSchedule({
     required DateTime startDate,
     required DateTime endDate,
-    required RequestType requestType,
-    required String queryValue,
+    required ScheduleModel scheduleModel,
+    bool force = false,
   }) async {
     SessionLogger.instance.debug(name, "Получение расписания", extra: {
-      "Период": "${_formatDate(startDate)} - ${_formatDate(endDate)}"
+      "Период": "${_formatDate(startDate)} - ${_formatDate(endDate)}",
+      "Принудительный запрос": "$force"
     });
     try {
-      final response = await cacheProvider?.getSchedule(
-          ScheduleModel(requestType: requestType, queryValue: queryValue),
-          startDate,
-          endDate);
+      final response = force
+          ? null
+          : await cacheProvider?.getSchedule(scheduleModel, startDate, endDate);
       if (response != null) {
         return response;
       } else {
@@ -118,7 +118,7 @@ class ApiService {
           'action': 'show',
           'startDate': formattedStartDate,
           'endDate': formattedEndDate,
-          requestType.query: queryValue,
+          scheduleModel.requestType.query: scheduleModel.queryValue,
         };
 
         SessionLogger.instance.debug(name, "Отправляем запрос к API",
@@ -137,9 +137,9 @@ class ApiService {
           SessionLogger.instance.log(name,
               'Получено ${scheduleResponse.schedules.length} дней расписания');
           cacheProvider?.saveSchedule(
-              ScheduleModel(requestType: requestType, queryValue: queryValue),
+              scheduleModel,
               scheduleResponse.fillEmptyDates(start, end,
-                  skip: requestType != RequestType.audience));
+                  skip: scheduleModel.requestType != RequestType.audience));
           return scheduleResponse.cut(startDate, endDate);
         } else {
           throw Exception('Ошибка API: ${response.statusCode}');
@@ -155,29 +155,25 @@ class ApiService {
   // Метод для получения расписания на неделю
   Future<ScheduleResponse> getWeekSchedule({
     required DateTime startOfWeek,
-    required RequestType requestType,
-    required String queryValue,
+    required ScheduleModel scheduleModel,
   }) async {
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
     return getSchedule(
       startDate: startOfWeek,
       endDate: endOfWeek,
-      requestType: requestType,
-      queryValue: queryValue,
+      scheduleModel: scheduleModel,
     );
   }
 
   // Метод для получения расписания на сегодня
   Future<ScheduleResponse> getTodaySchedule({
-    required RequestType requestType,
-    required String queryValue,
+    required ScheduleModel scheduleModel,
   }) async {
     final today = DateTime.now();
     return getSchedule(
       startDate: today,
       endDate: today,
-      requestType: requestType,
-      queryValue: queryValue,
+      scheduleModel: scheduleModel,
     );
   }
 

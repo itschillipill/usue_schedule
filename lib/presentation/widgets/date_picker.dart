@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class DatePicker {
   final BuildContext context;
   final DateTime selectedDate;
   final Function(DateTime) onDateSelected;
 
-  DatePicker(
-      {required this.context,
-      required this.selectedDate,
-      required this.onDateSelected});
+  DatePicker({
+    required this.context,
+    required this.selectedDate,
+    required this.onDateSelected,
+  });
 
   void call() async {
+    final now = DateTime.now();
+    final maxDate = DateTime(now.year + 1, now.month, now.day);
+    final minDate = DateTime(now.year - 1, now.month, now.day);
+
     DateTime? date = await showModalBottomSheet<DateTime?>(
       context: context,
       isScrollControlled: true,
@@ -39,8 +43,9 @@ class DatePicker {
                     ),
                   ),
                   TextButton(
-                      onPressed: () => Navigator.pop(context, DateTime.now()),
-                      child: Text("Сегодня")),
+                    onPressed: () => Navigator.pop(context, DateTime.now()),
+                    child: const Text("Сегодня"),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
@@ -48,33 +53,21 @@ class DatePicker {
                 ],
               ),
               Expanded(
-                child: SfDateRangePicker(
-                  initialSelectedDate: selectedDate,
-                  onSelectionChanged:
-                      (DateRangePickerSelectionChangedArgs args) {
-                    if (args.value is DateTime) {
-                      Navigator.pop(context, args.value);
-                    }
-                  },
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  monthViewSettings: const DateRangePickerMonthViewSettings(
-                    firstDayOfWeek: 1,
-                  ),
-                  headerStyle: DateRangePickerHeaderStyle(
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                    textAlign: TextAlign.center,
-                    textStyle: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                child: CalendarDatePicker(
+                    initialDate:
+                        selectedDate.isBefore(now) ? now : selectedDate,
+                    firstDate: minDate,
+                    lastDate: maxDate,
+                    currentDate: now,
+                    onDateChanged: (newDate) =>
+                        Navigator.pop(context, newDate)),
               ),
             ],
           ),
         );
       },
     );
+
     if (date != null) {
       onDateSelected(date);
     }
