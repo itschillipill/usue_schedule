@@ -34,7 +34,7 @@ class ScheduleSearchService {
   }
 
   late final Stream<List<ScheduleModel>> results = _querySubject
-      .debounceTime(const Duration(milliseconds: 300))
+      .debounceTime(const Duration(milliseconds: 500))
       .distinct((a, b) =>
           a.queryValue == b.queryValue && a.requestType == b.requestType)
       .switchMap((model) => Stream.fromFuture(_search(model)).onErrorResume(

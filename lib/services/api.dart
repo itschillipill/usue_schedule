@@ -58,7 +58,7 @@ class ApiService {
   }
 
   late final Stream<ScheduleResponse?> results = _querySubject
-      .debounceTime(const Duration(milliseconds: 300))
+      .debounceTime(const Duration(milliseconds: 500))
       .switchMap(
           (model) => Stream.fromFuture(_search(model)).onErrorResume((err, st) {
                 SessionLogger.instance.error(
