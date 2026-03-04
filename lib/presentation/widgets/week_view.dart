@@ -37,26 +37,23 @@ class WeekView extends StatelessWidget {
 
     if (daysWithPairs.isEmpty) return buildEmptyState;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Column(
-        spacing: 5,
-        children: [
-          WeekHeader(
-            days: data.schedules,
-            startDate: selectedWeek.first,
-            endDate: selectedWeek.last,
+    return Column(
+      spacing: 5,
+      children: [
+        WeekHeader(
+          days: data.schedules,
+          startDate: selectedWeek.first,
+          endDate: selectedWeek.last,
+        ),
+        ...daysWithPairs.map(
+          (day) => _LessonCard(
+            daySchedule: day,
+            date: DateFormat('dd.MM.yyyy').parse(day.date),
+            groupColors: groupColors,
+            selectedGroup: selectedGroupFilter,
           ),
-          ...daysWithPairs.map(
-            (day) => _LessonCard(
-              daySchedule: day,
-              date: DateFormat('dd.MM.yyyy').parse(day.date),
-              groupColors: groupColors,
-              selectedGroup: selectedGroupFilter,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -205,7 +202,7 @@ class _CompactLessonCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      pair.schedulePairs.map((e) => e.teacher).join(", "),
+                      pair.schedulePairs.teachers.join(", "),
                       style: TextStyle(
                         fontSize: 12,
                       ),

@@ -44,37 +44,16 @@ class ScheduleResponse extends Equatable {
   }
 
   // Получить все уникальные группы из расписания
-  List<String> getAllGroups() {
-    final groups = <String>{};
-    for (var day in schedules) {
-      for (var group in day.getAllGroups()) {
-        groups.add(group);
-      }
-    }
-    return groups.toList()..sort();
-  }
+  List<String> getAllGroups() =>
+      schedules.expand((d) => d.getAllGroups()).toSet().toList();
 
   // Получить все уникальные преподаватели из расписания
-  List<String> getAllTeachers() {
-    final teachers = <String>{};
-    for (var day in schedules) {
-      for (var teacher in day.getAllTeachers()) {
-        teachers.add(teacher);
-      }
-    }
-    return teachers.toList()..sort();
-  }
+  List<String> getAllTeachers() =>
+      schedules.expand((d) => d.getAllTeachers()).toSet().toList();
 
   // Получить все уникальные аудитории
-  List<String> getAllAudiences() {
-    final audiences = <String>{};
-    for (var day in schedules) {
-      for (var audience in day.getAllAudiences()) {
-        audiences.add(audience);
-      }
-    }
-    return audiences.toList()..sort();
-  }
+  List<String> getAllAudiences() =>
+      schedules.expand((d) => d.getAllAudiences()).toSet().toList();
 
   // Отфильтровать по группе
   ScheduleResponse filterByGroup([String? groupName]) {

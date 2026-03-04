@@ -23,11 +23,11 @@ class DatePicker {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.7,
+        return Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             spacing: 10,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -52,16 +52,12 @@ class DatePicker {
                   ),
                 ],
               ),
-              Expanded(
-                child: CalendarDatePicker(
-                    initialDate:
-                        selectedDate.isBefore(now) ? now : selectedDate,
-                    firstDate: minDate,
-                    lastDate: maxDate,
-                    currentDate: now,
-                    onDateChanged: (newDate) =>
-                        Navigator.pop(context, newDate)),
-              ),
+              CalendarDatePicker(
+                  initialDate: selectedDate.isBefore(now) ? now : selectedDate,
+                  firstDate: minDate,
+                  lastDate: maxDate,
+                  currentDate: now,
+                  onDateChanged: (newDate) => Navigator.pop(context, newDate)),
             ],
           ),
         );

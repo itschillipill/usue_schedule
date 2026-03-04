@@ -36,21 +36,18 @@ class DayView extends StatelessWidget {
 
     if (!daySchedule.hasPairs) return buildEmptyState;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Column(
-        spacing: 10,
-        children: [
-          DayHeader(day: daySchedule, date: selectedDate),
-          ...daySchedule.nonEmptyPairs.map(
-            (pair) => _TimelineLessonCard(
-              pair: pair,
-              groupColors: groupColors,
-              dateTime: selectedDate,
-            ),
+    return Column(
+      spacing: 10,
+      children: [
+        DayHeader(day: daySchedule, date: selectedDate),
+        ...daySchedule.nonEmptyPairs.map(
+          (pair) => _TimelineLessonCard(
+            pair: pair,
+            groupColors: groupColors,
+            dateTime: selectedDate,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

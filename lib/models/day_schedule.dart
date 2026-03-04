@@ -31,35 +31,14 @@ class DaySchedule extends Equatable {
 
   bool get hasPairs => nonEmptyPairs.isNotEmpty;
 
-  Iterable<String> getAllGroups() {
-    final groups = <String>{};
-    for (var pair in pairs) {
-      for (var group in pair.getAllGroups()) {
-        groups.add(group);
-      }
-    }
-    return groups;
-  }
+  Iterable<String> getAllGroups() =>
+      pairs.expand((pair) => pair.getAllGroups());
 
-  Iterable<String> getAllTeachers() {
-    final teachers = <String>{};
-    for (var pair in pairs) {
-      for (var teacher in pair.getAllTeachers()) {
-        teachers.add(teacher);
-      }
-    }
-    return teachers;
-  }
+  Iterable<String> getAllTeachers() =>
+      pairs.expand((pair) => pair.getAllTeachers());
 
-  Iterable<String> getAllAudiences() {
-    final audiences = <String>{};
-    for (var pair in pairs) {
-      for (var audience in pair.getAllAudiences()) {
-        audiences.add(audience);
-      }
-    }
-    return audiences;
-  }
+  Iterable<String> getAllAudiences() =>
+      pairs.expand((pair) => pair.getAllAudiences());
 
   DaySchedule filterByGroup(String groupName) {
     final filteredPairs =
