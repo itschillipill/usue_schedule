@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../core/utils/date_utils.dart';
+
 class SchedulePair extends Equatable {
   final String subject;
   final String teacher;
@@ -73,6 +75,8 @@ class SchedulePair extends Equatable {
       'par_id': pairId,
     };
   }
+
+  String? get correctedTime => DateTimeUtils.parseTimeFromComment(comment);
 
   @override
   List<Object?> get props =>

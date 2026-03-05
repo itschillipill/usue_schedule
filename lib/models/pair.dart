@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import 'pair_time.dart';
+import '../core/utils/date_utils.dart';
 import 'schedule_pair.dart';
 
 class Pair extends Equatable {
@@ -33,8 +33,10 @@ class Pair extends Equatable {
     return ('', '');
   }
 
+  String get pairTime => schedulePairs.first.correctedTime ?? time;
+
   bool isCurrentPair(DateTime date) =>
-      PairTime.isCurrentPair(number, date: date);
+      DateTimeUtils.isCurrentPair(pairTime, date);
 
   Iterable<String> getAllGroups() => schedulePairs.map((sp) => sp.cleanGroup);
 

@@ -56,6 +56,29 @@ class DateTimeUtils {
     return null;
   }
 
+  // Парсить время из комментария пары
+  static String? parseTimeFromComment(String? comment,
+      {String defaultTime = ''}) {
+    if (comment == null || comment.isEmpty)
+      return defaultTime.isEmpty ? null : defaultTime;
+
+    // Регулярное выражение для поиска времени в формате "ЧЧ.ММ-ЧЧ.ММ"
+    final timeRegex = RegExp(r'(\d{1,2})\.(\d{2})-(\d{1,2})\.(\d{2})');
+
+    final match = timeRegex.firstMatch(comment);
+    if (match != null) {
+      final startHour = match.group(1)!.padLeft(2, '0');
+      final startMin = match.group(2)!;
+      final endHour = match.group(3)!.padLeft(2, '0');
+      final endMin = match.group(4)!;
+
+      // Преобразуем в формат "ЧЧ:ММ-ЧЧ:ММ"
+      return '$startHour:$startMin-$endHour:$endMin';
+    }
+
+    return defaultTime.isEmpty ? null : defaultTime;
+  }
+
   // Проверить, является ли дата сегодняшней
   static bool isToday(DateTime date) {
     final now = DateTime.now();
@@ -71,5 +94,36 @@ class DateTimeUtils {
       return isToday(parsedDate);
     }
     return false;
+  }
+
+  static bool isCurrentPair(String time, DateTime date) {
+    // Если дата не сегодня - сразу false
+    if (!isToday(date)) return false;
+
+    final now = DateTime.now();
+    final currentMinutes = now.hour * 60 + now.minute;
+
+    // Парсим время пары из формата "ЧЧ:ММ-ЧЧ:ММ"
+    final parts = time.split('-');
+    if (parts.length != 2) return false;
+
+    final startParts = parts[0].trim().split(':');
+    final endParts = parts[1].trim().split(':');
+
+    if (startParts.length != 2 || endParts.length != 2) return false;
+
+    try {
+      final startHour = int.parse(startParts[0]);
+      final startMin = int.parse(startParts[1]);
+      final endHour = int.parse(endParts[0]);
+      final endMin = int.parse(endParts[1]);
+
+      final startMinutes = startHour * 60 + startMin;
+      final endMinutes = endHour * 60 + endMin;
+
+      return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+    } catch (e) {
+      return false;
+    }
   }
 }
