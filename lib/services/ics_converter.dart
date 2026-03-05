@@ -1,9 +1,9 @@
 import 'package:usue_schedule/core/utils/logger/session_logger.dart';
 
 import '../core/utils/date_utils.dart' as date_utils;
+import '../core/utils/date_utils.dart';
 import '../models/i_calendar_event.dart';
 import '../models/pair.dart';
-import '../models/pair_time.dart';
 import '../models/schedule_pair.dart';
 import '../models/schedule_response.dart';
 
@@ -52,27 +52,28 @@ class ICalendarConverter {
   }) {
     try {
       // Парсим время начала и окончания
-      final timeRange = _parseTimeRange(pair.time);
+      final timeRange = _parseTimeRange((DateTimeUtils.parseTimeFromComment(
+                  pair.schedulePairs.first.comment,
+                  defaultTime: pair.time) ??
+              pair.time)
+          .toString());
       if (timeRange == null) return null;
-
-      final PairTime pairTime = PairTime.defaultPairTimes[pair.number] ??
-          PairTime(start: (0, 0), end: (0, 0));
 
       // Создаем DateTime объекты
       final startDateTime = DateTime(
         dayDate.year,
         dayDate.month,
         dayDate.day,
-        pairTime.start.$1,
-        pairTime.start.$2,
+        timeRange.start.hour,
+        timeRange.start.minute,
       );
 
       final endDateTime = DateTime(
         dayDate.year,
         dayDate.month,
         dayDate.day,
-        pairTime.end.$1,
-        pairTime.end.$2,
+        timeRange.end.hour,
+        timeRange.end.minute,
       );
 
       // Формируем описание (все группы в одном событии)
@@ -247,7 +248,7 @@ class ICalendarConverter {
     return match?.group(1)?.trim() ?? summary;
   }
 
-  static (DateTime start, DateTime end)? _parseTimeRange(String timeString) {
+  static ({DateTime start, DateTime end})? _parseTimeRange(String timeString) {
     try {
       final parts = timeString.split('-');
       if (parts.length != 2) return null;
@@ -265,8 +266,8 @@ class ICalendarConverter {
       final now = DateTime.now();
 
       return (
-        DateTime(now.year, now.month, now.day, startHour, startMinute),
-        DateTime(now.year, now.month, now.day, endHour, endMinute),
+        start: DateTime(now.year, now.month, now.day, startHour, startMinute),
+        end: DateTime(now.year, now.month, now.day, endHour, endMinute),
       );
     } catch (e) {
       SessionLogger.instance.error(name, "Ошибка парсинга времени", error: e);

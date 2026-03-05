@@ -100,7 +100,8 @@ class ShowScheduleScreen extends StatelessWidget {
                       selectedWeek: provider.selectedWeek,
                       navigatePrevious: () =>
                           provider.shiftDate(provider.isDayView ? -1 : -7),
-                      navigateNext: () => provider.shiftDate(provider.isDayView ? 1 : 7),
+                      navigateNext: () =>
+                          provider.shiftDate(provider.isDayView ? 1 : 7),
                       toggleView: provider.toggleView,
                       showCalendar: DatePicker(
                               selectedDate: provider.selectedDate,
@@ -125,8 +126,10 @@ class ShowScheduleScreen extends StatelessWidget {
     }
 
     final filteredData = switch (params.requestType) {
-      RequestType.group => provider.lastResponse!.filterByTeacher(provider.selectedFilter),
-      RequestType.teacher => provider.lastResponse!.filterByGroup(provider.selectedFilter),
+      RequestType.group =>
+        provider.lastResponse!.filterByTeacher(provider.selectedFilter),
+      RequestType.teacher =>
+        provider.lastResponse!.filterByGroup(provider.selectedFilter),
       _ => provider.lastResponse!,
     };
 

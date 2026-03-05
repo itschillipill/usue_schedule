@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:usue_schedule/presentation/widgets/border_box.dart';
 import '../../models/pair.dart';
-import '../../models/pair_time.dart';
 import '../../models/schedule_response.dart';
 
 import '../../models/day_schedule.dart';
@@ -80,8 +79,7 @@ class _TimelineLessonCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    (PairTime.defaultPairTimes[pair.number] ?? pair.time)
-                        .toString(),
+                    pair.pairTime,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,

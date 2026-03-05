@@ -2,7 +2,7 @@ name: usue_schedule
 description: "An app for traking your schedule in USUE"
 publish_to: 'none'
 
-version: 3.6.0+62
+version: 3.6.0+68
 
 environment:
   sdk: ^3.5.3
