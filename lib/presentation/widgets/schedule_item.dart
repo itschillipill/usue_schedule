@@ -83,7 +83,7 @@ class ScheduleItem extends StatelessWidget {
                     .withValues(alpha: 0.6),
               ),
               Text(
-                pairs.first.audience,
+                pairs.audience,
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context)

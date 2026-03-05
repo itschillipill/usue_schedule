@@ -92,4 +92,6 @@ extension X on List<SchedulePair> {
 
   Iterable<String> get subgroups =>
       where((p) => p.isSubgroup).map((p) => '${p.subgroupNumber}').toSet();
+  
+  String get audience => firstWhere((p)=> p.audience.isNotEmpty).audience;
 }
