@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:usue_schedule/controlles/settings_cubit.dart';
-import 'package:usue_schedule/core/utils/logger/session_logger.dart';
-import 'package:usue_schedule/services/api.dart';
+import 'package:usue_schedule/features/settings/controlles/settings_cubit.dart';
+import 'package:usue_schedule/core/logger/session_logger.dart';
+import 'package:usue_schedule/features/schedule/services/api.dart';
 
-import '../controlles/cache_provider.dart';
-import '../controlles/schedule_cubit.dart';
+import '../features/cache/provider/cache_provider.dart';
+import '../features/schedule/controllers/schedule_cubit.dart';
 import 'dependencies.dart';
 import 'platform/initialization_vm.dart'
     if (dart.library.html) 'platform/initialization_js.dart';

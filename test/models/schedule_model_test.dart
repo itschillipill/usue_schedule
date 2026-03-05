@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:usue_schedule/models/schedule_model.dart';
-import 'package:usue_schedule/models/request_type.dart';
+import 'package:usue_schedule/features/schedule/models/schedule_model.dart';
+import 'package:usue_schedule/features/schedule/models/request_type.dart';
 
 void main() {
   group("ScheduleModel - factory constructors", () {

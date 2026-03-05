@@ -1,6 +1,6 @@
-import 'package:usue_schedule/controlles/schedule_cubit.dart';
-import 'package:usue_schedule/controlles/settings_cubit.dart';
-import 'package:usue_schedule/services/api.dart';
+import 'package:usue_schedule/features/schedule/controllers/schedule_cubit.dart';
+import 'package:usue_schedule/features/settings/controlles/settings_cubit.dart';
+import 'package:usue_schedule/features/schedule/services/api.dart';
 
 class Dependencies {
   late final MyScheduleCubit scheduleCubit;

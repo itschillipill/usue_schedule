@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:usue_schedule/models/day_schedule.dart';
-import 'package:usue_schedule/models/pair.dart';
-import 'package:usue_schedule/models/schedule_pair.dart';
+import 'package:usue_schedule/features/schedule/models/day_schedule.dart';
+import 'package:usue_schedule/features/schedule/models/pair.dart';
+import 'package:usue_schedule/features/schedule/models/schedule_pair.dart';
 
 void main() {
   group("DaySchedule", () {
