@@ -42,57 +42,56 @@ class AppPallete {
   static const Color transparent = Colors.transparent;
 
   // различные цвета для групп, ярких и легко различимых
-  static final List<Color> groupColors = [
-    Color(0xFFE53935), // красный
-    Color(0xFFD81B60), // розовый
-    Color(0xFF8E24AA), // фиолетовый
-    Color(0xFF5E35B1), // индиго
-    Color(0xFF3949AB), // синий
-    Color(0xFF1E88E5), // голубой
-    Color(0xFF039BE5),
-    Color(0xFF00ACC1), // бирюзовый
-    Color(0xFF00897B), // зеленый
-    Color(0xFF43A047),
-    Color(0xFF7CB342),
-    Color(0xFFC0CA33),
-    Color(0xFFFDD835), // желтый
-    Color(0xFFFFF176),
-    Color(0xFFFFEE58),
-    Color(0xFFFFCA28), // оранжевый
-    Color(0xFFFFA726),
-    Color(0xFFFF7043),
-    Color(0xFF6D4C41), // коричневый
-    Color(0xFF757575), // серый
-    Color(0xFF546E7A), // серо-синий
-    Color(0xFF26C6DA), // аквамарин
-    Color(0xFF00ACC1),
-    Color(0xFF80DEEA),
-    Color(0xFF4DD0E1),
-    Color(0xFF1DE9B6),
-    Color(0xFF00E676),
-    Color(0xFF69F0AE),
-    Color(0xFFB2FF59),
-    Color(0xFFEEFF41),
-    Color(0xFFFFF59D),
-    Color(0xFFFFE082),
-    Color(0xFFFFAB91),
-    Color(0xFFFF8A65),
-    Color(0xFFBCAAA4),
-    Color(0xFFE0E0E0),
-    Color(0xFF90A4AE),
-    Color(0xFF4FC3F7),
-    Color(0xFF29B6F6),
-    Color(0xFF03A9F4),
-    Color(0xFF039BE5),
-    Color(0xFF0288D1),
-    Color(0xFF0277BD),
-    Color(0xFF01579B),
-    Color(0xFFD81B60),
-    Color(0xFFC2185B),
-    Color(0xFF880E4F),
-    Color(0xFFAD1457),
-    Color(0xFFE91E63),
-    Color(0xFF9C27B0),
-    Color(0xFF673AB7),
-  ];
+// Оптимизировано для максимального контраста между соседними цветами
+static final List<Color> groupColors = [
+  Color(0xFFE53935), // красный
+  Color(0xFF1E88E5), // голубой (далеко от красного)
+  Color(0xFF43A047), // зеленый
+  Color(0xFF8E24AA), // фиолетовый
+  Color(0xFFFDD835), // желтый
+  Color(0xFFD81B60), // розовый
+  Color(0xFF00897B), // бирюзовый
+  Color(0xFF5E35B1), // индиго
+  Color(0xFFFF7043), // оранжевый
+  Color(0xFF00ACC1), // аквамарин
+  Color(0xFF6D4C41), // коричневый
+  Color(0xFF3949AB), // синий
+  Color(0xFFC0CA33), // салатовый
+  Color(0xFF00E676), // ярко-зеленый
+  Color(0xFFE91E63), // малиновый
+  Color(0xFF0288D1), // темно-голубой
+  Color(0xFFFFA726), // оранжевый
+  Color(0xFF673AB7), // темно-фиолетовый
+  Color(0xFF4DD0E1), // светло-бирюзовый
+  Color(0xFFD81B60), // розово-красный
+  Color(0xFF26C6DA), // циан
+  Color(0xFF7CB342), // светло-зеленый
+  Color(0xFF546E7A), // серо-синий
+  Color(0xFFE53935), // красный (для цикла)
+  Color(0xFF1DE9B6), // мятный
+  Color(0xFF9C27B0), // пурпурный
+  Color(0xFFFF8A65), // коралловый
+  Color(0xFF039BE5), // синий
+  Color(0xFF4FC3F7), // небесный
+  Color(0xFFFFAB91), // персиковый
+  Color(0xFF880E4F), // темно-розовый
+  Color(0xFF01579B), // темно-синий
+  Color(0xFFB2FF59), // лайм
+  Color(0xFF00ACC1), // бирюзовый
+  Color(0xFFE65100), // темно-оранжевый
+  Color(0xFFAD1457), // бордовый
+  Color(0xFF283593), // индиго
+  Color(0xFF2E7D32), // темно-зеленый
+  Color(0xFF00695C), // темно-бирюзовый
+  Color(0xFF4A148C), // темно-фиолетовый
+  Color(0xFFB71C1C), // темно-красный
+  Color(0xFF0D47A1), // темно-синий
+  Color(0xFF1B5E20), // темно-зеленый
+  Color(0xFFBF360C), // красно-оранжевый
+  Color(0xFF311B92), // темно-фиолетовый
+  Color(0xFF1A237E), // темно-синий
+  Color(0xFF004D40), // темно-бирюзовый
+  Color(0xFF827717), // оливковый
+  Color(0xFF3E2723), // темно-коричневый
+];
 }
