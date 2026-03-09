@@ -59,8 +59,9 @@ class DateTimeUtils {
   // Парсить время из комментария пары
   static String? parseTimeFromComment(String? comment,
       {String defaultTime = ''}) {
-    if (comment == null || comment.isEmpty)
+    if (comment == null || comment.isEmpty) {
       return defaultTime.isEmpty ? null : defaultTime;
+    }
 
     // Регулярное выражение для поиска времени в формате "ЧЧ.ММ-ЧЧ.ММ"
     final timeRegex = RegExp(r'(\d{1,2})\.(\d{2})-(\d{1,2})\.(\d{2})');

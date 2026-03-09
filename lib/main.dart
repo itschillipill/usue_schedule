@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:usue_schedule/core/utils/logger/session_logger.dart';
+import 'package:usue_schedule/core/logger/session_logger.dart';
 import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
 import 'core/theme/theme.dart';
-import 'controlles/settings_cubit.dart';
+import 'features/settings/controlles/settings_cubit.dart';
 import 'dependencies/widgets/intialization.dart';
-import 'presentation/app_gate.dart';
-import 'presentation/init_error_screen.dart';
-import 'presentation/splash_screen.dart';
-import 'services/message_service.dart';
+import 'shared/presentation/app_gate.dart';
+import 'shared/presentation/init_error_screen.dart';
+import 'shared/presentation/splash_screen.dart';
+import 'shared/services/message_service.dart';
 
 void main() => runZonedGuarded(() async {
       final InitializationExecutor initialization = InitializationExecutor();
@@ -40,8 +40,8 @@ class App extends StatelessWidget {
         selector: (state) => state.themeMode,
         builder: (context, themeMode) {
           return MaterialApp(
-            navigatorKey: MessageServise.navigatorKey,
-            scaffoldMessengerKey: MessageServise.scaffoldMessengerKey,
+            navigatorKey: MessageService.navigatorKey,
+            scaffoldMessengerKey: MessageService.scaffoldMessengerKey,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,

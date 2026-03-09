@@ -1,8 +1,8 @@
 import 'dart:io' show File;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:usue_schedule/models/pair.dart';
-import 'package:usue_schedule/models/schedule_response.dart';
+import 'package:usue_schedule/features/schedule/models/pair.dart';
+import 'package:usue_schedule/features/schedule/models/schedule_response.dart';
 
 void main() {
   late Pair pair;
