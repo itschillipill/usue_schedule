@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:usue_schedule/core/theme/schedule_styles.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_pair.dart';
 import 'package:usue_schedule/features/schedule/widgets/label_group.dart';
 
@@ -18,55 +17,20 @@ class ScheduleItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 3,
         children: [
-          Row(
+          Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 2,
-                  children: [
-                    Text(
-                      pairs.first.subject,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    if (pairs.hasMultipleGroups) _buildGroupsChips(context),
-                  ],
-                ),
-              ),
-              if (!pairs.hasMultipleGroups)
-                _buildSingleGroupChip(pairs.first.cleanGroup),
-            ],
-          ),
-
-          Row(
             spacing: 2,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.person_outline,
-                size: 16,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.6),
-              ),
-              Expanded(
-                child: Text(
-                  pairs.teachers.join(', '),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.8),
-                  ),
+              Text(
+                pairs.first.subject.trim(),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
+              if (pairs.hasMultipleGroups) _buildGroupsChips(context),
             ],
           ),
 
@@ -74,16 +38,39 @@ class ScheduleItem extends StatelessWidget {
           Row(
             spacing: 2,
             children: [
-              Icon(
-                Icons.meeting_room_outlined,
-                size: 16,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.6),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 2,
+                children: [
+                  Icon(
+                    Icons.meeting_room_outlined,
+                    size: 16,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.6),
+                  ),
+                  Text(
+                    pairs.audience,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.8),
+                    ),
+                  ),
+                ],
               ),
               Text(
-                pairs.audience,
+                '•',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                pairs.teachers.join(', '),
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context)
@@ -101,19 +88,21 @@ class ScheduleItem extends StatelessWidget {
             spacing: 8,
             runSpacing: 4,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration:
-                    ScheduleStyles.lessonTypeDecoration(pairs.first.lessonType),
-                child: Text(
-                  pairs.first.lessonType,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+              // Container(
+              //   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              //   decoration:
+              //       ScheduleStyles.lessonTypeDecoration(pairs.first.lessonType),
+              //   child: Text(
+              //     pairs.first.lessonType,
+              //     style: TextStyle(
+              //       fontSize: 12,
+              //       color: Colors.white,
+              //       fontWeight: FontWeight.w500,
+              //     ),
+              //   ),
+              // ),
+              if (!pairs.hasMultipleGroups)
+                _buildSingleGroupChip(pairs.first.cleanGroup),
               if (pairs.subgroups.isNotEmpty)
                 Container(
                   padding:

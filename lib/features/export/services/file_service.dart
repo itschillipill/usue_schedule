@@ -1,21 +1,58 @@
-import 'dart:convert' show Utf8Codec;
-import 'dart:io';
+// ignore_for_file: unused_element
 
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'dart:convert' show utf8;
+import 'dart:io' show Platform, File;
+import 'package:flutter/material.dart' show DateTimeRange;
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
 import 'package:share_plus/share_plus.dart';
 import 'package:usue_schedule/core/utils/date_utils.dart';
-
 import '../../../core/logger/session_logger.dart';
 import '../models/export_format.dart';
 import '../../schedule/models/schedule_response.dart';
 import 'ics_converter.dart';
+import 'docx_generator.dart'; // Импортируем WordExporter
+
+const platform = MethodChannel('app.channel.files');
 
 class FileService {
   static String name = "FileService";
 
+  // Базовый метод сохранения файла в Downloads
+  static Future<String?> saveToDownloads(
+      String fileName, Uint8List bytes) async {
+    try {
+      if (Platform.isAndroid) {
+        // Android использует нативный код
+        final path = await platform.invokeMethod('saveFile', {
+          'fileName': fileName,
+          'bytes': bytes,
+        });
+        return path as String?;
+      } else {
+        // Для других платформ (Windows, macOS, Linux)
+        final directory = await getDownloadsDirectory();
+        if (directory == null) {
+          throw Exception('Could not find Downloads directory');
+        }
+
+        final filePath = '${directory.path}/$fileName';
+        final file = File(filePath);
+        await file.writeAsBytes(bytes);
+        return filePath;
+      }
+    } on PlatformException catch (e, s) {
+      SessionLogger.instance
+          .error(name, "Ошибка сохранения на Android", error: e, stackTrace: s);
+      return null;
+    } catch (e, s) {
+      SessionLogger.instance
+          .error(name, "Ошибка сохранения", error: e, stackTrace: s);
+      return null;
+    }
+  }
+
+  // Основной метод сохранения расписания в разных форматах
   static Future<void> saveSchedule({
     required DateTimeRange dateRange,
     required ScheduleResponse schedule,
@@ -23,61 +60,45 @@ class FileService {
     String? queryValue,
     bool shareAfterSave = true,
   }) async {
-    if (Platform.isAndroid) {
-      await _handleAndroidPermissions();
-    }
-    final fileName =
-        'Расписание_УрГЭУ_${queryValue}_(${DateTimeUtils.formatDate(dateRange.start, showWeekday: false)}-${DateTimeUtils.formatDate(dateRange.end, showWeekday: false)})';
+    final fileName = _generateFileName(dateRange, queryValue);
 
-    final String path = switch (format) {
-      ExportFormat.pdf => await _saveAsPdf(schedule, fileName),
-      ExportFormat.excel => await _saveAsExcel(schedule, fileName),
-      ExportFormat.ics => await _saveAsICS(schedule, fileName, queryValue),
-    };
+    late final String? path;
+
+    switch (format) {
+      case ExportFormat.ics:
+        path = await _saveAsICS(schedule, fileName, queryValue);
+        break;
+      case ExportFormat.word:
+        path = await _saveAsWord(schedule, fileName);
+        break;
+    }
 
     SessionLogger.instance.debug(name, "✅ Файл сохранён: $path");
 
-    if (shareAfterSave) {
+    if (shareAfterSave && path != null) {
       await _shareFile(path, format);
     }
   }
 
-  static Future<void> _handleAndroidPermissions() async {
-    final info = await DeviceInfoPlugin().androidInfo;
-
-    if (info.version.sdkInt <= 28) {
-      final status = await Permission.storage.request();
-      if (!status.isGranted) {
-        throw Exception("Нет разрешения на доступ к хранилищу");
-      }
-    }
+  // Генерация имени файла
+  static String _generateFileName(DateTimeRange dateRange, String? queryValue) {
+    final baseName =
+        'Расписание_УрГЭУ_${queryValue ?? ""}_(${DateTimeUtils.formatDate(dateRange.start, showWeekday: false)}-${DateTimeUtils.formatDate(dateRange.end, showWeekday: false)})';
+    return _sanitizeFileName(baseName);
   }
 
-  static Future<String> _getSaveDirectory() async {
-    if (Platform.isAndroid) {
-      final dir = Directory('/storage/emulated/0/Download');
+  static Future<String?> _saveAsWord(
+      ScheduleResponse schedule, String fileName) async {
+    final bytes = DocxGenerator.create(schedule, fileName);
 
-      if (!await dir.exists()) {
-        await dir.create(recursive: true);
-      }
-
-      return dir.path;
-    }
-
-    if (Platform.isIOS) {
-      final dir = await getApplicationDocumentsDirectory();
-      return dir.path;
-    }
-
-    final dir = await getDownloadsDirectory() ?? await getTemporaryDirectory();
-    return dir.path;
+    // Важно: расширение теперь .docx
+    final safeFileName = '$fileName.docx';
+    return saveToDownloads(safeFileName, bytes);
   }
 
-  static Future<String> _saveAsICS(
-    ScheduleResponse schedule,
-    String fileName,
-    String? queryValue,
-  ) async {
+  // Сохранение в ICS
+  static Future<String?> _saveAsICS(
+      ScheduleResponse schedule, String fileName, String? queryValue) async {
     SessionLogger.instance.debug(name, "📅 Экспорт в iCalendar (.ics)");
 
     final calendar = ICalendarConverter.$convertScheduleToCalendar(
@@ -86,60 +107,36 @@ class FileService {
     );
 
     final icsContent = calendar.generate();
+    final bytes = utf8.encode('\ufeff$icsContent');
 
-    final dir = await _getSaveDirectory();
-    final safeFileName = _sanitizeFileName('$fileName.ics');
-    final file = File('$dir/$safeFileName');
-
-    final bom = String.fromCharCode(0xFEFF);
-    await file.writeAsString(
-      '$bom$icsContent',
-      encoding: const Utf8Codec(allowMalformed: false),
-    );
-
-    SessionLogger.instance.debug(name,
-        "📊 Создано событий: ${calendar.events.length}\n📁 Путь: ${file.path}");
-
-    return file.path;
+    final safeFileName = '$fileName.ics';
+    return saveToDownloads(safeFileName, Uint8List.fromList(bytes));
   }
 
-  static Future<String> _saveAsPdf(
-    ScheduleResponse schedule,
-    String fileName,
-  ) async {
-    final dir = await _getSaveDirectory();
-    final name = _sanitizeFileName('$fileName.pdf');
-    final file = File('$dir/$name');
-
-    await file.writeAsString('PDF экспорт будет реализован позже');
-
-    return file.path;
+  // Сохранение в PDF (заглушка)
+  static Future<String?> _saveAsPdf(
+      ScheduleResponse schedule, String fileName) async {
+    final bytes = utf8.encode('PDF экспорт будет реализован позже');
+    final safeFileName = '$fileName.pdf';
+    return saveToDownloads(safeFileName, Uint8List.fromList(bytes));
   }
 
-  static Future<String> _saveAsExcel(
-    ScheduleResponse schedule,
-    String fileName,
-  ) async {
-    final dir = await _getSaveDirectory();
-    final name = _sanitizeFileName('$fileName.xlsx');
-    final file = File('$dir/$name');
-
-    await file.writeAsString('Excel экспорт будет реализован позже');
-
-    return file.path;
+  // Сохранение в Excel (заглушка)
+  static Future<String?> _saveAsExcel(
+      ScheduleResponse schedule, String fileName) async {
+    final bytes = utf8.encode('Excel экспорт будет реализован позже');
+    final safeFileName = '$fileName.xlsx';
+    return saveToDownloads(safeFileName, Uint8List.fromList(bytes));
   }
 
+  // Шеринг файла
   static Future<void> _shareFile(String filePath, ExportFormat format) async {
-    final file = File(filePath);
-    if (!await file.exists()) {
-      throw Exception("Файл не найден: $filePath");
-    }
-
     final mimeType = switch (format) {
-      ExportFormat.pdf => 'application/pdf',
-      ExportFormat.excel =>
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      // ExportFormat.pdf => 'application/pdf',
+      // ExportFormat.excel =>
+      //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       ExportFormat.ics => 'text/calendar',
+      ExportFormat.word => 'application/msword',
     };
 
     await SharePlus.instance.share(
@@ -151,6 +148,7 @@ class FileService {
     );
   }
 
+  // Очистка имени файла от недопустимых символов
   static String _sanitizeFileName(String fileName) {
     return fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
   }

@@ -40,8 +40,8 @@ class App extends StatelessWidget {
         selector: (state) => state.themeMode,
         builder: (context, themeMode) {
           return MaterialApp(
-            navigatorKey: MessageServise.navigatorKey,
-            scaffoldMessengerKey: MessageServise.scaffoldMessengerKey,
+            navigatorKey: MessageService.navigatorKey,
+            scaffoldMessengerKey: MessageService.scaffoldMessengerKey,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,

@@ -34,16 +34,26 @@ class DayView extends StatelessWidget {
     );
 
     if (!daySchedule.hasPairs) return buildEmptyState;
-
-    return Column(
-      spacing: 10,
-      children: [
-        DayHeader(day: daySchedule, date: selectedDate),
-        ...daySchedule.nonEmptyPairs.map(
-          (pair) => _TimelineLessonCard(
-            pair: pair,
-            groupColors: groupColors,
-            dateTime: selectedDate,
+    final nonEmptyPairs = daySchedule.nonEmptyPairs.toList();
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+            child: DayHeader(day: daySchedule, date: selectedDate)),
+        SliverPadding(
+          padding: const EdgeInsets.only(top: 8),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final pair = nonEmptyPairs[index];
+                return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _TimelineLessonCard(
+                        pair: pair,
+                        groupColors: groupColors,
+                        dateTime: selectedDate));
+              },
+              childCount: nonEmptyPairs.length,
+            ),
           ),
         ),
       ],
@@ -64,6 +74,7 @@ class _TimelineLessonCard extends StatelessWidget {
     bool isCurrent = pair.isCurrentPair(dateTime);
     return BorderBox(
       padding: const EdgeInsets.symmetric(horizontal: 5),
+      borderColor: isCurrent ? Theme.of(context).colorScheme.outline : null,
       child: Column(
         children: [
           // Временная метка
@@ -73,25 +84,25 @@ class _TimelineLessonCard extends StatelessWidget {
               children: [
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
+                    'Пара ${pair.number}',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                  child: Text(
                     pair.pairTime,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: Colors.white,
                     ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'Пара ${pair.number}',
-                  style: const TextStyle(
-                    fontSize: 14,
                   ),
                 ),
                 const Spacer(),
@@ -101,20 +112,24 @@ class _TimelineLessonCard extends StatelessWidget {
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: Colors.orange.shade100,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.1),
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 2,
                       children: [
                         Icon(Icons.access_time,
-                            size: 14, color: Colors.orange.shade800),
-                        const SizedBox(width: 4),
+                            size: 14,
+                            color: Theme.of(context).colorScheme.primary),
                         Text(
                           'Сейчас',
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.orange.shade800,
-                          ),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary),
                         ),
                       ],
                     ),

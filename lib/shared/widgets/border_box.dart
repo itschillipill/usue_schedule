@@ -7,6 +7,7 @@ class BorderBox extends StatelessWidget {
   final double? width;
   final EdgeInsets? padding;
   final Color? color;
+  final Color? borderColor;
   const BorderBox({
     super.key,
     required this.child,
@@ -14,6 +15,7 @@ class BorderBox extends StatelessWidget {
     this.height,
     this.width = double.infinity,
     this.color,
+    this.borderColor,
     this.padding = const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
   });
 
@@ -24,19 +26,13 @@ class BorderBox extends StatelessWidget {
       height: height,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: color ?? Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: color ?? Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
+          color: borderColor ??
+              Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+          width: 1.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       padding: padding,
       child: child,

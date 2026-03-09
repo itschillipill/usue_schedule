@@ -4,6 +4,7 @@ import 'package:usue_schedule/features/schedule/models/schedule_model.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_response.dart';
 import 'package:usue_schedule/features/schedule/services/api.dart';
 
+import '../models/request_type.dart';
 import '../models/schedule_view_type.dart';
 
 class ScheduleViewProvider extends ChangeNotifier {
@@ -21,6 +22,14 @@ class ScheduleViewProvider extends ChangeNotifier {
   ScheduleViewType _viewType = ScheduleViewType.day;
 
   ScheduleViewType get viewType => _viewType;
+
+  bool get hasFilters => params.requestType == RequestType.group
+      ? availableTeachers.isNotEmpty
+      : availableGroups.isNotEmpty;
+
+  List<String> get availableFilters => params.requestType == RequestType.group
+      ? availableTeachers
+      : availableGroups;
 
   /// диапазон дат
   DateTime rangeStart = DateTime.now();
@@ -113,7 +122,7 @@ class ScheduleViewProvider extends ChangeNotifier {
   void setViewType(ScheduleViewType type) {
     switch (type) {
       case ScheduleViewType.day:
-        _setDayRange(rangeStart);
+        _setDayRange(DateTime.now());
         break;
 
       case ScheduleViewType.week:
@@ -174,7 +183,7 @@ class ScheduleViewProvider extends ChangeNotifier {
         _setWeekRange(date);
         break;
 
-      case ScheduleViewType.custom:
+      default:
         return;
     }
 

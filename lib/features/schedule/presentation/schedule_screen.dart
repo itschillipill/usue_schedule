@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:usue_schedule/features/guide/presentation/guide_screen.dart';
 
 import '../../../core/theme/schedule_styles.dart';
 import '../controllers/schedule_cubit.dart';
@@ -43,7 +44,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 style: Theme.of(context).textTheme.displaySmall,
               ),
               actions: [
-                if (!isTextFieldVisible)
+                if (!isTextFieldVisible && mySchedules.isNotEmpty)
                   IconButton(
                     onPressed: () {
                       setState(() {
@@ -52,6 +53,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     },
                     icon: const Icon(Icons.search),
                   ),
+                IconButton(
+                    onPressed: () {
+                      Navigator.push(context, GuideScreen.route());
+                    },
+                    icon: Icon(Icons.help_outline_rounded)),
               ],
               centerTitle: true,
             ),
@@ -121,7 +127,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       onSelected: (value) {
         switch (value) {
           case 'delete':
-            MessageServise.confirmAction(
+            MessageService.confirmAction(
                 onOk: () => cubit.removeSchedules([schedule]),
                 title: "Удалить расписание",
                 message:

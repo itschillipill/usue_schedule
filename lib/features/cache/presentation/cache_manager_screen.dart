@@ -69,7 +69,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
         _isLoading = false;
       });
     } catch (error, stackTrace) {
-      MessageServise.showErrorSnack('Ошибка загрузки кэша',
+      MessageService.showErrorSnack('Ошибка загрузки кэша',
           error: error, stackTrace: stackTrace);
     } finally {
       setState(() => _isLoading = false);
@@ -84,7 +84,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     }
 
     await _loadCacheInfo().then((_) {
-      MessageServise.showSnackBar('Удалено ${models.length} кэшей');
+      MessageService.showSnackBar('Удалено ${models.length} кэшей');
     });
   }
 
@@ -126,7 +126,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
           if (_selectedModels.isNotEmpty) ...[
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              onPressed: () => MessageServise.confirmAction(
+              onPressed: () => MessageService.confirmAction(
                 title: 'Удалить выбранное',
                 message: 'Удалить кэш для ${_selectedModels.length} элементов?',
                 onOk: () async {
@@ -342,7 +342,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                         ],
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 5),
 
                       // Кнопки действий
                       AnimatedSize(
@@ -361,15 +361,16 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                                   //     foregroundColor: Colors.orange.shade700,
                                   //   ),
                                   // ),
-                                  ElevatedButton.icon(
-                                    onPressed: () => _deleteModel([model]),
-                                    icon: const Icon(Icons.delete_outline,
-                                        size: 18),
-                                    label: const Text('Удалить'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red.shade50,
-                                      foregroundColor: Colors.red.shade700,
-                                      elevation: 0,
+                                  Expanded(
+                                    child: ElevatedButton.icon(
+                                      onPressed: () => _deleteModel([model]),
+                                      icon: const Icon(Icons.delete_outline),
+                                      label: const Text('Удалить'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red.shade50,
+                                        foregroundColor: Colors.red.shade700,
+                                        elevation: 0,
+                                      ),
                                     ),
                                   ),
                                 ],

@@ -93,5 +93,7 @@ extension X on List<SchedulePair> {
   Iterable<String> get subgroups =>
       where((p) => p.isSubgroup).map((p) => '${p.subgroupNumber}').toSet();
 
-  String get audience => firstWhere((p) => p.audience.isNotEmpty).audience;
+  String get audience => any((p) => p.audience.isNotEmpty)
+      ? firstWhere((p) => p.audience.isNotEmpty).audience
+      : 'Аудитория не указана';
 }

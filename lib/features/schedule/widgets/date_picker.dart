@@ -53,7 +53,7 @@ class DatePicker {
                 ],
               ),
               CalendarDatePicker(
-                  initialDate: selectedDate.isBefore(now) ? now : selectedDate,
+                  initialDate: selectedDate,
                   firstDate: minDate,
                   lastDate: maxDate,
                   currentDate: now,

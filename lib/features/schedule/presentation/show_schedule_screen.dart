@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:usue_schedule/core/theme/theme.dart';
 import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
-import 'package:usue_schedule/features/schedule/models/request_type.dart';
 import 'package:usue_schedule/features/schedule/widgets/date_picker.dart';
 import 'package:usue_schedule/features/schedule/widgets/day_view.dart';
 import 'package:usue_schedule/features/schedule/widgets/load_view.dart';
+import 'package:usue_schedule/shared/services/message_service.dart';
 
+import '../../export/services/export_service.dart';
+import '../../export/widgets/filter_selector.dart';
 import '../controllers/schedule_view_provider.dart';
 import '../models/schedule_model.dart';
 import '../models/schedule_view_type.dart';
 
-import '../../export/presentation/export_schedule_screen.dart';
 import '../widgets/build_empty_state.dart';
 import '../widgets/error_view.dart';
-import '../widgets/filter_button.dart';
 import '../widgets/schedule_header.dart';
 import '../widgets/custom_range_view.dart';
 
@@ -39,6 +40,7 @@ class ShowScheduleScreen extends StatelessWidget {
     final provider = context.watch<ScheduleViewProvider>();
 
     return Scaffold(
+      backgroundColor: context.isDarkMode ? Colors.black12 : Colors.white,
       body: SafeArea(
         child: NestedScrollView(
           headerSliverBuilder: (context, _) => [
@@ -68,38 +70,45 @@ class ShowScheduleScreen extends StatelessWidget {
         ],
       ),
       actions: [
-        FilterButton(
-          selectedFilter: provider.selectedFilter,
-          availableGroups: provider.availableGroups,
-          availableTeachers: provider.availableTeachers,
-          requestType: params.requestType,
-          generatedColors: provider.groupColors,
-          toggleFilter: provider.toggleFilter,
+        IconButton(
+          icon: Icon(
+            Icons.filter_list,
+            color: (provider.selectedFilter != null) ? Colors.amber : null,
+          ),
+          onPressed: () async {
+            final filter = await FilterSelector.show(context, provider,
+                filter: provider.selectedFilter);
+            if (filter != null) {
+              provider.toggleFilter(filter: filter.isEmpty ? null : filter);
+            }
+          },
+          tooltip: 'Фильтр',
         ),
         PopupMenuButton<String>(
           onSelected: (value) {
-            if (value == "export_schedule") {
-              Navigator.push(
-                context,
-                ExportScheduleScreen.route(
-                  params,
-                  provider.apiService.getSchedule,
-                ),
-              );
-            }
-
             if (value == "force_update_schedule") {
               provider.loadSchedule(force: true);
+            }
+            if (value == "download_schedule") {
+              if (provider.lastResponse == null) return;
+              final filtredData = provider.lastResponse!.schedules
+                  .where((s) => s.pairs.any((p) => p.schedulePairs.isNotEmpty));
+              if (filtredData.isEmpty) {
+                MessageService.showSnackBar(
+                    "На этот период расписание не найдено");
+                return;
+              }
+              ExportService.exportSchedule(context, provider);
             }
           },
           itemBuilder: (context) => const [
             PopupMenuItem(
-              value: "export_schedule",
-              child: Text("Экспорт расписания"),
-            ),
-            PopupMenuItem(
               value: "force_update_schedule",
               child: Text("Обновить с сервером"),
+            ),
+            PopupMenuItem(
+              value: "download_schedule",
+              child: Text("Скачать расписание"),
             ),
           ],
           child: const Icon(Icons.more_vert),
@@ -123,8 +132,8 @@ class ShowScheduleScreen extends StatelessWidget {
           if (provider.viewType == ScheduleViewType.custom) {
             final range = await showDateRangePicker(
               context: context,
-              firstDate: DateTime(2020),
-              lastDate: DateTime(2030),
+              firstDate: DateTime.now().subtract(Duration(days: 365)),
+              lastDate: DateTime.now().add(Duration(days: 365)),
               initialEntryMode: DatePickerEntryMode.inputOnly,
               initialDateRange: DateTimeRange(
                 start: provider.rangeStart,
@@ -161,13 +170,8 @@ class ShowScheduleScreen extends StatelessWidget {
       return const Center(child: Text('Загрузка данных...'));
     }
 
-    final filteredData = switch (params.requestType) {
-      RequestType.group =>
-        provider.lastResponse!.filterByTeacher(provider.selectedFilter),
-      RequestType.teacher =>
-        provider.lastResponse!.filterByGroup(provider.selectedFilter),
-      _ => provider.lastResponse!,
-    };
+    final filteredData = provider.lastResponse!
+        .getFiltredData(params.requestType, provider.selectedFilter);
 
     final emptyState = BuildEmptyState(
       isFiltered: provider.isFiltered,
@@ -175,7 +179,7 @@ class ShowScheduleScreen extends StatelessWidget {
       clearFilters: provider.clearFilters,
     );
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: provider.viewType == ScheduleViewType.day
           ? DayView(

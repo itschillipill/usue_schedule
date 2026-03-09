@@ -5,6 +5,7 @@ import 'package:usue_schedule/core/utils/date_utils.dart';
 
 import '../../cache/services/cache_service.dart';
 import 'day_schedule.dart';
+import 'request_type.dart';
 
 class ScheduleResponse extends Equatable {
   final List<DaySchedule> schedules;
@@ -64,6 +65,21 @@ class ScheduleResponse extends Equatable {
           .where((day) => day.pairs.isNotEmpty)
           .toList(),
     );
+  }
+
+  ScheduleResponse getFiltredData(
+    RequestType requestType,
+    String? filter,
+  ) {
+    if (filter == null) return this;
+    switch (requestType) {
+      case RequestType.group:
+        return filterByTeacher(filter);
+      case RequestType.teacher:
+        return filterByGroup(filter);
+      default:
+        return this;
+    }
   }
 
   // Отфильтровать по преподавателю

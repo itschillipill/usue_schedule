@@ -3,8 +3,8 @@ import 'dart:async' show TimeoutException, FutureOr;
 import 'package:flutter/material.dart';
 import 'package:usue_schedule/core/logger/session_logger.dart';
 
-class MessageServise {
-  static String name = "MessageServise";
+class MessageService {
+  static String name = "MessageService";
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();

@@ -32,20 +32,33 @@ class CustomRangeView extends StatelessWidget {
 
     if (daysWithPairs.isEmpty) return buildEmptyState;
 
-    return Column(
-      spacing: 5,
-      children: [
-        CustomRangeHeader(
-          days: data.schedules,
-          startDate: rangeStart,
-          endDate: rangeEnd,
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: CustomRangeHeader(
+            days: data.schedules,
+            startDate: rangeStart,
+            endDate: rangeEnd,
+          ),
         ),
-        ...daysWithPairs.map(
-          (day) => _LessonCard(
-            daySchedule: day,
-            date: DateFormat('dd.MM.yyyy').parse(day.date),
-            groupColors: groupColors,
-            selectedGroup: selectedGroupFilter,
+        SliverPadding(
+          padding: const EdgeInsets.only(top: 8),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final day = daysWithPairs[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _LessonCard(
+                    daySchedule: day,
+                    date: DateFormat('dd.MM.yyyy').parse(day.date),
+                    groupColors: groupColors,
+                    selectedGroup: selectedGroupFilter,
+                  ),
+                );
+              },
+              childCount: daysWithPairs.length,
+            ),
           ),
         ),
       ],
@@ -111,26 +124,18 @@ class _CompactLessonCard extends StatelessWidget {
     final schedulePair = pair.schedulePairs.first;
     final isCurrent = pair.isCurrentPair(dateTime);
     return BorderBox(
-      color: isCurrent ? Theme.of(context).canvasColor : null,
+      borderColor: isCurrent ? Theme.of(context).colorScheme.outline : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             spacing: 5,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  pair.time,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+              Text(
+                pair.time,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               if (isCurrent)
@@ -138,7 +143,10 @@ class _CompactLessonCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -146,7 +154,7 @@ class _CompactLessonCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: Colors.orange.shade800,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),
@@ -160,14 +168,6 @@ class _CompactLessonCard extends StatelessWidget {
           Row(
             spacing: 5,
             children: [
-              Container(
-                width: 4,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: groupColors[schedulePair.cleanGroup] ?? Colors.grey,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,39 +179,6 @@ class _CompactLessonCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      pair.schedulePairs.teachers.join(", "),
-                      style: TextStyle(
-                        fontSize: 12,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Wrap(
-                      spacing: 5,
-                      children: [
-                        ...pair.schedulePairs.groups
-                            .map<Widget>((group) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 4, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: groupColors[group]
-                                        ?.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    group,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: groupColors[group],
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                )),
-                      ],
                     ),
                     Row(
                       spacing: 2,
@@ -220,14 +187,28 @@ class _CompactLessonCard extends StatelessWidget {
                         Text(
                           schedulePair.audience,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
                           ),
+                        ),
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          pair.schedulePairs.teachers.join(", "),
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         Spacer(),
                         if (pair.schedulePairs.subgroups.isNotEmpty)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                                horizontal: 4, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.purple.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
@@ -252,6 +233,29 @@ class _CompactLessonCard extends StatelessWidget {
                               ],
                             ),
                           ),
+                      ],
+                    ),
+                    Wrap(
+                      spacing: 5,
+                      children: [
+                        ...pair.schedulePairs.groups
+                            .map<Widget>((group) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: groupColors[group]
+                                        ?.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    group,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: groupColors[group],
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                )),
                       ],
                     ),
                   ],

@@ -36,7 +36,9 @@ class Pair extends Equatable {
   String get pairTime => schedulePairs.first.correctedTime ?? time;
 
   bool isCurrentPair(DateTime date) =>
-      DateTimeUtils.isCurrentPair(pairTime, date);
+      DateTimeUtils.isCurrentPair(pairTime, date)
+      //   || number==4
+      ;
 
   Iterable<String> getAllGroups() => schedulePairs.map((sp) => sp.cleanGroup);
 
