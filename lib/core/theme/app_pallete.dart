@@ -45,7 +45,7 @@ class AppPallete {
 // Оптимизировано для максимального контраста между соседними цветами
 static final List<Color> groupColors = [
   Color(0xFFE53935), // красный
-  Color(0xFF1E88E5), // голубой (далеко от красного)
+  Color(0xFF1E88E5), // голубой
   Color(0xFF43A047), // зеленый
   Color(0xFF8E24AA), // фиолетовый
   Color(0xFFFDD835), // желтый
