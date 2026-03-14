@@ -24,6 +24,7 @@ class ShowScheduleScreen extends StatelessWidget {
       builder: (context) => ChangeNotifierProvider(
         create: (_) => ScheduleViewProvider(
           apiService: DependenciesScope.of(context).apiService,
+          onUpdate: DependenciesScope.of(context).scheduleCubit.updateSchedule,
           params: params,
         ),
         child: ShowScheduleScreen(params: params),
@@ -40,14 +41,16 @@ class ShowScheduleScreen extends StatelessWidget {
     final provider = context.watch<ScheduleViewProvider>();
 
     return Scaffold(
-      backgroundColor: context.isDarkMode ? Colors.black12 : Colors.white,
       body: SafeArea(
         child: NestedScrollView(
           headerSliverBuilder: (context, _) => [
             _buildAppBar(context, provider),
             _buildHeader(context, provider),
           ],
-          body: _buildBody(provider),
+          body: DecoratedBox(
+              decoration: BoxDecoration(
+                  color: context.isDarkMode ? Colors.black : Colors.white),
+              child: _buildBody(provider)),
         ),
       ),
     );
@@ -59,21 +62,16 @@ class ShowScheduleScreen extends StatelessWidget {
       floating: true,
       snap: true,
       actionsPadding: const EdgeInsets.symmetric(horizontal: 4),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(params.queryValue, style: const TextStyle(fontSize: 16)),
-          Text(
-            params.requestType.text,
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          ),
-        ],
-      ),
+      titleSpacing: 0,
+      title: Text(params.queryValue, style: const TextStyle(fontSize: 16)),
       actions: [
         IconButton(
           icon: Icon(
             Icons.filter_list,
-            color: (provider.selectedFilter != null) ? Colors.amber : null,
+            color: (provider.selectedFilter != null)
+                ? (provider.groupColors[provider.selectedFilter] ??
+                    Theme.of(context).colorScheme.primary)
+                : null,
           ),
           onPressed: () async {
             final filter = await FilterSelector.show(context, provider,
@@ -180,7 +178,7 @@ class ShowScheduleScreen extends StatelessWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: provider.viewType == ScheduleViewType.day
           ? DayView(
               data: filteredData,

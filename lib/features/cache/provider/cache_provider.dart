@@ -28,9 +28,7 @@ class CacheProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- ЕДИНЫЕ МЕТОДЫ для работы с кэшем ---
-
-  /// Сохраняет расписание для модели (может быть день или неделя)
+  /// Сохраняет расписание для модели (может быть день, неделя или произвольный период)
   Future<void> saveSchedule(
       ScheduleModel model, ScheduleResponse response) async {
     try {
@@ -48,16 +46,12 @@ class CacheProvider extends ChangeNotifier {
     return result;
   }
 
-  /// Проверяет наличие расписания в кэше
-  Future<bool> hasSchedule(
-      ScheduleModel model, DateTime start, DateTime end) async {
-    return _cacheManager.hasSchedule(model, start, end);
-  }
-
   // --- Управление кэшем ---
 
-  Future<void> clearModelCache(ScheduleModel model) async {
-    await _cacheManager.clearModelCache(model);
+  Future<void> clearModelsCache(List<ScheduleModel> models) async {
+    for (final model in models) {
+      await _cacheManager.clearModelCache(model);
+    }
     await refreshCacheInfo();
   }
 
@@ -81,29 +75,7 @@ class CacheProvider extends ChangeNotifier {
     return '${(size / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  // --- Вспомогательные методы для удобства ---
-
-  /// Получить расписание на один день (обертка над getSchedule)
-  Future<ScheduleResponse?> getDaySchedule(
-      ScheduleModel model, DateTime date) async {
-    return getSchedule(model, date, date);
-  }
-
-  /// Получить расписание на неделю (обертка над getSchedule)
-  Future<ScheduleResponse?> getWeekSchedule(
-      ScheduleModel model, DateTime startOfWeek) async {
-    final endOfWeek = startOfWeek.add(const Duration(days: 6));
-    return getSchedule(model, startOfWeek, endOfWeek);
-  }
-
-  /// Сохранить расписание на неделю (обертка над saveSchedule)
-  Future<void> saveWeekSchedule(
-      ScheduleModel model, ScheduleResponse weekResponse) async {
-    await saveSchedule(model, weekResponse);
-  }
-
-  // Добавить в CacheProvider метод для получения дней модели
-  Future<List<DateTime>> getAvailableDaysForModel(ScheduleModel model) async {
+  Future<int> getAvailableDaysForModel(ScheduleModel model) async {
     return _cacheManager.getAvailableDaysForModel(model);
   }
 

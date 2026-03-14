@@ -133,15 +133,11 @@ class _FilterSelectionSheetState extends State<_FilterSelectionSheet> {
           const SizedBox(height: 4),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 5),
               child: Column(
                 children: [
                   if (_filteredFilters.isNotEmpty) ...[
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _buildSortedFilters(theme),
-                    ),
+                    _buildSortedFilters(theme),
                     const SizedBox(height: 20),
                   ] else ...[
                     const SizedBox(height: 40),
@@ -227,7 +223,7 @@ class _FilterSelectionSheetState extends State<_FilterSelectionSheet> {
     );
   }
 
-  List<Widget> _buildSortedFilters(ThemeData theme) {
+  Widget _buildSortedFilters(ThemeData theme) {
     final sortedFilters = List<String>.from(_filteredFilters);
 
     if (_selectedFilter != null && sortedFilters.contains(_selectedFilter)) {
@@ -238,30 +234,40 @@ class _FilterSelectionSheetState extends State<_FilterSelectionSheet> {
       sortedFilters.sort((a, b) => a.compareTo(b));
     }
 
-    return sortedFilters.map((filter) {
-      final isSelected = _selectedFilter == filter;
-      return FilterChip(
-        label: Text(
-          filter,
-          style: TextStyle(
-            color: isSelected ? Colors.white : null,
-            fontWeight: isSelected ? FontWeight.bold : null,
-          ),
-        ),
-        selected: isSelected,
-        onSelected: (selected) {
-          setState(() {
-            _selectedFilter = filter;
-          });
-        },
-        selectedColor: widget.generatedColors[filter] ?? theme.primaryColor,
-        checkmarkColor: Colors.white,
-        shape: StadiumBorder(
-          side: BorderSide(
-            color: isSelected ? Colors.transparent : Colors.grey[300]!,
-          ),
-        ),
-      );
-    }).toList();
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Wrap(
+          key: ValueKey(_selectedFilter),
+          spacing: 8,
+          runSpacing: 8,
+          children: sortedFilters.map((filter) {
+            final isSelected = _selectedFilter == filter;
+            return FilterChip(
+              label: Text(
+                filter,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : null,
+                  fontWeight: isSelected ? FontWeight.bold : null,
+                ),
+              ),
+              selected: isSelected,
+              onSelected: (selected) {
+                setState(() {
+                  _selectedFilter = filter;
+                });
+              },
+              selectedColor:
+                  widget.generatedColors[filter] ?? theme.primaryColor,
+              checkmarkColor: Colors.white,
+              shape: StadiumBorder(
+                side: BorderSide(
+                  color: !isSelected
+                      ? (widget.generatedColors[filter] ?? Colors.transparent)
+                      : Colors.transparent,
+                ),
+              ),
+            );
+          }).toList()),
+    );
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:usue_schedule/core/theme/app_pallete.dart';
 
 class ScheduleStyles {
+  ScheduleStyles._();
+
   static BoxDecoration linearBackgroundDecoration(BuildContext context) {
     return BoxDecoration(
       gradient: LinearGradient(

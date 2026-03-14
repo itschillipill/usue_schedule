@@ -3,13 +3,26 @@ import 'package:equatable/equatable.dart';
 import 'request_type.dart';
 
 class ScheduleModel extends Equatable {
-  final RequestType requestType;
-  final String queryValue;
-
   const ScheduleModel({
     required this.requestType,
     required this.queryValue,
+    this.lastUpdated,
   });
+
+  // Тип запроса
+  final RequestType requestType;
+
+  // Значение запроса
+  final String queryValue;
+
+  // Последнее обновление
+  final DateTime? lastUpdated;
+
+  // проверяем необходимость обновления, на случай если данные устарели
+  bool needsUpdate({Duration maxAge = const Duration(days: 7)}) {
+    if (lastUpdated == null) return true;
+    return DateTime.now().difference(lastUpdated!) > maxAge;
+  }
 
   // Фабричные конструкторы
   factory ScheduleModel.teacher(String teacherName) {
@@ -55,6 +68,9 @@ class ScheduleModel extends Equatable {
     return ScheduleModel(
       requestType: RequestType.values[json['requestType']],
       queryValue: json['queryValue'].toString(),
+      lastUpdated: json['lastUpdated'] != null
+          ? DateTime.parse(json['lastUpdated'])
+          : null,
     );
   }
 
@@ -62,12 +78,19 @@ class ScheduleModel extends Equatable {
     return {
       'requestType': requestType.index,
       'queryValue': queryValue,
+      'lastUpdated': lastUpdated?.toIso8601String(),
     };
   }
 
+  ScheduleModel update() => ScheduleModel(
+        requestType: requestType,
+        queryValue: queryValue,
+        lastUpdated: DateTime.now(),
+      );
+
   @override
   String toString() =>
-      "ScheduleModel(requestType: ${requestType.name}, value: $queryValue)";
+      "ScheduleModel(requestType: ${requestType.name}, value: $queryValue, lastUpdated: $lastUpdated)";
 
   @override
   List<Object?> get props => [requestType, queryValue];

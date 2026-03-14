@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:usue_schedule/core/api_exceptions.dart';
 import 'package:usue_schedule/core/theme/schedule_styles.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_model.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_response.dart';
@@ -9,11 +10,13 @@ import '../models/schedule_view_type.dart';
 
 class ScheduleViewProvider extends ChangeNotifier {
   final ApiService apiService;
-  final ScheduleModel params;
+  final Function(ScheduleModel model) onUpdate;
+  ScheduleModel params;
 
   ScheduleViewProvider({
     required this.apiService,
     required this.params,
+    required this.onUpdate,
   }) {
     _init();
   }
@@ -56,34 +59,49 @@ class ScheduleViewProvider extends ChangeNotifier {
 
   /// инициализация
   void _init() {
-    _setDayRange(DateTime.now());
+    // устанавливаем параметры по умолчанию
+    rangeStart = DateTime.now();
+    rangeEnd = rangeStart;
+    _viewType = ScheduleViewType.day;
+
     loadSchedule();
   }
 
   /// загрузка расписания
   Future<void> loadSchedule({bool force = false}) async {
-    isLoading = true;
-    notifyListeners();
-
-    final response = await apiService.search((
-      startDate: rangeStart,
-      endDate: rangeEnd,
-      scheduleModel: params,
-      forceUpdate: force,
-    ));
-
-    isLoading = false;
-
-    if (response != null) {
-      lastResponse = response;
+    try {
+      isLoading = true;
       error = null;
-      _extractParamsFrom(response);
-    } else {
-      error = "Ошибка загрузки";
-    }
+      notifyListeners();
 
-    notifyListeners();
+      final response = await apiService.search(
+        (
+          startDate: rangeStart,
+          endDate: rangeEnd,
+          scheduleModel: params,
+          forceUpdate: force
+        ),
+        onUpdateModel: (model) {
+          onUpdate(model);
+          updateParams(model);
+        },
+      );
+
+      if (response != null) {
+        lastResponse = response;
+        _extractParamsFrom(response);
+      }
+    } on ApiException catch (e) {
+      error = e.message;
+    } catch (_) {
+      error = "Неизвестная ошибка";
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
+
+  void updateParams(ScheduleModel model) => params = model;
 
   /// DAY RANGE
   void _setDayRange(DateTime date) {
@@ -220,9 +238,7 @@ class ScheduleViewProvider extends ChangeNotifier {
 
           return MapEntry(
             group,
-            group == selectedFilter
-                ? Colors.amber.shade600
-                : ScheduleStyles.getGroupColor(index),
+            ScheduleStyles.getGroupColor(index),
           );
         }),
       );

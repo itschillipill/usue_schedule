@@ -2,15 +2,17 @@ import 'dart:convert' show jsonDecode;
 
 import 'package:equatable/equatable.dart';
 import 'package:usue_schedule/core/utils/date_utils.dart';
-
-import '../../cache/services/cache_service.dart';
 import 'day_schedule.dart';
 import 'request_type.dart';
 
 class ScheduleResponse extends Equatable {
+  const ScheduleResponse({required this.schedules, this.isFromCache = false});
+
+  // Список дней с расписанием
   final List<DaySchedule> schedules;
 
-  const ScheduleResponse({required this.schedules});
+  // флаг который показывает из кэша ли расписание
+  final bool isFromCache;
 
   factory ScheduleResponse.fromJson(List<dynamic> json) {
     return ScheduleResponse(
@@ -30,15 +32,11 @@ class ScheduleResponse extends Equatable {
   }
 
   ScheduleResponse cut(DateTime startDate, DateTime endDate) {
-    final normalizedStart =
-        DateTime(startDate.year, startDate.month, startDate.day);
-    final normalizedEnd = DateTime(endDate.year, endDate.month, endDate.day);
-
     final filteredSchedules = schedules.where((day) {
-      final dayDate = day.date.toDateTime(); // используем ваш метод парсинга
-      return dayDate
-              .isAfter(normalizedStart.subtract(const Duration(days: 1))) &&
-          dayDate.isBefore(normalizedEnd.add(const Duration(days: 1)));
+      final dayDate = DateTimeUtils.parseDate(day.date);
+      if (dayDate == null) return false;
+      return dayDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
+          dayDate.isBefore(endDate.add(const Duration(days: 1)));
     }).toList();
 
     return ScheduleResponse(schedules: filteredSchedules);

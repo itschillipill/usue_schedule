@@ -46,7 +46,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
             // Получаем количество дней для модели
             final days =
                 await widget.cacheProvider.getAvailableDaysForModel(model);
-            daysCount[model.cacheKey] = days.length;
+            daysCount[model.cacheKey] = days;
             lastUpdated[model.cacheKey] = entry.key;
           }
         }
@@ -76,30 +76,14 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     }
   }
 
-  Future<void> _deleteModel(Iterable<ScheduleModel> models) async {
+  Future<void> _deleteModel(List<ScheduleModel> models) async {
     _selectedModels.clear();
-
-    for (final model in models) {
-      await widget.cacheProvider.clearModelCache(model);
-    }
+    await widget.cacheProvider.clearModelsCache(models);
 
     await _loadCacheInfo().then((_) {
       MessageService.showSnackBar('Удалено ${models.length} кэшей');
     });
   }
-
-  // Future<void> _deleteOldForModel(ScheduleModel model) async {
-  //   // Удаляем старше 10 дней
-  //   final cutoff = DateTime.now().subtract(const Duration(days: 10));
-  //   final days = await widget.cacheProvider.getAvailableDaysForModel(model);
-
-  //   for (var day in days) {
-  //     if (day.isBefore(cutoff)) {
-  //       // TODO: реализовать удаление конкретного дня
-  //       // пока просто показываем заглушку
-  //     }
-  //   }
-  // }
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'никогда';
@@ -130,9 +114,11 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                 title: 'Удалить выбранное',
                 message: 'Удалить кэш для ${_selectedModels.length} элементов?',
                 onOk: () async {
-                  final models = _cachedModels.where(
-                    (m) => _selectedModels.contains(m.cacheKey),
-                  );
+                  final models = _cachedModels
+                      .where(
+                        (m) => _selectedModels.contains(m.cacheKey),
+                      )
+                      .toList();
                   await _deleteModel(models);
                 },
               ),

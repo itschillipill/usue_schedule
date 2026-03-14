@@ -7,8 +7,8 @@ class Constants {
       "https://github.com/itschillipill/usue_schedule";
   static const String developerLinkRuStore =
       "https://www.rustore.ru/catalog/developer/vsxmns";
-  static const String version = "4.0.0";
-  static const String buildNumber = "75";
+  static const String version = "4.2.5";
+  static const String buildNumber = "81";
   static const String usueScheduleLink = "https://www.usue.ru/raspisanie/";
   static const String devTeam = "Команда разработчиков Flutter development";
   static const String sign = "© 2026 Мехроб Мунимович";
