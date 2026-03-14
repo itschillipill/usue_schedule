@@ -48,8 +48,25 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
 
   @override
   void onChange(Change<MyScheduleState> change) {
-    SessionLogger.instance
-        .onTransition(name, change.currentState, change.nextState);
+    final oldSchedules = change.currentState.schedules;
+    final newSchedules = change.nextState.schedules;
+
+    // Найти какие расписания изменились
+    final List<ScheduleModel> updated = <ScheduleModel>[];
+    for (int i = 0; i < newSchedules.length; i++) {
+      if (i >= oldSchedules.length ||
+          oldSchedules[i] != newSchedules[i] ||
+          oldSchedules[i].lastUpdated != newSchedules[i].lastUpdated) {
+        updated.add(newSchedules[i]);
+      }
+    }
+
+    SessionLogger.instance.onTransition(
+      name,
+      'old: count=${oldSchedules.length}',
+      'new: count=${newSchedules.length}, updated=$updated',
+    );
+
     super.onChange(change);
   }
 
@@ -89,6 +106,19 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
     schedules.insert(newIndex, schedule);
     prefs.setStringList(
         mySchedulesKey, schedules.map((e) => jsonEncode(e.toJson())).toList());
+    emit(MyScheduleState(schedules: schedules));
+  }
+
+  void updateSchedule(ScheduleModel schedule) {
+    List<ScheduleModel> schedules = List.from(state.schedules);
+    final modelIndex = schedules.indexOf(schedule);
+    if (modelIndex != -1) {
+      schedules[modelIndex] = schedule.update();
+    }
+    prefs.setStringList(
+      mySchedulesKey,
+      schedules.map((e) => jsonEncode(e.toJson())).toList(),
+    );
     emit(MyScheduleState(schedules: schedules));
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:usue_schedule/features/schedule/models/day_schedule.dart';
 import '../../../core/logger/session_logger.dart';
 import '../../schedule/models/schedule_response.dart';
@@ -15,9 +14,6 @@ abstract class CacheServiceBase {
   /// Получает расписание для модели за указанный период
   Future<ScheduleResponse?> getSchedule(
       ScheduleModel model, DateTime start, DateTime end);
-
-  /// Проверяет наличие расписания в кэше
-  Future<bool> hasSchedule(ScheduleModel model, DateTime start, DateTime end);
 
   // --- Управление памятью ---
 
@@ -47,13 +43,9 @@ final class CacheManager implements CacheServiceBase {
   CacheManager._internal();
 
   late final String _cacheDir;
-  final Map<String, ScheduleModel> _activeModels = {};
-  late final SharedPreferences _prefs;
 
   Future<void> init({String? cacheDir}) async {
-    _prefs = await SharedPreferences.getInstance();
     await _initCacheDirectory(cachePath: cacheDir);
-    await _loadActiveModels();
     SessionLogger.instance.onCreate(name);
   }
 
@@ -66,23 +58,6 @@ final class CacheManager implements CacheServiceBase {
     }
     SessionLogger.instance
         .log(name, "Cache directory initialized: ${cacheDir.path}");
-  }
-
-  Future<void> _loadActiveModels() async {
-    final modelsJson = _prefs.getString('active_models');
-    if (modelsJson != null) {
-      final List<dynamic> decoded = jsonDecode(modelsJson);
-      for (var item in decoded) {
-        final model = ScheduleModel.fromJson(item);
-        _activeModels[model.cacheKey] = model;
-      }
-    }
-  }
-
-  Future<void> _saveActiveModels() async {
-    final modelsJson =
-        jsonEncode(_activeModels.values.map((m) => m.toJson()).toList());
-    await _prefs.setString('active_models', modelsJson);
   }
 
   String _dateKey(DateTime date) {
@@ -104,14 +79,14 @@ final class CacheManager implements CacheServiceBase {
 
     // Загружаем существующий кэш или создаем новый
     Map<String, dynamic> cacheData;
-    if (await file.exists()) {
+    if (file.existsSync()) {
       final content = await file.readAsString();
       cacheData = jsonDecode(content);
     } else {
       cacheData = {
         'model': model.toJson(),
         'days': {}, // Здесь будут храниться дни по ключам
-        'last_updated': DateTime.now().toIso8601String(),
+        'last_updated': "" // Здесь будет храниться время последнего обновления
       };
     }
 
@@ -128,18 +103,19 @@ final class CacheManager implements CacheServiceBase {
     cacheData['last_updated'] = DateTime.now().toIso8601String();
     cacheData['days_count'] = (cacheData['days'] as Map).length;
 
-    _activeModels[model.cacheKey] = model;
-
     // Сохраняем файл
-    await file.writeAsString(jsonEncode(cacheData));
-    await _saveActiveModels();
+    try {
+      await file.writeAsString(jsonEncode(cacheData));
 
-    SessionLogger.instance
-        .debug(name, "Расписание успешно сохранено в кеш", extra: {
-      "✅ Сохранено":
-          "${response.schedules.length} дней в кэш для ${model.displayName}",
-      "📊 Всего дней в кэше": "${cacheData['days_count']}"
-    });
+      SessionLogger.instance
+          .debug(name, "Расписание успешно сохранено в кеш", extra: {
+        "✅ Сохранено":
+            "${response.schedules.length} дней в кэш для ${model.displayName}",
+        "📊 Всего дней в кэше": "${cacheData['days_count']}"
+      });
+    } catch (e) {
+      SessionLogger.instance.error(name, "❌ Ошибка записи кэша", error: e);
+    }
   }
 
   @override
@@ -156,14 +132,12 @@ final class CacheManager implements CacheServiceBase {
       final cacheData = jsonDecode(content);
 
       // Нормализуем даты
-      final normalizedStart = DateTime(start.year, start.month, start.day);
-      final normalizedEnd = DateTime(end.year, end.month, end.day);
 
       // Собираем все дни в диапазоне
       final days = <DaySchedule>[];
 
-      for (var date = normalizedStart;
-          date.isBefore(normalizedEnd.add(const Duration(days: 1)));
+      for (DateTime date = start;
+          date.isBefore(end.add(const Duration(days: 1)));
           date = date.add(const Duration(days: 1))) {
         final dateKey = _dateKey(date);
         if (cacheData['days'].containsKey(dateKey)) {
@@ -176,12 +150,10 @@ final class CacheManager implements CacheServiceBase {
         }
       }
 
-      _activeModels[model.cacheKey] = model;
-      await _saveActiveModels();
       SessionLogger.instance.log(name,
           '📦 Загружено ${days.length} дней из кэша для ${model.displayName}');
 
-      return ScheduleResponse(schedules: days);
+      return ScheduleResponse(schedules: days, isFromCache: true);
     } catch (e, s) {
       SessionLogger.instance
           .error(name, "❌ Ошибка чтения кэша", error: e, stackTrace: s);
@@ -189,50 +161,21 @@ final class CacheManager implements CacheServiceBase {
     }
   }
 
-  @override
-  Future<bool> hasSchedule(
-      ScheduleModel model, DateTime start, DateTime end) async {
-    final file = await _getModelFile(model);
-
-    if (!await file.exists()) {
-      return false;
-    }
-
-    try {
-      final content = await file.readAsString();
-      final cacheData = jsonDecode(content);
-
-      final normalizedStart = DateTime(start.year, start.month, start.day);
-      final normalizedEnd = DateTime(end.year, end.month, end.day);
-
-      // Проверяем, есть ли все дни в диапазоне
-      for (var date = normalizedStart;
-          date.isBefore(normalizedEnd.add(const Duration(days: 1)));
-          date = date.add(const Duration(days: 1))) {
-        final dateKey = _dateKey(date);
-        if (!cacheData['days'].containsKey(dateKey)) {
-          return false;
-        }
-      }
-
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
   // --- Остальные методы с изменениями ---
 
   @override
   Future<void> clearModelCache(ScheduleModel model) async {
-    final file = await _getModelFile(model);
-    if (await file.exists()) {
-      await file.delete();
-    }
+    try {
+      final file = await _getModelFile(model);
+      if (await file.exists()) {
+        await file.delete();
+      }
 
-    _activeModels.remove(model.cacheKey);
-    await _saveActiveModels();
-    SessionLogger.instance.log(name, '🗑️ Очищен кэш для ${model.displayName}');
+      SessionLogger.instance
+          .log(name, '🗑️ Очищен кэш для ${model.displayName}');
+    } catch (e) {
+      SessionLogger.instance.error(name, "❌ Ошибка очистки кэша", error: e);
+    }
   }
 
   @override
@@ -242,8 +185,8 @@ final class CacheManager implements CacheServiceBase {
 
     if (!await dir.exists()) return result;
 
-    await for (var file in dir.list()) {
-      if (file is File && file.path.endsWith('.json')) {
+    await for (var fileEntity in dir.list()) {
+      if (fileEntity case File file when file.path.endsWith('.json')) {
         try {
           final content = await file.readAsString();
           final data = jsonDecode(content);
@@ -264,32 +207,17 @@ final class CacheManager implements CacheServiceBase {
   }
 
   // Вспомогательный метод для получения всех сохраненных дней модели
-  Future<List<DateTime>> getAvailableDaysForModel(ScheduleModel model) async {
-    final file = await _getModelFile(model);
-
-    if (!await file.exists()) {
-      return [];
-    }
-
+  Future<int> getAvailableDaysForModel(ScheduleModel model) async {
     try {
+      final file = await _getModelFile(model);
+
+      if (!await file.exists()) return 0;
+
       final content = await file.readAsString();
       final data = jsonDecode(content);
-
-      final days = <DateTime>[];
-      for (var dateKey in (data['days'] as Map).keys) {
-        final parts = dateKey.split('_');
-        if (parts.length == 3) {
-          days.add(DateTime(
-            int.parse(parts[0]),
-            int.parse(parts[1]),
-            int.parse(parts[2]),
-          ));
-        }
-      }
-
-      return days..sort();
+      return int.parse(data['days_count'].toString());
     } catch (e) {
-      return [];
+      return 0;
     }
   }
 
@@ -301,8 +229,8 @@ final class CacheManager implements CacheServiceBase {
 
     if (!await dir.exists()) return;
 
-    await for (var file in dir.list()) {
-      if (file is File) {
+    await for (var fileEntity in dir.list()) {
+      if (fileEntity case File file when file.path.endsWith('.json')) {
         try {
           final content = await file.readAsString();
           final data = jsonDecode(content);
@@ -326,8 +254,6 @@ final class CacheManager implements CacheServiceBase {
       await dir.delete(recursive: true);
       await dir.create();
     }
-    _activeModels.clear();
-    await _saveActiveModels();
     SessionLogger.instance.log(name, '🗑️ Весь кэш очищен');
   }
 

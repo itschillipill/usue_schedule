@@ -36,29 +36,23 @@ class CustomRangeView extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: CustomRangeHeader(
-            days: data.schedules,
+            pairs: daysWithPairs.length,
             startDate: rangeStart,
             endDate: rangeEnd,
           ),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.only(top: 8),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final day = daysWithPairs[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: _LessonCard(
-                    daySchedule: day,
-                    date: DateFormat('dd.MM.yyyy').parse(day.date),
-                    groupColors: groupColors,
-                    selectedGroup: selectedGroupFilter,
-                  ),
-                );
-              },
-              childCount: daysWithPairs.length,
-            ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final day = daysWithPairs[index];
+              return _LessonCard(
+                daySchedule: day,
+                date: DateFormat('dd.MM.yyyy').parse(day.date),
+                groupColors: groupColors,
+                selectedGroup: selectedGroupFilter,
+              );
+            },
+            childCount: daysWithPairs.length,
           ),
         ),
       ],
@@ -82,7 +76,7 @@ class _LessonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ExpansionTile(
       initiallyExpanded: true,
-      tilePadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      tilePadding: EdgeInsets.symmetric(horizontal: 4),
       shape: RoundedRectangleBorder(
         side: BorderSide.none,
       ),
@@ -127,15 +121,24 @@ class _CompactLessonCard extends StatelessWidget {
       borderColor: isCurrent ? Theme.of(context).colorScheme.outline : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 5,
         children: [
           Row(
             spacing: 5,
             children: [
-              Text(
-                pair.time,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  pair.time,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               if (isCurrent)
@@ -165,101 +168,100 @@ class _CompactLessonCard extends StatelessWidget {
                 )
             ],
           ),
-          Row(
-            spacing: 5,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            spacing: 2,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 2,
-                  children: [
-                    Text(
-                      schedulePair.subject,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+              Column(
+                spacing: 2,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    schedulePair.subject,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Row(
+                    spacing: 2,
+                    children: [
+                      Icon(Icons.meeting_room, size: 12),
+                      Text(
+                        schedulePair.audience,
+                        style: TextStyle(
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    Row(
-                      spacing: 2,
-                      children: [
-                        Icon(Icons.meeting_room, size: 12),
-                        Text(
-                          schedulePair.audience,
-                          style: TextStyle(
-                            fontSize: 14,
-                          ),
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          fontSize: 14,
                         ),
-                        Text(
-                          '•',
-                          style: TextStyle(
-                            fontSize: 14,
-                          ),
+                      ),
+                      Text(
+                        pair.schedulePairs.teachers.join(", "),
+                        style: TextStyle(
+                          fontSize: 14,
                         ),
-                        Text(
-                          pair.schedulePairs.teachers.join(", "),
-                          style: TextStyle(
-                            fontSize: 14,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Spacer(),
+                      if (pair.schedulePairs.subgroups.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Spacer(),
-                        if (pair.schedulePairs.subgroups.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.purple.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: 2,
-                              children: [
-                                Icon(
-                                  Icons.account_tree_outlined,
-                                  size: 12,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 2,
+                            children: [
+                              Icon(
+                                Icons.account_tree_outlined,
+                                size: 12,
+                                color: Colors.purple,
+                              ),
+                              Text(
+                                'Подгр. ${pair.schedulePairs.subgroups.join(', ')}',
+                                style: TextStyle(
+                                  fontSize: 12,
                                   color: Colors.purple,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                                Text(
-                                  'Подгр. ${pair.schedulePairs.subgroups.join(', ')}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.purple,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                      ],
-                    ),
-                    Wrap(
-                      spacing: 5,
-                      children: [
-                        ...pair.schedulePairs.groups
-                            .map<Widget>((group) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: groupColors[group]
-                                        ?.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    group,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: groupColors[group],
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                )),
-                      ],
-                    ),
-                  ],
-                ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+              Wrap(
+                spacing: 5,
+                children: [
+                  ...pair.schedulePairs.groups.map<Widget>((group) => Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: groupColors[group]?.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          group,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: groupColors[group],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      )),
+                ],
               ),
             ],
           ),

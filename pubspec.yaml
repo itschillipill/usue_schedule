@@ -2,7 +2,7 @@ name: usue_schedule
 description: "An app for traking your schedule in USUE"
 publish_to: 'none'
 
-version: 3.6.0+68
+version: 4.2.5+81
 
 environment:
   sdk: ^3.5.3
@@ -14,7 +14,6 @@ dependencies:
   url_launcher: ^6.3.1
   flutter_bloc: ^8.1.6
   intl: ^0.20.2
-  table_calendar: ^3.1.2
   flutter_localizations:
     sdk: flutter
   dio: ^5.8.0+1
@@ -31,6 +30,9 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^4.0.0
+  dart_pubspec_licenses: ^3.2.0
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/

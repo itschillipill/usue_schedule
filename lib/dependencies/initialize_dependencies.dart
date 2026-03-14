@@ -25,8 +25,8 @@ mixin InitializeDependencies {
       final step = _initializationSteps[currentStep];
       final percent = (currentStep * 100 ~/ totalSteps).clamp(0, 100);
       onProgress?.call(percent, step.$1);
-      await step.$2(dependencies);
       SessionLogger.instance.debug("Initialization", step.$1);
+      await step.$2(dependencies);
     }
     return dependencies;
   }
@@ -35,7 +35,7 @@ mixin InitializeDependencies {
 List<(String, _InitializationStep)> get _initializationSteps => [
       ("Platform initialization", (_) => $platformInit()),
       (
-        ("Initialization"),
+        ("Setting up dependencies"),
         (deps) async {
           final prefs = await SharedPreferences.getInstance();
 
@@ -45,5 +45,5 @@ List<(String, _InitializationStep)> get _initializationSteps => [
               ApiService(cacheProvider: kIsWeb ? null : CacheProvider());
         }
       ),
-      //("Fake Waiting",(_)=> Future.delayed(Duration(seconds: 2)))
+      //   ("Fake Waiting", (_) => Future.delayed(Duration(seconds: 1)))
     ];

@@ -17,7 +17,9 @@ void main() => runZonedGuarded(() async {
       final InitializationExecutor initialization = InitializationExecutor();
       runApp(
         DependenciesScope(
-            splashScreen: const SplashScreen(),
+            splashScreen: SplashScreen(
+              progress: initialization,
+            ),
             initialization: initialization(onError: $handleInitError),
             child: const App()),
       );

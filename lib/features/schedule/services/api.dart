@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:io' show HttpClient;
+import 'dart:io' show HttpClient, SocketException;
 import 'dart:math' show Random;
 
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
+import 'package:dio/io.dart' show IOHttpClientAdapter;
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:usue_schedule/core/api_exceptions.dart';
 
 import '../../../core/logger/session_logger.dart';
 import '../../cache/provider/cache_provider.dart';
@@ -20,11 +21,19 @@ typedef Params = ({
   bool forceUpdate,
 });
 
+typedef _SearchRequest = ({
+  Params params,
+  Completer<ScheduleResponse?> completer,
+});
+
 class ApiService {
   static const String name = "ApiService";
+
+  // количество дополнительных дней к кешируемому периоду
   static const int defaultPrefetchDays = 30;
 
   final int _prefetchDays;
+
   final CacheProvider? cacheProvider;
 
   final Dio _dio;
@@ -68,8 +77,11 @@ class ApiService {
     _querySubject
         .debounceTime(const Duration(milliseconds: 500))
         .switchMap((req) => Stream.fromFuture(_search(req.params))
-            .map((r) => (req, r))
-            .onErrorReturn((req, null)))
+                .map((r) => (req, r))
+                .onErrorReturnWith((error, stack) {
+              req.completer.completeError(error);
+              return (req, null);
+            }))
         .listen((result) {
       final (req, response) = result;
 
@@ -79,11 +91,29 @@ class ApiService {
     });
   }
 
-  Future<ScheduleResponse?> search(Params params) {
+  /// во время первого запроса обновляем принудительно, на случай если расписание обновили.
+  bool _checkForceUpdate(bool force, ScheduleModel model,
+      Function(ScheduleModel model) onUpdateModel) {
+    if (force) return true;
+    if (model.needsUpdate()) {
+      onUpdateModel(model.update());
+      return true;
+    }
+    return false;
+  }
+
+  Future<ScheduleResponse?> search(Params params,
+      {required Function(ScheduleModel model) onUpdateModel}) async {
     final completer = Completer<ScheduleResponse?>();
 
-    _querySubject.add(_SearchRequest(
-      params: params,
+    _querySubject.add((
+      params: (
+        startDate: params.startDate,
+        endDate: params.endDate,
+        scheduleModel: params.scheduleModel,
+        forceUpdate: _checkForceUpdate(
+            params.forceUpdate, params.scheduleModel, onUpdateModel),
+      ),
       completer: completer,
     ));
 
@@ -105,7 +135,7 @@ class ApiService {
         error: e,
         stackTrace: st,
       );
-      return null;
+      rethrow;
     }
   }
 
@@ -120,40 +150,99 @@ class ApiService {
       "Принудительный запрос": "$force"
     });
 
-    final cached = force
-        ? null
-        : await cacheProvider?.getSchedule(scheduleModel, startDate, endDate);
+    try {
+      // Проверка кэша
+      final cached = force
+          ? null
+          : await cacheProvider?.getSchedule(scheduleModel, startDate, endDate);
 
-    if (cached != null) return cached;
+      if (cached != null) return cached;
 
-    final end =
-        endDate.add(Duration(days: cacheProvider == null ? 0 : _prefetchDays));
-    final start =
-        startDate.subtract(Duration(days: cacheProvider == null ? 0 : 7));
+      // Подготовка параметров
+      final end = endDate
+          .add(Duration(days: cacheProvider == null ? 0 : _prefetchDays));
+      final start =
+          startDate.subtract(Duration(days: cacheProvider == null ? 0 : 7));
 
-    final params = {
-      't': _generateTimestamp(),
-      'action': 'show',
-      'startDate': _formatDate(start),
-      'endDate': _formatDate(end),
-      scheduleModel.requestType.query: scheduleModel.queryValue,
-    };
+      final params = {
+        't': _generateT(),
+        'action': 'show',
+        'startDate': _formatDate(start),
+        'endDate': _formatDate(end),
+        scheduleModel.requestType.query: scheduleModel.queryValue,
+      };
 
-    final response = await _dio.get(_baseUrl, queryParameters: params);
+      late final Response response;
 
-    if (response.statusCode != 200) {
-      throw Exception('Ошибка API: ${response.statusCode}');
+      try {
+        response = await _dio.get(_baseUrl, queryParameters: params);
+      } on DioException catch (e) {
+        late final ApiException apiException;
+
+        if (e.error is SocketException) {
+          apiException = NetworkException(e.error);
+        } else if (e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout) {
+          apiException = TimeoutException(e);
+        } else if (e.response?.statusCode != null) {
+          apiException = ServerException(e.response!.statusCode!, e);
+        } else {
+          apiException = UnknownException('Ошибка сети: ${e.message}', e);
+        }
+
+        if (force) {
+          SessionLogger.instance.error(
+            name,
+            "Ошибка при force-запросе, пробуем без force",
+            error: apiException,
+          );
+          return getSchedule(
+            startDate: startDate,
+            endDate: endDate,
+            scheduleModel: scheduleModel,
+            force: false,
+          );
+        }
+
+        throw apiException;
+      }
+
+      if (response.statusCode != 200) {
+        throw ServerException(response.statusCode);
+      }
+
+      // Парсинг ответа
+      late final ScheduleResponse parsed;
+      try {
+        parsed = ScheduleResponse.parseFromApiResponse(response.data);
+      } catch (e, st) {
+        SessionLogger.instance
+            .error(name, "Ошибка парсинга ответа", error: e, stackTrace: st);
+        throw ParseException(e);
+      }
+
+      // Сохранение в кэш
+      try {
+        cacheProvider?.saveSchedule(
+          scheduleModel,
+          parsed.fillEmptyDates(start, end,
+              skip: scheduleModel.requestType != RequestType.audience),
+        );
+      } catch (e) {
+        SessionLogger.instance
+            .warning(name, "Ошибка сохранения в кэш", error: e);
+      }
+
+      // возвращаем расписание только на заданный период,
+      // без учета дополнительных дней для кеширования
+      return parsed.cut(startDate, endDate);
+    } on ApiException {
+      rethrow;
+    } catch (e, st) {
+      SessionLogger.instance
+          .error(name, "Неожиданная ошибка", error: e, stackTrace: st);
+      throw UnknownException('Неожиданная ошибка: $e', e);
     }
-
-    final parsed = ScheduleResponse.parseFromApiResponse(response.data);
-
-    cacheProvider?.saveSchedule(
-      scheduleModel,
-      parsed.fillEmptyDates(start, end,
-          skip: scheduleModel.requestType != RequestType.audience),
-    );
-
-    return parsed.cut(startDate, endDate);
   }
 
   String _formatDate(DateTime date) {
@@ -162,18 +251,7 @@ class ApiService {
         '${date.year}';
   }
 
-  String _generateTimestamp() {
-    final random = Random();
-    return '0.${List.generate(16, (_) => random.nextInt(10)).join()}';
-  }
-}
-
-class _SearchRequest {
-  final Params params;
-  final Completer<ScheduleResponse?> completer;
-
-  _SearchRequest({
-    required this.params,
-    required this.completer,
-  });
+  // генерируем t для запроса, как на офицальном сайте
+  String _generateT() =>
+      '0.${List<int>.generate(16, (_) => Random().nextInt(10)).join()}';
 }

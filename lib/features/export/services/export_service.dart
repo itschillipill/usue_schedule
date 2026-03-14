@@ -61,7 +61,8 @@ class ExportService {
             ),
             schedule: filtredData,
             format: exportFormat,
-            queryValue: "${provider.params.queryValue}${filter==null?'':' - $filter'}",
+            queryValue:
+                "${provider.params.queryValue}${filter == null ? '' : ' - $filter'}",
             shareAfterSave: false,
           );
           return true;

@@ -51,7 +51,7 @@ class _ExportFormatPickerDialog extends StatelessWidget {
               format: ExportFormat.word,
               icon: Icons.description,
               title: 'Word документ',
-              subtitle: 'Формат .doc для редактирования',
+              subtitle: 'Формат .docx для редактирования',
               color: Colors.blue,
             ),
 
