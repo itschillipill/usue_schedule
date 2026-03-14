@@ -9,6 +9,7 @@ void main() {
 
       expect(model.requestType, RequestType.teacher);
       expect(model.queryValue, "Иванов");
+      expect(model.lastUpdated, isNull);
     });
 
     test("group factory creates correct model", () {
@@ -16,6 +17,7 @@ void main() {
 
       expect(model.requestType, RequestType.group);
       expect(model.queryValue, "ИВТ-23-1");
+      expect(model.lastUpdated, isNull);
     });
 
     test("audience factory creates correct model", () {
@@ -23,6 +25,7 @@ void main() {
 
       expect(model.requestType, RequestType.audience);
       expect(model.queryValue, "338TV");
+      expect(model.lastUpdated, isNull);
     });
   });
 
@@ -63,10 +66,9 @@ void main() {
 
       final json = model.toJson();
 
-      expect(json, {
-        'requestType': RequestType.group.index,
-        'queryValue': "ИВТ-23-1",
-      });
+      expect(json['requestType'], RequestType.group.index);
+      expect(json['queryValue'], "ИВТ-23-1");
+      expect(json['lastUpdated'], isNull);
     });
 
     test("fromJson restores object correctly", () {
@@ -85,7 +87,7 @@ void main() {
 
       expect(
         model.toString(),
-        "ScheduleModel(requestType: teacher, value: Иванов)",
+        "ScheduleModel(requestType: teacher, value: Иванов, lastUpdated: null)",
       );
     });
   });
@@ -110,6 +112,38 @@ void main() {
       final m2 = ScheduleModel.teacher("Петров");
 
       expect(m1 == m2, false);
+    });
+  });
+
+  group("ScheduleModel - needsUpdate / update", () {
+    test("needsUpdate returns true when lastUpdated is null", () {
+      final model = ScheduleModel.teacher("Иванов");
+
+      expect(model.needsUpdate(), true);
+    });
+
+    test("needsUpdate returns false when lastUpdated is recent", () {
+      final model = ScheduleModel.teacher("Иванов", lastUpdated: DateTime.now());
+
+      expect(model.needsUpdate(), false);
+    });
+
+    test("needsUpdate returns true when lastUpdated is older than maxAge", () {
+      final oldDate = DateTime.now().subtract(const Duration(days: 10));
+      final model = ScheduleModel.teacher("Иванов", lastUpdated: oldDate);
+
+      expect(model.needsUpdate(maxAge: const Duration(days: 7)), true);
+    });
+
+    test("update returns new model with updated lastUpdated", () {
+      final model = ScheduleModel.teacher("Иванов");
+
+      final updated = model.update();
+
+      expect(updated.queryValue, model.queryValue);
+      expect(updated.requestType, model.requestType);
+      expect(updated.lastUpdated, isNotNull);
+      expect(updated.lastUpdated!.isAfter(DateTime.now().subtract(const Duration(seconds: 1))), true);
     });
   });
 }
