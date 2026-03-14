@@ -25,24 +25,27 @@ class ScheduleModel extends Equatable {
   }
 
   // Фабричные конструкторы
-  factory ScheduleModel.teacher(String teacherName) {
+  factory ScheduleModel.teacher(String teacherName, {DateTime? lastUpdated}) {
     return ScheduleModel(
       requestType: RequestType.teacher,
       queryValue: teacherName,
+      lastUpdated: lastUpdated,
     );
   }
 
-  factory ScheduleModel.group(String groupName) {
+  factory ScheduleModel.group(String groupName, {DateTime? lastUpdated}) {
     return ScheduleModel(
       requestType: RequestType.group,
       queryValue: groupName,
+      lastUpdated: lastUpdated,
     );
   }
 
-  factory ScheduleModel.audience(String audienceName) {
+  factory ScheduleModel.audience(String audienceName, {DateTime? lastUpdated}) {
     return ScheduleModel(
       requestType: RequestType.audience,
       queryValue: audienceName,
+      lastUpdated: lastUpdated,
     );
   }
 
