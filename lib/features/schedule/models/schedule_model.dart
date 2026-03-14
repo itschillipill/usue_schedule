@@ -19,7 +19,7 @@ class ScheduleModel extends Equatable {
   final DateTime? lastUpdated;
 
   // проверяем необходимость обновления, на случай если данные устарели
-  bool needsUpdate({Duration maxAge = const Duration(days: 7)}) {
+  bool needsUpdate({Duration maxAge = const Duration(days: 2)}) {
     if (lastUpdated == null) return true;
     return DateTime.now().difference(lastUpdated!) > maxAge;
   }
