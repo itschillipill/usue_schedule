@@ -19,6 +19,7 @@ typedef Params = ({
   DateTime endDate,
   ScheduleModel scheduleModel,
   bool forceUpdate,
+  Function(ScheduleModel model) onUpdateModel,
 });
 
 typedef _SearchRequest = ({
@@ -76,7 +77,7 @@ class ApiService {
   void _initPipeline() {
     _querySubject
         .debounceTime(const Duration(milliseconds: 500))
-        .switchMap((req) => Stream.fromFuture(_search(req.params))
+        .switchMap((req) => Stream.fromFuture(_fetchSchedule(req.params))
                 .map((r) => (req, r))
                 .onErrorReturnWith((error, stack) {
               req.completer.completeError(error);
@@ -91,43 +92,25 @@ class ApiService {
     });
   }
 
-  /// во время первого запроса обновляем принудительно, на случай если расписание обновили.
-  bool _checkForceUpdate(bool force, ScheduleModel model,
-      Function(ScheduleModel model) onUpdateModel) {
-    if (force) return true;
-    if (model.needsUpdate()) {
-      onUpdateModel(model.update());
-      return true;
-    }
-    return false;
-  }
-
-  Future<ScheduleResponse?> search(Params params,
-      {required Function(ScheduleModel model) onUpdateModel}) async {
+  Future<ScheduleResponse?> fetch(Params params) async {
     final completer = Completer<ScheduleResponse?>();
 
     _querySubject.add((
-      params: (
-        startDate: params.startDate,
-        endDate: params.endDate,
-        scheduleModel: params.scheduleModel,
-        forceUpdate: _checkForceUpdate(
-            params.forceUpdate, params.scheduleModel, onUpdateModel),
-      ),
+      params: params,
       completer: completer,
     ));
 
     return completer.future;
   }
 
-  Future<ScheduleResponse?> _search(Params p) async {
+  Future<ScheduleResponse?> _fetchSchedule(Params p) async {
     try {
       return await getSchedule(
-        startDate: p.startDate,
-        endDate: p.endDate,
-        scheduleModel: p.scheduleModel,
-        force: p.forceUpdate,
-      );
+          startDate: p.startDate,
+          endDate: p.endDate,
+          scheduleModel: p.scheduleModel,
+          force: p.forceUpdate,
+          onUpdateModel: p.onUpdateModel);
     } catch (e, st) {
       SessionLogger.instance.error(
         name,
@@ -143,7 +126,9 @@ class ApiService {
     required DateTime startDate,
     required DateTime endDate,
     required ScheduleModel scheduleModel,
+    required Function(ScheduleModel model) onUpdateModel,
     bool force = false,
+    ApiException? withException,
   }) async {
     SessionLogger.instance.debug(name, "Получение расписания", extra: {
       "Период": "${_formatDate(startDate)} - ${_formatDate(endDate)}",
@@ -154,7 +139,9 @@ class ApiService {
       // Проверка кэша
       final cached = force
           ? null
-          : await cacheProvider?.getSchedule(scheduleModel, startDate, endDate);
+          : (await cacheProvider?.getSchedule(
+                  scheduleModel, startDate, endDate))
+              ?.withException(withException);
 
       if (cached != null) return cached;
 
@@ -176,6 +163,9 @@ class ApiService {
 
       try {
         response = await _dio.get(_baseUrl, queryParameters: params);
+        // throw DioException(
+        //     requestOptions: response.requestOptions,
+        //     error: SocketException('simulated'));
       } on DioException catch (e) {
         late final ApiException apiException;
 
@@ -201,6 +191,8 @@ class ApiService {
             endDate: endDate,
             scheduleModel: scheduleModel,
             force: false,
+            onUpdateModel: onUpdateModel,
+            withException: apiException,
           );
         }
 
@@ -232,6 +224,8 @@ class ApiService {
         SessionLogger.instance
             .warning(name, "Ошибка сохранения в кэш", error: e);
       }
+
+      onUpdateModel(scheduleModel.update());
 
       // возвращаем расписание только на заданный период,
       // без учета дополнительных дней для кеширования

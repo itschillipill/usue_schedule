@@ -1,7 +1,6 @@
 class DateTimeUtils {
   // Получить дату начала недели (понедельник)
   static DateTime getStartOfWeek(DateTime date) {
-    // В России неделя начинается с понедельника
     final weekday = date.weekday;
     return date.subtract(Duration(days: weekday - 1));
   }

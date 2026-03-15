@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:usue_schedule/core/api_exceptions.dart';
 import 'package:usue_schedule/core/theme/theme.dart';
 import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
 import 'package:usue_schedule/features/schedule/widgets/date_picker.dart';
 import 'package:usue_schedule/features/schedule/widgets/day_view.dart';
 import 'package:usue_schedule/features/schedule/widgets/load_view.dart';
 import 'package:usue_schedule/shared/services/message_service.dart';
+import 'package:usue_schedule/shared/widgets/border_box.dart';
 
 import '../../export/services/export_service.dart';
 import '../../export/widgets/filter_selector.dart';
@@ -20,16 +22,18 @@ import '../widgets/custom_range_view.dart';
 
 class ShowScheduleScreen extends StatelessWidget {
   static Route<ScheduleModel> route({required ScheduleModel params}) {
-    return MaterialPageRoute(
-      builder: (context) => ChangeNotifierProvider(
+    return MaterialPageRoute(builder: (context) {
+      final deps = DependenciesScope.of(context);
+      return ChangeNotifierProvider(
         create: (_) => ScheduleViewProvider(
-          apiService: DependenciesScope.of(context).apiService,
-          onUpdate: DependenciesScope.of(context).scheduleCubit.updateSchedule,
+          apiService: deps.apiService,
+          onUpdate: deps.scheduleCubit.updateSchedule,
           params: params,
+          initialViewType: deps.settingsCubit.state.viewType,
         ),
         child: ShowScheduleScreen(params: params),
-      ),
-    );
+      );
+    });
   }
 
   final ScheduleModel params;
@@ -46,10 +50,12 @@ class ShowScheduleScreen extends StatelessWidget {
           headerSliverBuilder: (context, _) => [
             _buildAppBar(context, provider),
             _buildHeader(context, provider),
+            if (provider.lastResponse?.exception case ApiException exception
+                when provider.lastResponse?.isFromCache == true)
+              _buildWarning(exception, context)
           ],
           body: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: context.isDarkMode ? Colors.black : Colors.white),
+              decoration: BoxDecoration(color: context.backgroundColor),
               child: _buildBody(provider)),
         ),
       ),
@@ -65,22 +71,29 @@ class ShowScheduleScreen extends StatelessWidget {
       titleSpacing: 0,
       title: Text(params.queryValue, style: const TextStyle(fontSize: 16)),
       actions: [
-        IconButton(
-          icon: Icon(
-            Icons.filter_list,
-            color: (provider.selectedFilter != null)
-                ? (provider.groupColors[provider.selectedFilter] ??
-                    Theme.of(context).colorScheme.primary)
-                : null,
+        Badge(
+          smallSize: 10,
+          padding: EdgeInsets.zero,
+          backgroundColor: (provider.groupColors[provider.selectedFilter] ??
+              Theme.of(context).colorScheme.primary),
+          isLabelVisible: (provider.selectedFilter != null),
+          child: IconButton(
+            icon: Icon(
+              Icons.filter_list,
+              color: (provider.selectedFilter != null)
+                  ? (provider.groupColors[provider.selectedFilter] ??
+                      Theme.of(context).colorScheme.primary)
+                  : null,
+            ),
+            onPressed: () async {
+              final filter = await FilterSelector.show(context, provider,
+                  filter: provider.selectedFilter);
+              if (filter != null) {
+                provider.toggleFilter(filter: filter.isEmpty ? null : filter);
+              }
+            },
+            tooltip: 'Фильтр',
           ),
-          onPressed: () async {
-            final filter = await FilterSelector.show(context, provider,
-                filter: provider.selectedFilter);
-            if (filter != null) {
-              provider.toggleFilter(filter: filter.isEmpty ? null : filter);
-            }
-          },
-          tooltip: 'Фильтр',
         ),
         PopupMenuButton<String>(
           onSelected: (value) {
@@ -145,11 +158,59 @@ class ShowScheduleScreen extends StatelessWidget {
           } else {
             DatePicker(
               selectedDate: provider.rangeStart,
-              onDateSelected: provider.onDateSelected,
+              onDateSelected: (date) =>
+                  provider.setViewType(provider.viewType, date: date),
               context: context,
             ).call();
           }
         },
+      ),
+    );
+  }
+
+  SliverToBoxAdapter _buildWarning(
+      ApiException exception, BuildContext context) {
+    return SliverToBoxAdapter(
+      child: ColoredBox(
+        color: context.backgroundColor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: BorderBox(
+            borderColor: Colors.orange,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 5,
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.orange.shade800,
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 4,
+                    children: [
+                      Text(
+                        exception.message,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        exception.tip ?? "",
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

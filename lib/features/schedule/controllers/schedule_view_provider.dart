@@ -11,18 +11,20 @@ import '../models/schedule_view_type.dart';
 class ScheduleViewProvider extends ChangeNotifier {
   final ApiService apiService;
   final Function(ScheduleModel model) onUpdate;
+  final ScheduleViewType initialViewType;
   ScheduleModel params;
 
   ScheduleViewProvider({
     required this.apiService,
     required this.params,
     required this.onUpdate,
+    this.initialViewType = ScheduleViewType.day,
   }) {
     _init();
   }
 
   /// режим отображения
-  ScheduleViewType _viewType = ScheduleViewType.day;
+  late ScheduleViewType _viewType;
 
   ScheduleViewType get viewType => _viewType;
 
@@ -60,31 +62,35 @@ class ScheduleViewProvider extends ChangeNotifier {
   /// инициализация
   void _init() {
     // устанавливаем параметры по умолчанию
-    rangeStart = DateTime.now();
-    rangeEnd = rangeStart;
-    _viewType = ScheduleViewType.day;
+    setViewType(initialViewType);
+  }
 
-    loadSchedule();
+  /// проверяем нужно ли обновить расписание, на случай если расписание обновили.
+  bool _checkForceUpdate(bool force, ScheduleModel model) {
+    if (force) return true;
+    return model.needsUpdate();
   }
 
   /// загрузка расписания
   Future<void> loadSchedule({bool force = false}) async {
+    force = _checkForceUpdate(force, params);
+
     try {
       isLoading = true;
       error = null;
       notifyListeners();
 
-      final response = await apiService.search(
+      final response = await apiService.fetch(
         (
           startDate: rangeStart,
           endDate: rangeEnd,
           scheduleModel: params,
-          forceUpdate: force
+          forceUpdate: force,
+          onUpdateModel: (model) {
+            onUpdate(model);
+            updateParams(model);
+          },
         ),
-        onUpdateModel: (model) {
-          onUpdate(model);
-          updateParams(model);
-        },
       );
 
       if (response != null) {
@@ -104,32 +110,37 @@ class ScheduleViewProvider extends ChangeNotifier {
   void updateParams(ScheduleModel model) => params = model;
 
   /// DAY RANGE
-  void _setDayRange(DateTime date) {
-    _viewType = ScheduleViewType.day;
-
+  void _setDayRange(DateTime date, {bool notify = true}) {
     rangeStart = DateTime(date.year, date.month, date.day);
     rangeEnd = rangeStart;
 
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   /// WEEK RANGE
-  void _setWeekRange(DateTime date) {
-    _viewType = ScheduleViewType.week;
-
+  void _setWeekRange(DateTime date, {bool notify = true}) {
     final start = date.subtract(Duration(days: date.weekday - 1));
     final end = start.add(const Duration(days: 6));
 
     rangeStart = DateTime(start.year, start.month, start.day);
     rangeEnd = DateTime(end.year, end.month, end.day);
 
-    notifyListeners();
+    if (notify) notifyListeners();
+  }
+
+  /// MONTH RANGE
+  void _setMonthRange(DateTime date, {bool notify = true}) {
+    final start = DateTime(date.year, date.month, 1);
+    final end = DateTime(date.year, date.month + 1, 0);
+
+    rangeStart = DateTime(start.year, start.month, start.day);
+    rangeEnd = DateTime(end.year, end.month, end.day);
+
+    if (notify) notifyListeners();
   }
 
   /// CUSTOM RANGE
   void setCustomRange(DateTime start, DateTime end) {
-    _viewType = ScheduleViewType.custom;
-
     rangeStart = DateTime(start.year, start.month, start.day);
     rangeEnd = DateTime(end.year, end.month, end.day);
 
@@ -137,20 +148,17 @@ class ScheduleViewProvider extends ChangeNotifier {
   }
 
   /// переключение режима
-  void setViewType(ScheduleViewType type) {
-    switch (type) {
-      case ScheduleViewType.day:
-        _setDayRange(DateTime.now());
-        break;
+  void setViewType(ScheduleViewType type, {DateTime? date}) {
+    _viewType = type;
 
-      case ScheduleViewType.week:
-        _setWeekRange(rangeStart);
-        break;
+    final fn = switch (type) {
+      ScheduleViewType.day => _setDayRange,
+      ScheduleViewType.week => _setWeekRange,
+      ScheduleViewType.month => _setMonthRange,
+      ScheduleViewType.custom => (_) {},
+    };
 
-      case ScheduleViewType.custom:
-        _viewType = ScheduleViewType.custom;
-        break;
-    }
+    fn(date ?? DateTime.now());
 
     loadSchedule();
   }
@@ -164,6 +172,10 @@ class ScheduleViewProvider extends ChangeNotifier {
 
       case ScheduleViewType.week:
         _setWeekRange(rangeStart.add(const Duration(days: 7)));
+        break;
+
+      case ScheduleViewType.month:
+        _setMonthRange(DateTime(rangeStart.year, rangeStart.month + 1));
         break;
 
       default:
@@ -183,26 +195,13 @@ class ScheduleViewProvider extends ChangeNotifier {
       case ScheduleViewType.week:
         _setWeekRange(rangeStart.subtract(const Duration(days: 7)));
         break;
-      default:
-        break;
-    }
 
-    loadSchedule();
-  }
-
-  /// выбор даты из календаря
-  void onDateSelected(DateTime date) {
-    switch (_viewType) {
-      case ScheduleViewType.day:
-        _setDayRange(date);
-        break;
-
-      case ScheduleViewType.week:
-        _setWeekRange(date);
+      case ScheduleViewType.month:
+        _setMonthRange(DateTime(rangeStart.year, rangeStart.month - 1));
         break;
 
       default:
-        return;
+        break;
     }
 
     loadSchedule();

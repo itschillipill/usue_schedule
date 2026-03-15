@@ -1,18 +1,23 @@
 import 'dart:convert' show jsonDecode;
 
 import 'package:equatable/equatable.dart';
+import 'package:usue_schedule/core/api_exceptions.dart';
 import 'package:usue_schedule/core/utils/date_utils.dart';
 import 'day_schedule.dart';
 import 'request_type.dart';
 
 class ScheduleResponse extends Equatable {
-  const ScheduleResponse({required this.schedules, this.isFromCache = false});
+  const ScheduleResponse(
+      {required this.schedules, this.isFromCache = false, this.exception});
 
   // Список дней с расписанием
   final List<DaySchedule> schedules;
 
   // флаг который показывает из кэша ли расписание
   final bool isFromCache;
+
+  // если есть ошибка
+  final ApiException? exception;
 
   factory ScheduleResponse.fromJson(List<dynamic> json) {
     return ScheduleResponse(
@@ -97,6 +102,9 @@ class ScheduleResponse extends Equatable {
       'schedules': schedules.map((e) => e.toJson()).toList(),
     };
   }
+
+  ScheduleResponse withException(ApiException? exception) => ScheduleResponse(
+      schedules: schedules, isFromCache: isFromCache, exception: exception);
 
   factory ScheduleResponse.fromJsonString(String jsonString) {
     final json = jsonDecode(jsonString);

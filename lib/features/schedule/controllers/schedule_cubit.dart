@@ -61,10 +61,17 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
       }
     }
 
+    final List<ScheduleModel> removed = <ScheduleModel>[];
+    for (int i = 0; i < oldSchedules.length; i++) {
+      if (!newSchedules.contains(oldSchedules[i])) {
+        removed.add(oldSchedules[i]);
+      }
+    }
+
     SessionLogger.instance.onTransition(
       name,
       'old: count=${oldSchedules.length}',
-      'new: count=${newSchedules.length}, updated=$updated',
+      'new: count=${newSchedules.length}${updated.isEmpty ? "" : ", updated=$updated"}${removed.isEmpty ? "" : ", removed=$removed"}',
     );
 
     super.onChange(change);
@@ -116,6 +123,17 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
       schedules[modelIndex] = schedule.update();
     }
     prefs.setStringList(
+      mySchedulesKey,
+      schedules.map((e) => jsonEncode(e.toJson())).toList(),
+    );
+    emit(MyScheduleState(schedules: schedules));
+  }
+
+  Future<void> onDeleteCache(List<ScheduleModel> models) async {
+    List<ScheduleModel> schedules = List<ScheduleModel>.from(state.schedules)
+        .map((element) => element.resetUpdate())
+        .toList();
+    await prefs.setStringList(
       mySchedulesKey,
       schedules.map((e) => jsonEncode(e.toJson())).toList(),
     );
