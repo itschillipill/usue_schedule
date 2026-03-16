@@ -98,7 +98,7 @@ class ScheduleViewProvider extends ChangeNotifier {
         _extractParamsFrom(response);
       }
     } on ApiException catch (e) {
-      error = e.message;
+      error = "${e.message}${e.tip != null ? '\n${e.tip}' : ""}";
     } catch (_) {
       error = "Неизвестная ошибка";
     } finally {

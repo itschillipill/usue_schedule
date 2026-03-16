@@ -198,6 +198,10 @@ class ShowScheduleScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      Text("Текущее расписание может быть устаревшим.",
+                          style: const TextStyle(
+                            fontSize: 14,
+                          )),
                       Text(
                         exception.tip ?? "",
                         style: const TextStyle(

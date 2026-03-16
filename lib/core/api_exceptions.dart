@@ -13,12 +13,13 @@ abstract class ApiException implements Exception {
 class NetworkException extends ApiException {
   NetworkException([dynamic originalError])
       : super('Нет подключения к интернету', originalError,
-            "Текущее расписание может быть устаревшим.\nПроверьте подключение к интернету и VPN — серверы университета могут быть недоступны через VPN.");
+            "Проверьте подключение к интернету и VPN — серверы университета могут быть недоступны через VPN.");
 }
 
 class TimeoutException extends ApiException {
   TimeoutException([dynamic originalError])
-      : super('Превышено время ожидания ответа от сервера');
+      : super('Превышено время ожидания ответа от сервера', originalError,
+            "Проверьте подключение к интернету и VPN.\nCерверы университета могут быть недоступны через VPN.");
 }
 
 class ServerException extends ApiException {
