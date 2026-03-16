@@ -185,31 +185,36 @@ class _CompactLessonCard extends StatelessWidget {
                       fontSize: 14,
                     ),
                   ),
-                  Row(
+                  Wrap(
                     spacing: 2,
                     children: [
-                      Icon(Icons.meeting_room, size: 12),
-                      Text(
-                        schedulePair.audience,
-                        style: TextStyle(
-                          fontSize: 14,
-                        ),
+                      Row(
+                        spacing: 2,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.meeting_room, size: 12),
+                          Text(
+                            schedulePair.audience,
+                            style: TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            '•',
+                            style: TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            pair.schedulePairs.teachers.join(", "),
+                            style: TextStyle(
+                              fontSize: 14,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      Text(
-                        '•',
-                        style: TextStyle(
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        pair.schedulePairs.teachers.join(", "),
-                        style: TextStyle(
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Spacer(),
                       if (pair.schedulePairs.subgroups.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.symmetric(

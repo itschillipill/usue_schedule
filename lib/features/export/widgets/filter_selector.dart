@@ -257,7 +257,7 @@ class _FilterSelectionSheetState extends State<_FilterSelectionSheet> {
                 });
               },
               selectedColor:
-                  widget.generatedColors[filter] ?? theme.primaryColor,
+                  widget.generatedColors[filter] ?? theme.colorScheme.primary,
               checkmarkColor: Colors.white,
               shape: StadiumBorder(
                 side: BorderSide(

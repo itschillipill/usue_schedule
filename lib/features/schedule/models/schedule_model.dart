@@ -24,6 +24,10 @@ class ScheduleModel extends Equatable {
     return DateTime.now().difference(lastUpdated!) > maxAge;
   }
 
+  // сбрасываем последнее обновление
+  ScheduleModel resetUpdate() => ScheduleModel(
+      requestType: requestType, queryValue: queryValue, lastUpdated: null);
+
   // Фабричные конструкторы
   factory ScheduleModel.teacher(String teacherName, {DateTime? lastUpdated}) {
     return ScheduleModel(

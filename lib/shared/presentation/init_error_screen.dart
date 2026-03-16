@@ -37,7 +37,7 @@ class InitializationErrorScreen extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () => _sendEmail(context),
                 icon: const Icon(Icons.bug_report),
-                label: const Text("Сообщить об ошыбке"),
+                label: const Text("Сообщить об ошибке"),
               ),
             ],
           ),

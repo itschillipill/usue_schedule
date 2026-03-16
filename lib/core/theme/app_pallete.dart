@@ -48,7 +48,6 @@ class AppPallete {
     Color(0xFF1E88E5), // голубой
     Color(0xFF43A047), // зеленый
     Color(0xFF8E24AA), // фиолетовый
-    Color(0xFFFDD835), // желтый
     Color(0xFFD81B60), // розовый
     Color(0xFF00897B), // бирюзовый
     Color(0xFF5E35B1), // индиго
@@ -65,6 +64,7 @@ class AppPallete {
     Color(0xFF4DD0E1), // светло-бирюзовый
     Color(0xFFD81B60), // розово-красный
     Color(0xFF26C6DA), // циан
+    Color(0xFFFDD835), // желтый
     Color(0xFF7CB342), // светло-зеленый
     Color(0xFF546E7A), // серо-синий
     Color(0xFFE53935), // красный (для цикла)

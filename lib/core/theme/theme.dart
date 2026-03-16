@@ -569,7 +569,7 @@ class AppTheme {
 extension ThemeExtension on BuildContext {
   Color get primaryColor => Theme.of(this).colorScheme.primary;
   Color get secondaryColor => Theme.of(this).colorScheme.secondary;
-  Color get backgroundColor => Theme.of(this).scaffoldBackgroundColor;
+  Color get backgroundColor => isDarkMode ? Colors.black : Colors.white;
   Color get surfaceColor => Theme.of(this).colorScheme.surface;
   Color get onSurfaceColor => Theme.of(this).colorScheme.onSurface;
   Color get cardColor => Theme.of(this).cardColor;

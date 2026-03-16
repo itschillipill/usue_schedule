@@ -123,7 +123,8 @@ void main() {
     });
 
     test("needsUpdate returns false when lastUpdated is recent", () {
-      final model = ScheduleModel.teacher("Иванов", lastUpdated: DateTime.now());
+      final model =
+          ScheduleModel.teacher("Иванов", lastUpdated: DateTime.now());
 
       expect(model.needsUpdate(), false);
     });
@@ -143,7 +144,10 @@ void main() {
       expect(updated.queryValue, model.queryValue);
       expect(updated.requestType, model.requestType);
       expect(updated.lastUpdated, isNotNull);
-      expect(updated.lastUpdated!.isAfter(DateTime.now().subtract(const Duration(seconds: 1))), true);
+      expect(
+          updated.lastUpdated!
+              .isAfter(DateTime.now().subtract(const Duration(seconds: 1))),
+          true);
     });
   });
 }

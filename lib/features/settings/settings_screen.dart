@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:usue_schedule/core/constants.dart';
+import 'package:usue_schedule/features/schedule/models/schedule_view_type.dart';
 import 'package:usue_schedule/features/settings/controlles/settings_cubit.dart';
 import 'package:usue_schedule/shared/widgets/custom_list_tile.dart';
 
@@ -33,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
           children: [
             _Section(
               icon: Icons.palette,
-              title: 'Внешний вид',
+              title: 'Костомизация',
               children: [
                 CustomListTile(
                   title: 'Тема приложения',
@@ -67,6 +68,30 @@ class SettingsScreen extends StatelessWidget {
                         .toList(),
                   ),
                 ),
+                CustomListTile(
+                  title: 'Вид расписания',
+                  subTitle: "Тип отображения расписания по умолчанию",
+                  trailing: DropdownButton<ScheduleViewType>(
+                    underline: const SizedBox.shrink(),
+                    focusColor: Colors.transparent,
+                    isDense: true,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    dropdownColor: theme.colorScheme.surface,
+                    value: settingsCubit.state.viewType,
+                    onChanged: settingsCubit.setViewType,
+                    items: ScheduleViewType.values
+                        .where((v) => v != ScheduleViewType.custom)
+                        .map((viewType) => DropdownMenuItem(
+                              value: viewType,
+                              child: Text(viewType.text),
+                            ))
+                        .toList(),
+                  ),
+                ),
               ],
             ),
             if (cacheProvider != null)
@@ -80,7 +105,12 @@ class SettingsScreen extends StatelessWidget {
                       subTitle: 'Удалить данные расписаний',
                       onTap: () {
                         Navigator.push(
-                            context, CacheManagerScreen.route(cacheProvider));
+                            context,
+                            CacheManagerScreen.route(
+                                cacheProvider,
+                                DependenciesScope.of(context)
+                                    .scheduleCubit
+                                    .onDeleteCache));
                       }),
                 ],
               ),

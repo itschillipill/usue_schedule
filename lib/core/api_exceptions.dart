@@ -2,21 +2,24 @@
 abstract class ApiException implements Exception {
   final String message;
   final dynamic originalError;
+  final String? tip;
 
-  ApiException(this.message, [this.originalError]);
+  ApiException(this.message, [this.originalError, this.tip]);
 
   @override
-  String toString() => "$message: $originalError";
+  String toString() => "$message: $originalError,${tip != null ? " $tip" : ""}";
 }
 
 class NetworkException extends ApiException {
   NetworkException([dynamic originalError])
-      : super('Нет подключения к интернету');
+      : super('Нет подключения к интернету', originalError,
+            "Проверьте подключение к интернету и VPN — серверы университета могут быть недоступны через VPN.");
 }
 
 class TimeoutException extends ApiException {
   TimeoutException([dynamic originalError])
-      : super('Превышено время ожидания ответа от сервера');
+      : super('Превышено время ожидания ответа от сервера', originalError,
+            "Проверьте подключение к интернету и VPN.\nCерверы университета могут быть недоступны через VPN.");
 }
 
 class ServerException extends ApiException {

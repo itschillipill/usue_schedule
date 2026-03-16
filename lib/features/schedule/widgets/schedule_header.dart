@@ -30,7 +30,8 @@ class ScheduleHeaderDelegate extends SliverPersistentHeaderDelegate {
     String titleText;
     if (isDayView) {
       titleText = DateFormat('dd MMMM yyyy', 'ru').format(rangeStart);
-    } else if (viewType == ScheduleViewType.week) {
+    } else if (viewType == ScheduleViewType.week ||
+        viewType == ScheduleViewType.month) {
       titleText =
           '${DateFormat('dd', 'ru').format(rangeStart)} - ${DateFormat('dd MMMM yyyy', 'ru').format(rangeEnd)}';
     } else {
@@ -106,20 +107,12 @@ class ScheduleHeaderDelegate extends SliverPersistentHeaderDelegate {
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
-                items: const [
-                  DropdownMenuItem(
-                    value: ScheduleViewType.day,
-                    child: Text('День'),
-                  ),
-                  DropdownMenuItem(
-                    value: ScheduleViewType.week,
-                    child: Text('Неделя'),
-                  ),
-                  DropdownMenuItem(
-                    value: ScheduleViewType.custom,
-                    child: Text('Произвольно'),
-                  ),
-                ],
+                items: ScheduleViewType.values
+                    .map((viewType) => DropdownMenuItem(
+                          value: viewType,
+                          child: Text(viewType.text),
+                        ))
+                    .toList(),
                 onChanged: (value) {
                   if (value != null) onViewTypeChanged(value);
                 },

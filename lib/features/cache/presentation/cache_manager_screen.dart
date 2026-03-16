@@ -4,13 +4,16 @@ import 'package:usue_schedule/shared/services/message_service.dart';
 import '../../schedule/models/schedule_model.dart';
 
 class CacheManagerScreen extends StatefulWidget {
-  static route(CacheProvider cacheProvider) => MaterialPageRoute(
-      builder: (_) => CacheManagerScreen(
-            cacheProvider: cacheProvider,
-          ));
+  static route(CacheProvider cacheProvider,
+          Future<void> Function(List<ScheduleModel> model) onDelete) =>
+      MaterialPageRoute(
+          builder: (_) => CacheManagerScreen(
+              cacheProvider: cacheProvider, onDelete: onDelete));
 
   final CacheProvider cacheProvider;
-  const CacheManagerScreen({super.key, required this.cacheProvider});
+  final Future<void> Function(List<ScheduleModel> model) onDelete;
+  const CacheManagerScreen(
+      {super.key, required this.cacheProvider, required this.onDelete});
 
   @override
   State<CacheManagerScreen> createState() => _CacheManagerScreenState();
@@ -78,6 +81,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
 
   Future<void> _deleteModel(List<ScheduleModel> models) async {
     _selectedModels.clear();
+    await widget.onDelete(models);
     await widget.cacheProvider.clearModelsCache(models);
 
     await _loadCacheInfo().then((_) {
