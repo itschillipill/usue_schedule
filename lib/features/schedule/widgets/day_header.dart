@@ -17,7 +17,7 @@ class DayHeader extends StatelessWidget {
 
     return BorderBox(
       padding: const EdgeInsets.all(8),
-      color: isCurrent ? Theme.of(context).canvasColor : null,
+      borderColor: isCurrent ? Theme.of(context).colorScheme.primary : null,
       child: Row(
         spacing: 8,
         children: [
