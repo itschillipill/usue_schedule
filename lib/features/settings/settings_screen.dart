@@ -215,10 +215,10 @@ class SettingsScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 5,
             children: [
-              Text(
+              const Text(
                 Constants.appName,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue,
@@ -232,16 +232,16 @@ class SettingsScreen extends StatelessWidget {
                     height: 1.5,
                   ),
                   children: [
-                    TextSpan(
+                    const TextSpan(
                       text: 'Версия: ',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    TextSpan(text: '${Constants.version}\n'),
-                    TextSpan(
+                    const TextSpan(text: '${Constants.version}\n'),
+                    const TextSpan(
                       text: 'Сборка: ',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    TextSpan(text: Constants.buildNumber),
+                    const TextSpan(text: Constants.buildNumber),
                   ],
                 ),
               ),
@@ -312,9 +312,9 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(color: Colors.grey),
                     ),
                   ])),
-              _LinkCard(
+              const _LinkCard(
                   'Офицальный сайт расписания', Constants.usueScheduleLink),
-              _LinkCard(
+              const _LinkCard(
                   'Исходный код приложения на GitHub', Constants.githubLink),
             ],
           ),

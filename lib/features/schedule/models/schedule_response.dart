@@ -32,7 +32,7 @@ class ScheduleResponse extends Equatable {
     } else if (responseData is List) {
       return ScheduleResponse.fromJson(responseData);
     } else {
-      throw FormatException('Некорректный формат данных от API');
+      throw const FormatException('Некорректный формат данных от API');
     }
   }
 

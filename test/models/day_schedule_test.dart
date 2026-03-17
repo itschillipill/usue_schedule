@@ -5,7 +5,7 @@ import 'package:usue_schedule/features/schedule/models/schedule_pair.dart';
 
 void main() {
   group("DaySchedule", () {
-    DaySchedule dayScheduleExample = DaySchedule(
+    DaySchedule dayScheduleExample = const DaySchedule(
       date: "16.02.2026",
       weekDay: "Понедельник",
       pairs: [

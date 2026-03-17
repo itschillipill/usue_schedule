@@ -115,14 +115,14 @@ class ScheduleItem extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     spacing: 2,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.account_tree_outlined,
                         size: 12,
                         color: Colors.purple,
                       ),
                       Text(
                         'Подгр. ${pairs.subgroups.join(', ')}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Colors.purple,
                           fontWeight: FontWeight.w500,

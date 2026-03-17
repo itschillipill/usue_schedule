@@ -351,7 +351,7 @@ class _AnswerScreen extends StatelessWidget {
                       ),
                       Container(
                         padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),

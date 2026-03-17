@@ -18,14 +18,14 @@ class SplashScreen extends StatelessWidget {
             body: ValueListenableBuilder(
           valueListenable: progress,
           builder: (context, value, child) => SafeArea(
-            minimum: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            minimum: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 20,
                 children: [
-                  Spacer(),
-                  CircleAvatar(
+                  const Spacer(),
+                  const CircleAvatar(
                     radius: 50,
                     backgroundImage: AssetImage("assets/app_logo.png"),
                   ),
@@ -36,9 +36,9 @@ class SplashScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(5),
                     value: value.progress / 100,
                   ),
-                  Text("Инициализация приложения..."),
-                  Spacer(),
-                  Text("Версия ${Constants.version}")
+                  const Text("Инициализация приложения..."),
+                  const Spacer(),
+                  const Text("Версия ${Constants.version}")
                 ],
               ),
             ),

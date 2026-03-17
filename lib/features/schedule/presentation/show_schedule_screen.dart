@@ -143,8 +143,8 @@ class ShowScheduleScreen extends StatelessWidget {
           if (provider.viewType == ScheduleViewType.custom) {
             final range = await showDateRangePicker(
               context: context,
-              firstDate: DateTime.now().subtract(Duration(days: 365)),
-              lastDate: DateTime.now().add(Duration(days: 365)),
+              firstDate: DateTime.now().subtract(const Duration(days: 365)),
+              lastDate: DateTime.now().add(const Duration(days: 365)),
               initialEntryMode: DatePickerEntryMode.inputOnly,
               initialDateRange: DateTimeRange(
                 start: provider.rangeStart,
@@ -198,8 +198,8 @@ class ShowScheduleScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text("Текущее расписание может быть устаревшим.",
-                          style: const TextStyle(
+                      const Text("Текущее расписание может быть устаревшим.",
+                          style: TextStyle(
                             fontSize: 14,
                           )),
                       Text(

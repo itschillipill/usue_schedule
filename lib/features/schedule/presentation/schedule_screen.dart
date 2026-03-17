@@ -57,7 +57,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     onPressed: () {
                       Navigator.push(context, GuideScreen.route());
                     },
-                    icon: Icon(Icons.help_outline_rounded)),
+                    icon: const Icon(Icons.help_outline_rounded)),
               ],
               centerTitle: true,
             ),
@@ -88,7 +88,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                     ),
                                   ),
                                 )
-                              : SizedBox.shrink(),
+                              : const SizedBox.shrink(),
                         ),
                         Expanded(
                           child: ListView.builder(
@@ -155,11 +155,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 8,
         children: [
-          Icon(
+          const Icon(
             Icons.calendar_today_outlined,
             size: 80,
           ),
-          Text(
+          const Text(
             "Расписаний пока нет",
             style: TextStyle(
               fontSize: 18,

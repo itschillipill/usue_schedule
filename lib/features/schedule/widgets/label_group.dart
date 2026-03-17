@@ -15,14 +15,14 @@ class LabelGroup extends StatelessWidget {
       child: Row(
         spacing: 4,
         children: [
-          Icon(
+          const Icon(
             Icons.group,
             size: 12,
             color: Colors.blue,
           ),
           Text(
             '$pairs групп${_getGroupsEnding(pairs)}',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               color: Colors.blue,
               fontWeight: FontWeight.w500,

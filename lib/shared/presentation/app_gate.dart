@@ -9,9 +9,9 @@ class AppGate extends StatelessWidget {
 
   final ValueNotifier<int> selectedIndex = ValueNotifier(0);
 
-  final List<Widget> screens = [
-    ScheduleScreen(),
-    SettingsScreen(),
+   final List<Widget> screens = const[
+     ScheduleScreen(),
+     SettingsScreen(),
   ];
 
   @override
@@ -31,9 +31,9 @@ class AppGate extends StatelessWidget {
               selectedItemColor: Theme.of(context).colorScheme.primary,
               unselectedItemColor: Colors.grey,
               items: [
-                BottomNavigationBarItem(
+                const BottomNavigationBarItem(
                     icon: Icon(Icons.list), label: "Расписания"),
-                BottomNavigationBarItem(
+                const BottomNavigationBarItem(
                     icon: Icon(Icons.settings), label: "Настройки"),
               ]),
           floatingActionButtonLocation:
@@ -51,7 +51,7 @@ class AppGate extends StatelessWidget {
                           .addSchedule(newSchedule);
                     }
                   },
-                  child: Icon(Icons.add),
+                  child: const Icon(Icons.add),
                 )
               : null,
         ),

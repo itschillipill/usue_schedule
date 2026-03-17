@@ -76,8 +76,8 @@ class _LessonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ExpansionTile(
       initiallyExpanded: true,
-      tilePadding: EdgeInsets.symmetric(horizontal: 4),
-      shape: RoundedRectangleBorder(
+      tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+      shape: const RoundedRectangleBorder(
         side: BorderSide.none,
       ),
       title: DayHeader(
@@ -134,7 +134,7 @@ class _CompactLessonCard extends StatelessWidget {
                 ),
                 child: Text(
                   pair.time,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -180,7 +180,7 @@ class _CompactLessonCard extends StatelessWidget {
                 children: [
                   Text(
                     schedulePair.subject,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -192,14 +192,14 @@ class _CompactLessonCard extends StatelessWidget {
                         spacing: 2,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.meeting_room, size: 12),
+                          const Icon(Icons.meeting_room, size: 12),
                           Text(
                             pair.schedulePairs.audience,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                             ),
                           ),
-                          Text(
+                          const Text(
                             '•',
                             style: TextStyle(
                               fontSize: 14,
@@ -207,7 +207,7 @@ class _CompactLessonCard extends StatelessWidget {
                           ),
                           Text(
                             pair.schedulePairs.teachers.join(", "),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                             ),
                             maxLines: 1,
@@ -227,14 +227,14 @@ class _CompactLessonCard extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             spacing: 2,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.account_tree_outlined,
                                 size: 12,
                                 color: Colors.purple,
                               ),
                               Text(
                                 'Подгр. ${pair.schedulePairs.subgroups.join(', ')}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.purple,
                                   fontWeight: FontWeight.w500,

@@ -18,7 +18,7 @@ class CustomRangeHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
+          const Text(
             "На этот прериод:",
             style: TextStyle(
               fontWeight: FontWeight.w600,

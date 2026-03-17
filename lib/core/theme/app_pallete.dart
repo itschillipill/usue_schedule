@@ -43,7 +43,7 @@ class AppPallete {
 
   // различные цвета для групп, ярких и легко различимых
 // Оптимизировано для максимального контраста между соседними цветами
-  static final List<Color> groupColors = [
+  static const List<Color> groupColors = [
     Color(0xFFE53935), // красный
     Color(0xFF1E88E5), // голубой
     Color(0xFF43A047), // зеленый

@@ -91,7 +91,7 @@ class _TimelineLessonCard extends StatelessWidget {
                   ),
                   child: Text(
                     'Пара ${pair.number}',
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 Padding(
