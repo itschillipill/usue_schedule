@@ -29,7 +29,7 @@ class DayView extends StatelessWidget {
       orElse: () => DaySchedule(
         date: selectedDateStr,
         weekDay: DateFormat('EEEE').format(selectedDate),
-        pairs: [],
+        pairs: const [],
       ),
     );
 

@@ -30,10 +30,10 @@ class AppGate extends StatelessWidget {
               type: BottomNavigationBarType.shifting,
               selectedItemColor: Theme.of(context).colorScheme.primary,
               unselectedItemColor: Colors.grey,
-              items: [
-                const BottomNavigationBarItem(
+              items: const [
+                BottomNavigationBarItem(
                     icon: Icon(Icons.list), label: "Расписания"),
-                const BottomNavigationBarItem(
+                BottomNavigationBarItem(
                     icon: Icon(Icons.settings), label: "Настройки"),
               ]),
           floatingActionButtonLocation:

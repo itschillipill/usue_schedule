@@ -149,7 +149,7 @@ extension ScheduleResponseFiller on ScheduleResponse {
         filledSchedules.add(DaySchedule(
           date: apiDateStr,
           weekDay: weekDay,
-          pairs: [],
+          pairs: const [],
         ));
       }
     }

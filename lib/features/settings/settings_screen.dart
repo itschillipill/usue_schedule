@@ -231,17 +231,17 @@ class SettingsScreen extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurface,
                     height: 1.5,
                   ),
-                  children: [
-                    const TextSpan(
+                  children: const [
+                    TextSpan(
                       text: 'Версия: ',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    const TextSpan(text: '${Constants.version}\n'),
-                    const TextSpan(
+                    TextSpan(text: '${Constants.version}\n'),
+                    TextSpan(
                       text: 'Сборка: ',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    const TextSpan(text: Constants.buildNumber),
+                    TextSpan(text: Constants.buildNumber),
                   ],
                 ),
               ),
@@ -279,18 +279,18 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      children: [
-                    const TextSpan(
+                      children: const [
+                    TextSpan(
                       text: 'Это приложение является ',
                     ),
-                    const TextSpan(
+                    TextSpan(
                       text: 'неофициальным клиентом ',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.blue,
                       ),
                     ),
-                    const TextSpan(
+                    TextSpan(
                         text:
                             """для просмотра расписания УрГЭУ (USUE) и было создано в рамках учебного проекта.
 Статус: Студенческий проект
