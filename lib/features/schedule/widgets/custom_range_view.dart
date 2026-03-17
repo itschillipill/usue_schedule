@@ -194,7 +194,7 @@ class _CompactLessonCard extends StatelessWidget {
                         children: [
                           Icon(Icons.meeting_room, size: 12),
                           Text(
-                            schedulePair.audience,
+                            pair.schedulePairs.audience,
                             style: TextStyle(
                               fontSize: 14,
                             ),
