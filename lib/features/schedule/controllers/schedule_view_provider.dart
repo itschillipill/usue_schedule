@@ -12,12 +12,14 @@ class ScheduleViewProvider extends ChangeNotifier {
   final ApiService apiService;
   final Function(ScheduleModel model) onUpdate;
   final ScheduleViewType initialViewType;
+  final bool isDarkMode;
   ScheduleModel params;
 
   ScheduleViewProvider({
     required this.apiService,
     required this.params,
     required this.onUpdate,
+    required this.isDarkMode,
     this.initialViewType = ScheduleViewType.day,
   }) {
     _init();
@@ -237,7 +239,7 @@ class ScheduleViewProvider extends ChangeNotifier {
 
           return MapEntry(
             group,
-            ScheduleStyles.getGroupColor(index),
+            ScheduleStyles.getGroupColor(index, isDarkMode),
           );
         }),
       );

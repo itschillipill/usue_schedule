@@ -131,7 +131,8 @@ class MyScheduleCubit extends Cubit<MyScheduleState> {
 
   Future<void> onDeleteCache(List<ScheduleModel> models) async {
     List<ScheduleModel> schedules = List<ScheduleModel>.from(state.schedules)
-        .map((element) => element.resetUpdate())
+        .map((element) =>
+            models.contains(element) ? element.resetUpdate() : element)
         .toList();
     await prefs.setStringList(
       mySchedulesKey,

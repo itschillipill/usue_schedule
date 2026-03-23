@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:usue_schedule/core/page_transition/app_page_route.dart';
 import 'package:usue_schedule/features/schedule/widgets/schedule_card.dart';
 import '../models/request_type.dart';
 import '../models/schedule_model.dart';
@@ -6,10 +7,9 @@ import '../services/schedule_search_service.dart';
 
 class AddScheduleScreen extends StatefulWidget {
   static Route<ScheduleModel> route() {
-    return MaterialPageRoute(
-      builder: (_) => const AddScheduleScreen._(),
-      fullscreenDialog: true,
-    );
+    return AppPageRoute.build(
+        page: (_) => AddScheduleScreen._(),
+        transition: PageTransitionType.slideFromBottom);
   }
 
   const AddScheduleScreen._();
@@ -255,7 +255,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            "Попробуйте другой запрос",
+            "Попробуйте другой запрос или проверьте подключение к интернету и VPN",
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],

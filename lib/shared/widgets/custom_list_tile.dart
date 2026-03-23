@@ -11,76 +11,102 @@ class CustomListTile extends StatelessWidget {
   final VoidCallback? onLongPress;
   final EdgeInsets cardPadding;
 
-  const CustomListTile(
-      {super.key,
-      this.border = BorderSide.none,
-      this.mainColor,
-      this.leadingIcon,
-      required this.title,
-      this.subTitle,
-      this.trailing,
-      this.onLongPress,
-      this.onTap,
-      this.cardPadding =
-          const EdgeInsets.symmetric(vertical: 8, horizontal: 16)});
+  const CustomListTile({
+    super.key,
+    this.border = BorderSide.none,
+    this.mainColor,
+    this.leadingIcon,
+    required this.title,
+    this.subTitle,
+    this.trailing,
+    this.onLongPress,
+    this.onTap,
+    this.cardPadding = const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+  });
 
   @override
   Widget build(BuildContext context) {
-    final color = mainColor ?? Theme.of(context).colorScheme.primary;
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Padding(
-        padding: cardPadding,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
-            border: border != BorderSide.none
-                ? Border.all(color: border.color, width: border.width)
-                : null,
+    final theme = Theme.of(context);
+    final color = mainColor ?? theme.colorScheme.primary;
+
+    return Padding(
+      padding: cardPadding,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: theme.colorScheme.surface,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: border != BorderSide.none
+                ? border
+                : BorderSide(color: theme.dividerColor.withValues(alpha: 0.08)),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              spacing: 12,
-              children: [
-                if (leadingIcon != null)
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      leadingIcon,
-                      color: color,
-                      size: 20,
-                    ),
-                  ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+          child: InkWell(
+            onTap: onTap,
+            onLongPress: onLongPress,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  if (leadingIcon != null) ...[
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      if (subTitle != null)
-                        Text(subTitle!,
-                            style: Theme.of(context).textTheme.bodySmall),
-                    ],
+                      child: Icon(
+                        leadingIcon,
+                        color: color,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (subTitle != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            subTitle!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.hintColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                ),
-                if (trailing != null) trailing!,
-              ],
+                  if (trailing != null) ...[
+                    const SizedBox(width: 8),
+                    trailing!,
+                  ],
+                ],
+              ),
             ),
           ),
         ),

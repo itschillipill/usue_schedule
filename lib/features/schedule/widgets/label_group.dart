@@ -13,6 +13,7 @@ class LabelGroup extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         spacing: 4,
         children: [
           const Icon(

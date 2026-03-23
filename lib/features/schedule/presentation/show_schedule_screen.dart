@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:usue_schedule/core/api_exceptions.dart';
+import 'package:usue_schedule/core/page_transition/app_page_route.dart';
 import 'package:usue_schedule/core/theme/theme.dart';
 import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
 import 'package:usue_schedule/features/schedule/widgets/date_picker.dart';
@@ -22,18 +23,21 @@ import '../widgets/custom_range_view.dart';
 
 class ShowScheduleScreen extends StatelessWidget {
   static Route<ScheduleModel> route({required ScheduleModel params}) {
-    return MaterialPageRoute(builder: (context) {
-      final deps = DependenciesScope.of(context);
-      return ChangeNotifierProvider(
-        create: (_) => ScheduleViewProvider(
-          apiService: deps.apiService,
-          onUpdate: deps.scheduleCubit.updateSchedule,
-          params: params,
-          initialViewType: deps.settingsCubit.state.viewType,
-        ),
-        child: ShowScheduleScreen(params: params),
-      );
-    });
+    return AppPageRoute.build(
+        page: (context) {
+          final deps = DependenciesScope.of(context);
+          return ChangeNotifierProvider(
+            create: (_) => ScheduleViewProvider(
+              apiService: deps.apiService,
+              onUpdate: deps.scheduleCubit.updateSchedule,
+              params: params,
+              initialViewType: deps.settingsCubit.state.viewType,
+              isDarkMode: Theme.brightnessOf(context) == Brightness.dark,
+            ),
+            child: ShowScheduleScreen(params: params),
+          );
+        },
+        transition: PageTransitionType.slideFromRight);
   }
 
   final ScheduleModel params;

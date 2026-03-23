@@ -17,6 +17,7 @@ class BuildEmptyState extends StatelessWidget {
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               Icons.schedule_outlined,
@@ -26,6 +27,7 @@ class BuildEmptyState extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               isFiltered ? 'Нет занятий для выбранного фильтра' : 'Нет занятий',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,

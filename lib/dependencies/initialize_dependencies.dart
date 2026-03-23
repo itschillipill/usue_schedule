@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:usue_schedule/features/settings/controlles/settings_cubit.dart';
+import 'package:usue_schedule/features/settings/controllers/settings_cubit.dart';
 import 'package:usue_schedule/core/logger/session_logger.dart';
 import 'package:usue_schedule/features/schedule/services/api.dart';
 

@@ -9,9 +9,9 @@ class AppGate extends StatelessWidget {
 
   final ValueNotifier<int> selectedIndex = ValueNotifier(0);
 
-   final List<Widget> screens = const[
-     ScheduleScreen(),
-     SettingsScreen(),
+  final List<Widget> screens = const [
+    ScheduleScreen(),
+    SettingsScreen(),
   ];
 
   @override

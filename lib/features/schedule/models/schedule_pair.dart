@@ -95,5 +95,5 @@ extension X on List<SchedulePair> {
 
   String get audience => any((p) => p.audience.isNotEmpty)
       ? firstWhere((p) => p.audience.isNotEmpty).audience
-      : 'Аудитория не указана';
+      : 'Не указана';
 }

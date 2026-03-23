@@ -41,57 +41,53 @@ class AppPallete {
 
   static const Color transparent = Colors.transparent;
 
-  // различные цвета для групп, ярких и легко различимых
-// Оптимизировано для максимального контраста между соседними цветами
-  static const List<Color> groupColors = [
-    Color(0xFFE53935), // красный
-    Color(0xFF1E88E5), // голубой
-    Color(0xFF43A047), // зеленый
-    Color(0xFF8E24AA), // фиолетовый
-    Color(0xFFD81B60), // розовый
-    Color(0xFF00897B), // бирюзовый
-    Color(0xFF5E35B1), // индиго
-    Color(0xFFFF7043), // оранжевый
-    Color(0xFF00ACC1), // аквамарин
-    Color(0xFF6D4C41), // коричневый
-    Color(0xFF3949AB), // синий
-    Color(0xFFC0CA33), // салатовый
-    Color(0xFF00E676), // ярко-зеленый
-    Color(0xFFE91E63), // малиновый
-    Color(0xFF0288D1), // темно-голубой
-    Color(0xFFFFA726), // оранжевый
-    Color(0xFF673AB7), // темно-фиолетовый
-    Color(0xFF4DD0E1), // светло-бирюзовый
-    Color(0xFFD81B60), // розово-красный
-    Color(0xFF26C6DA), // циан
-    Color(0xFFFDD835), // желтый
-    Color(0xFF7CB342), // светло-зеленый
-    Color(0xFF546E7A), // серо-синий
-    Color(0xFFE53935), // красный (для цикла)
-    Color(0xFF1DE9B6), // мятный
-    Color(0xFF9C27B0), // пурпурный
-    Color(0xFFFF8A65), // коралловый
-    Color(0xFF039BE5), // синий
-    Color(0xFF4FC3F7), // небесный
-    Color(0xFFFFAB91), // персиковый
-    Color(0xFF880E4F), // темно-розовый
-    Color(0xFF01579B), // темно-синий
-    Color(0xFFB2FF59), // лайм
-    Color(0xFF00ACC1), // бирюзовый
-    Color(0xFFE65100), // темно-оранжевый
-    Color(0xFFAD1457), // бордовый
-    Color(0xFF283593), // индиго
-    Color(0xFF2E7D32), // темно-зеленый
-    Color(0xFF00695C), // темно-бирюзовый
-    Color(0xFF4A148C), // темно-фиолетовый
-    Color(0xFFB71C1C), // темно-красный
-    Color(0xFF0D47A1), // темно-синий
-    Color(0xFF1B5E20), // темно-зеленый
-    Color(0xFFBF360C), // красно-оранжевый
-    Color(0xFF311B92), // темно-фиолетовый
-    Color(0xFF1A237E), // темно-синий
-    Color(0xFF004D40), // темно-бирюзовый
-    Color(0xFF827717), // оливковый
-    Color(0xFF3E2723), // темно-коричневый
+  // --- ПАЛИТРА ДЛЯ СВЕТЛОЙ ТЕМЫ (20 цветов) ---
+  // Глубокие, насыщенные цвета для белого фона
+  static const List<Color> lightGroupColors = [
+    Color(0xFFD32F2F), // 1. Красный (Deep Red)
+    Color(0xFF1976D2), // 2. Синий (Deep Blue)
+    Color(0xFF388E3C), // 3. Зеленый (Forest Green)
+    Color(0xFF7B1FA2), // 4. Фиолетовый (Purple)
+    Color(0xFFC2185B), // 5. Розовый (Berry)
+    Color(0xFF00796B), // 6. Бирюзовый (Teal)
+    Color(0xFFE65100), // 7. Оранжевый (Burnt Orange)
+    Color(0xFF303F9F), // 8. Индиго (Navy)
+    Color(0xFF5D4037), // 9. Коричневый (Coffee)
+    Color(0xFF455A64), // 10. Серо-синий (Slate)
+    Color(0xFF00838F), // 11. Циан (Dark Cyan)
+    Color(0xFFF9A825), // 12. Янтарный (Dark Amber)
+    Color(0xFF2E7D32), // 13. Темно-зеленый (Emerald)
+    Color(0xFF6A1B9A), // 14. Глубокий пурпур (Grape)
+    Color(0xFFBF360C), // 15. Красно-оранжевый (Rust)
+    Color(0xFF0277BD), // 16. Голубой (Ocean Blue)
+    Color(0xFF827717), // 17. Оливковый (Olive)
+    Color(0xFFAD1457), // 18. Малиновый (Crimson)
+    Color(0xFF1565C0), // 19. Ярко-синий (Azure)
+    Color(0xFF37474F), // 20. Темный графит (Charcoal)
+  ];
+
+  // --- ПАЛИТРА ДЛЯ ТЕМНОЙ ТЕМЫ (20 цветов) ---
+  // Светлые, пастельные и неоновые цвета для черного фона
+  static const List<Color> darkGroupColors = [
+    Color(0xFFEF9A9A), // 1. Нежно-красный
+    Color(0xFF90CAF9), // 2. Светло-голубой
+    Color(0xFFA5D6A7), // 3. Мятный
+    Color(0xFFCE93D8), // 4. Лавандовый
+    Color(0xFFF48FB1), // 5. Розовый лепесток
+    Color(0xFF80CBC4), // 6. Аквамарин
+    Color(0xFFFFCC80), // 7. Персиковый
+    Color(0xFF9FA8DA), // 8. Светлый индиго
+    Color(0xFFBCAAA4), // 9. Бежево-коричневый
+    Color(0xFFB0BEC5), // 10. Светло-серый
+    Color(0xFF80DEEA), // 11. Светлый циан
+    Color(0xFFFFF59D), // 12. Лимонный пастельный
+    Color(0xFFC5E1A5), // 13. Светлый лайм
+    Color(0xFFE1BEE7), // 14. Нежно-пурпурный
+    Color(0xFFFFAB91), // 15. Коралловый
+    Color(0xFF81D4FA), // 16. Небесный
+    Color(0xFFE6EE9C), // 17. Салатовый
+    Color(0xFFF06292), // 18. Яркий розовый (светлый)
+    Color(0xFF1DE9B6), // 19. Неоновая бирюза
+    Color(0xFFB2FF59), // 20. Яркий лайм
   ];
 }

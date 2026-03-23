@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:usue_schedule/core/constants.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_view_type.dart';
-import 'package:usue_schedule/features/settings/controlles/settings_cubit.dart';
+import 'package:usue_schedule/features/settings/controllers/settings_cubit.dart';
 import 'package:usue_schedule/shared/widgets/custom_list_tile.dart';
 
 import '../../core/theme/schedule_styles.dart';
@@ -183,12 +183,6 @@ class SettingsScreen extends StatelessWidget {
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
-                  Text(
-                    Constants.sign,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -292,7 +286,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     TextSpan(
                         text:
-                            """для просмотра расписания УрГЭУ (USUE) и было создано в рамках учебного проекта.
+                            """для просмотра расписания УрГЭУ (USUE) и было создано в для удобного слежения за расписанием, для студентов и преподователей.
 Статус: Студенческий проект
 Разработчик: ${Constants.author}
 Источник данных: Официальный сайт расписания УрГЭУ"""),

@@ -33,7 +33,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       },
       child: BlocBuilder<MyScheduleCubit, MyScheduleState>(
         builder: (context, state) {
-          final mySchedules = state.schedules;
+          final mySchedules = state.schedules..sort();
           final scheduleCubit = context.read<MyScheduleCubit>();
           final filtredSchedule = mySchedules.where((schedule) =>
               schedule.queryValue.toLowerCase().contains(query.toLowerCase()));

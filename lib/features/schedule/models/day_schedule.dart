@@ -24,7 +24,8 @@ class DaySchedule extends Equatable {
     );
   }
 
-  DaySchedule empty() => DaySchedule(date: date, weekDay: weekDay, pairs: const []);
+  DaySchedule empty() =>
+      DaySchedule(date: date, weekDay: weekDay, pairs: const []);
 
   Iterable<Pair> get nonEmptyPairs =>
       pairs.where((p) => p.schedulePairs.isNotEmpty);
