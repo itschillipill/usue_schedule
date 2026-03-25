@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:usue_schedule/features/schedule/widgets/label_group.dart';
 import '../models/pair.dart';
 import '../models/schedule_pair.dart';
 import '../models/schedule_response.dart';
@@ -112,73 +113,78 @@ class _TimelineLessonCard extends StatelessWidget {
                 width: 1,
               ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: isCurrent
-                                  ? theme.colorScheme.primary
-                                  : theme.hintColor.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '${pair.number} пара',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
+      padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isCurrent
+                                ? theme.colorScheme.primary
+                                : theme.hintColor.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            pair.pairTime,
-                            style: theme.textTheme.titleSmall?.copyWith(
+                          child: Text(
+                            '${pair.number} пара',
+                            style: TextStyle(
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                              fontSize: 12,
                             ),
                           ),
-                          const Spacer(),
-                          if (isCurrent) _buildLiveIndicator(theme),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          pair.pairTime,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (isCurrent) _buildLiveIndicator(theme),
+                      ],
                     ),
-                    Column(
-                      children: displayItems.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final group = entry.value;
+                  ),
+                  Stack(
+                    children: [
+                      Column(
+                        children: displayItems.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final group = entry.value;
 
-                        final hasTitle = index == 0 ||
-                            group.first.subject !=
-                                displayItems[index - 1].first.subject;
-                        return ScheduleItem(
-                          pairs: group,
-                          groupColors: groupColors,
-                          hasTitle: hasTitle,
-                          isLast: index == displayItems.length - 1,
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
+                          final hasTitle = index == 0 ||
+                              group.first.subject !=
+                                  displayItems[index - 1].first.subject;
+                          return ScheduleItem(
+                            pairs: group,
+                            groupColors: groupColors,
+                            hasTitle: hasTitle,
+                            isLast: index == displayItems.length - 1,
+                          );
+                        }).toList(),
+                      ),
+                      Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: LabelGroup(pairs: pair.schedulePairs.length))
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

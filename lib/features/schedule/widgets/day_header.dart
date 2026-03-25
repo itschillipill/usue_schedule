@@ -66,10 +66,7 @@ class DayHeader extends StatelessWidget {
                 ],
               ),
             ),
-
             const VerticalDivider(width: 1),
-
-            // --- ПРАВАЯ ЧАСТЬ (ДЕНЬ НЕДЕЛИ И СЧЕТЧИК) ---
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),

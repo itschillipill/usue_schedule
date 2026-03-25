@@ -30,13 +30,12 @@ class ScheduleViewProvider extends ChangeNotifier {
 
   ScheduleViewType get viewType => _viewType;
 
-  bool get hasFilters => params.requestType == RequestType.group
-      ? availableTeachers.isNotEmpty
-      : availableGroups.isNotEmpty;
-
-  List<String> get availableFilters => params.requestType == RequestType.group
+  List<String> get _activeFilters => params.requestType == RequestType.group
       ? availableTeachers
       : availableGroups;
+
+  bool get hasFilters => _activeFilters.isNotEmpty;
+  List<String> get availableFilters => _activeFilters;
 
   /// диапазон дат
   DateTime rangeStart = DateTime.now();
@@ -95,12 +94,12 @@ class ScheduleViewProvider extends ChangeNotifier {
         ),
       );
 
-      if (response != null) {
-        lastResponse = response;
-        _extractParamsFrom(response);
+      if (response case final r?) {
+        lastResponse = r;
+        _extractParamsFrom(r);
       }
     } on ApiException catch (e) {
-      error = "${e.message}${e.tip != null ? '\n${e.tip}' : ""}";
+      error = [e.message, e.tip].whereType<String>().join('\n');
     } catch (_) {
       error = "Неизвестная ошибка";
     } finally {

@@ -149,23 +149,23 @@ class ShowScheduleScreen extends StatelessWidget {
               context: context,
               firstDate: DateTime.now().subtract(const Duration(days: 365)),
               lastDate: DateTime.now().add(const Duration(days: 365)),
-              initialEntryMode: DatePickerEntryMode.inputOnly,
+              initialEntryMode: DatePickerEntryMode.input,
               initialDateRange: DateTimeRange(
                 start: provider.rangeStart,
                 end: provider.rangeEnd,
               ),
             );
 
-            if (range != null) {
-              provider.setCustomRange(range.start, range.end);
-            }
+            if (range == null) return;
+
+            provider.setCustomRange(range.start, range.end);
           } else {
             DatePicker(
               selectedDate: provider.rangeStart,
               onDateSelected: (date) =>
                   provider.setViewType(provider.viewType, date: date),
               context: context,
-            ).call();
+            )();
           }
         },
       ),
@@ -206,12 +206,13 @@ class ShowScheduleScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                           )),
-                      Text(
-                        exception.tip ?? "",
-                        style: const TextStyle(
-                          fontSize: 14,
+                      if (exception.tip case String tip when tip.isNotEmpty)
+                        Text(
+                          tip,
+                          style: const TextStyle(
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),

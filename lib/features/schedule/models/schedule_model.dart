@@ -25,8 +25,7 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
   }
 
   // сбрасываем последнее обновление
-  ScheduleModel resetUpdate() => ScheduleModel(
-      requestType: requestType, queryValue: queryValue, lastUpdated: null);
+  ScheduleModel resetUpdate() => _copyWith(lastUpdated: null);
 
   // Фабричные конструкторы
   factory ScheduleModel.teacher(String teacherName, {DateTime? lastUpdated}) {
@@ -89,10 +88,17 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
     };
   }
 
-  ScheduleModel update() => ScheduleModel(
-        requestType: requestType,
-        queryValue: queryValue,
-        lastUpdated: DateTime.now(),
+  ScheduleModel update() => _copyWith(lastUpdated: DateTime.now());
+
+  ScheduleModel _copyWith({
+    RequestType? requestType,
+    String? queryValue,
+    DateTime? lastUpdated,
+  }) =>
+      ScheduleModel(
+        requestType: requestType ?? this.requestType,
+        queryValue: queryValue ?? this.queryValue,
+        lastUpdated: lastUpdated ?? this.lastUpdated,
       );
 
   @override
@@ -113,19 +119,4 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
     // Сначала самые НОВЫЕ
     return other.lastUpdated!.compareTo(lastUpdated!);
   }
-}
-
-void Function() dispose = () {
-  dispose = () {};
-};
-
-void disposable(void Function() fn) {
-  final prev = dispose;
-  dispose = () {
-    try {
-      fn();
-    } finally {
-      prev();
-    }
-  };
 }

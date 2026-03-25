@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_pair.dart';
-import 'package:usue_schedule/features/schedule/widgets/label_group.dart';
 
 class ScheduleItem extends StatelessWidget {
   final List<SchedulePair> pairs;
@@ -20,7 +19,7 @@ class ScheduleItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       width: double.infinity,
       decoration: BoxDecoration(
         border: isLast
@@ -42,7 +41,7 @@ class ScheduleItem extends StatelessWidget {
                 fontSize: 18,
               ),
             ),
-          if (pairs.hasMultipleGroups) _buildGroupsChips(pairs.length),
+          if (pairs.hasMultipleGroups) _buildGroupsChips(),
           Wrap(
             spacing: 5,
             children: [
@@ -122,19 +121,11 @@ class ScheduleItem extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupsChips(int pairsCount) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 4),
-        LabelGroup(pairs: pairsCount),
-        const SizedBox(height: 4),
-        Wrap(
-          spacing: 2,
-          runSpacing: 3,
-          children: pairs.groups.map(_buildSingleGroupChip).toList(),
-        ),
-      ],
+  Widget _buildGroupsChips() {
+    return Wrap(
+      spacing: 2,
+      runSpacing: 3,
+      children: pairs.groups.map(_buildSingleGroupChip).toList(),
     );
   }
 }

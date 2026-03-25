@@ -87,6 +87,12 @@ class DateTimeUtils {
     return null;
   }
 
+  static Iterable<DateTime> daysInRange(DateTime start, DateTime end) sync* {
+    for (var d = start; !d.isAfter(end); d = d.add(const Duration(days: 1))) {
+      yield d;
+    }
+  }
+
   // Парсить время из комментария пары
   static String? parseTimeFromComment(String? comment,
       {String defaultTime = ''}) {

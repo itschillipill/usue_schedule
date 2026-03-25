@@ -69,7 +69,8 @@ class CustomRangeView extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: CustomRangeHeader(
-            pairs: daysWithPairs.length,
+            days: daysWithPairs.length,
+            pairs: daysWithPairs.expand((e) => e.day.nonEmptyPairs).length,
             startDate: rangeStart,
             endDate: rangeEnd,
           ),
@@ -335,6 +336,7 @@ class PairCard extends StatelessWidget {
                     group: group,
                     isLast: isLast,
                     groupColors: groupColors,
+                    totalPairsCount: pair.schedulePairs.length,
                   );
                 }).toList(),
               ),
@@ -351,12 +353,14 @@ class _ScheduleItem extends StatelessWidget {
   final List<SchedulePair> group;
   final bool isLast;
   final bool hasTitle;
+  final int totalPairsCount;
   final Map<String, Color> groupColors;
   const _ScheduleItem(
       {required this.first,
       required this.group,
       required this.isLast,
       required this.hasTitle,
+      required this.totalPairsCount,
       required this.groupColors});
 
   @override
@@ -378,7 +382,6 @@ class _ScheduleItem extends StatelessWidget {
         children: [
           Column(
             mainAxisSize: MainAxisSize.min,
-            spacing: 2,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (hasTitle)
@@ -443,7 +446,8 @@ class _ScheduleItem extends StatelessWidget {
                   ),
                 ),
               ),
-              if (group.hasMultipleGroups) LabelGroup(pairs: group.length)
+              if (group.hasMultipleGroups && isLast)
+                LabelGroup(pairs: totalPairsCount)
             ],
           ),
           Wrap(

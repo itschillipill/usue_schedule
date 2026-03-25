@@ -112,12 +112,11 @@ class ApiService {
           force: p.forceUpdate,
           onUpdateModel: p.onUpdateModel);
     } catch (e, st) {
-      SessionLogger.instance.error(
-        name,
-        "Ошибка поиска расписания",
-        error: e,
-        stackTrace: st,
-      );
+      if (e case DioException error when CancelToken.isCancel(error)) {
+        return null;
+      }
+      SessionLogger.instance
+          .error(name, "Ошибка получения расписания", error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -141,7 +140,7 @@ class ApiService {
           ? null
           : (await cacheProvider?.getSchedule(
                   scheduleModel, startDate, endDate))
-              ?.withException(withException);
+              ?.copyWith(exception: withException);
 
       if (cached != null) return cached;
 
@@ -225,10 +224,12 @@ class ApiService {
             .warning(name, "Ошибка сохранения в кэш", error: e);
       }
 
-      onUpdateModel(scheduleModel.update());
+      if (scheduleModel.needsUpdate()) {
+        onUpdateModel(scheduleModel.update());
+      }
 
       // возвращаем расписание только на заданный период,
-      // без учета дополнительных дней для кеширования
+      // без учета дополнительных дней которых мы запросили для кеширования
       return parsed.cut(startDate, endDate);
     } on ApiException {
       rethrow;
