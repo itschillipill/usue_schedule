@@ -5,8 +5,8 @@ import 'dart:math' show Random;
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart' show IOHttpClientAdapter;
 import 'package:flutter/foundation.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:usue_schedule/core/api_exceptions.dart';
+import 'package:usue_schedule/shared/mixins/debounce_mixin.dart';
 
 import '../../../core/logger/session_logger.dart';
 import '../../cache/provider/cache_provider.dart';
@@ -22,12 +22,7 @@ typedef Params = ({
   Function(ScheduleModel model) onUpdateModel,
 });
 
-typedef _SearchRequest = ({
-  Params params,
-  Completer<ScheduleResponse?> completer,
-});
-
-class ApiService {
+class ApiService with DebouncedRequestMixin {
   static const String name = "ApiService";
 
   // количество дополнительных дней к кешируемому периоду
@@ -39,8 +34,6 @@ class ApiService {
 
   final Dio _dio;
 
-  final _querySubject = PublishSubject<_SearchRequest>();
-
   ApiService({
     this.cacheProvider,
     Dio? dio,
@@ -50,8 +43,6 @@ class ApiService {
     if (dio == null) {
       _configureDio();
     }
-
-    _initPipeline();
   }
 
   final String _baseUrl = 'https://www.usue.ru/schedule/';
@@ -74,43 +65,20 @@ class ApiService {
     }
   }
 
-  void _initPipeline() {
-    _querySubject
-        .debounceTime(const Duration(milliseconds: 500))
-        .switchMap((req) => Stream.fromFuture(_fetchSchedule(req.params))
-                .map((r) => (req, r))
-                .onErrorReturnWith((error, stack) {
-              req.completer.completeError(error);
-              return (req, null);
-            }))
-        .listen((result) {
-      final (req, response) = result;
-
-      if (!req.completer.isCompleted) {
-        req.completer.complete(response);
-      }
-    });
-  }
-
   Future<ScheduleResponse?> fetch(Params params) async {
-    final completer = Completer<ScheduleResponse?>();
-
-    _querySubject.add((
-      params: params,
-      completer: completer,
-    ));
-
-    return completer.future;
-  }
-
-  Future<ScheduleResponse?> _fetchSchedule(Params p) async {
     try {
-      return await getSchedule(
-          startDate: p.startDate,
-          endDate: p.endDate,
-          scheduleModel: p.scheduleModel,
-          force: p.forceUpdate,
-          onUpdateModel: p.onUpdateModel);
+      return await debouncedRequest<ScheduleResponse?>(
+          delay: Duration(milliseconds: 500),
+          action: (token) {
+            return getSchedule(
+              startDate: params.startDate,
+              endDate: params.endDate,
+              scheduleModel: params.scheduleModel,
+              force: params.forceUpdate,
+              onUpdateModel: params.onUpdateModel,
+              cancelToken: token,
+            );
+          });
     } catch (e, st) {
       if (e case DioException error when CancelToken.isCancel(error)) {
         return null;
@@ -127,6 +95,7 @@ class ApiService {
     required ScheduleModel scheduleModel,
     required Function(ScheduleModel model) onUpdateModel,
     bool force = false,
+    CancelToken? cancelToken,
     ApiException? withException,
   }) async {
     SessionLogger.instance.debug(name, "Получение расписания", extra: {
@@ -161,7 +130,8 @@ class ApiService {
       late final Response response;
 
       try {
-        response = await _dio.get(_baseUrl, queryParameters: params);
+        response = await _dio.get(_baseUrl,
+            queryParameters: params, cancelToken: cancelToken);
         // throw DioException(
         //     requestOptions: response.requestOptions,
         //     error: SocketException('simulated'));
@@ -192,6 +162,7 @@ class ApiService {
             force: false,
             onUpdateModel: onUpdateModel,
             withException: apiException,
+            cancelToken: cancelToken,
           );
         }
 

@@ -76,7 +76,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                // Тип расписания
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
@@ -160,14 +159,12 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                 ),
                 color: Theme.of(context).cardColor,
               ),
-              child: StreamBuilder<List<ScheduleModel>>(
-                stream: _searchService.results,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData || _controller.text.isEmpty) {
+              child: ValueListenableBuilder<List<ScheduleModel>>(
+                valueListenable: _searchService.resultsNotifier,
+                builder: (context, items, _) {
+                  if (_controller.text.isEmpty) {
                     return _buildEmptyState();
                   }
-
-                  final items = snapshot.data!;
 
                   if (items.isEmpty) {
                     return _buildNoResults();
@@ -182,15 +179,16 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                       final isSelected = selected == item;
 
                       return ScheduleCard(
-                          scheduleModel: item,
-                          isSelected: isSelected,
-                          onTap: () {
-                            setState(() {
-                              selected = item;
-                              _controller.text = item.queryValue;
-                            });
-                            _focusNode.unfocus();
+                        scheduleModel: item,
+                        isSelected: isSelected,
+                        onTap: () {
+                          setState(() {
+                            selected = item;
+                            _controller.text = item.queryValue;
                           });
+                          _focusNode.unfocus();
+                        },
+                      );
                     },
                   );
                 },
