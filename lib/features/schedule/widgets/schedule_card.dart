@@ -23,21 +23,30 @@ class ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final typeColor = scheduleModel.requestType.color;
+
     return CustomListTile(
-        mainColor: scheduleModel.requestType.color,
-        title: scheduleModel.queryValue,
-        subTitle: scheduleModel.requestType.text,
-        leadingIcon: scheduleModel.requestType.icon,
-        onTap: onTap,
-        onLongPress: onLongPress,
-        border: isSelected
-            ? BorderSide(color: scheduleModel.requestType.color)
-            : BorderSide.none,
-        trailing: isSelected
+      mainColor: typeColor,
+      title: scheduleModel.queryValue,
+      subTitle: scheduleModel.requestType.text,
+      leadingIcon: scheduleModel.requestType.icon,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      // Делаем бордер более акцентным, если карточка выбрана
+      border:
+          isSelected ? BorderSide(color: typeColor, width: 2) : BorderSide.none,
+      trailing: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        child: isSelected
             ? Icon(
                 Icons.check_circle,
-                color: scheduleModel.requestType.color,
+                key: const ValueKey('selected'),
+                color: typeColor,
+                size: 28,
               )
-            : trailing);
+            : (trailing ??
+                const Icon(Icons.chevron_right, color: Colors.grey, size: 20)),
+      ),
+    );
   }
 }

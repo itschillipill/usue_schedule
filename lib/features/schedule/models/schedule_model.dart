@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'request_type.dart';
 
-class ScheduleModel extends Equatable {
+class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
   const ScheduleModel({
     required this.requestType,
     required this.queryValue,
@@ -18,15 +18,14 @@ class ScheduleModel extends Equatable {
   // Последнее обновление
   final DateTime? lastUpdated;
 
-  // проверяем необходимость обновления, на случай если данные устарели
-  bool needsUpdate({Duration maxAge = const Duration(days: 2)}) {
+  // проверяем необходимость обновления, на случай если расписание обновили
+  bool needsUpdate({Duration maxAge = const Duration(days: 3)}) {
     if (lastUpdated == null) return true;
     return DateTime.now().difference(lastUpdated!) > maxAge;
   }
 
   // сбрасываем последнее обновление
-  ScheduleModel resetUpdate() => ScheduleModel(
-      requestType: requestType, queryValue: queryValue, lastUpdated: null);
+  ScheduleModel resetUpdate() => _copyWith(lastUpdated: null);
 
   // Фабричные конструкторы
   factory ScheduleModel.teacher(String teacherName, {DateTime? lastUpdated}) {
@@ -89,10 +88,17 @@ class ScheduleModel extends Equatable {
     };
   }
 
-  ScheduleModel update() => ScheduleModel(
-        requestType: requestType,
-        queryValue: queryValue,
-        lastUpdated: DateTime.now(),
+  ScheduleModel update() => _copyWith(lastUpdated: DateTime.now());
+
+  ScheduleModel _copyWith({
+    RequestType? requestType,
+    String? queryValue,
+    DateTime? lastUpdated,
+  }) =>
+      ScheduleModel(
+        requestType: requestType ?? this.requestType,
+        queryValue: queryValue ?? this.queryValue,
+        lastUpdated: lastUpdated ?? this.lastUpdated,
       );
 
   @override
@@ -101,4 +107,16 @@ class ScheduleModel extends Equatable {
 
   @override
   List<Object?> get props => [requestType, queryValue];
+
+  // Сравнение для сортировки списка расписаний
+  @override
+  int compareTo(ScheduleModel other) {
+    // null значения в конце
+    if (lastUpdated == null && other.lastUpdated == null) return 0;
+    if (lastUpdated == null) return 1;
+    if (other.lastUpdated == null) return -1;
+
+    // Сначала самые НОВЫЕ
+    return other.lastUpdated!.compareTo(lastUpdated!);
+  }
 }

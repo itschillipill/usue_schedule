@@ -1,139 +1,104 @@
 import 'package:flutter/material.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_pair.dart';
-import 'package:usue_schedule/features/schedule/widgets/label_group.dart';
 
 class ScheduleItem extends StatelessWidget {
   final List<SchedulePair> pairs;
   final Map<String, Color> groupColors;
+  final bool hasTitle;
+  final bool isLast;
 
-  const ScheduleItem(
-      {super.key, required this.groupColors, required this.pairs});
+  const ScheduleItem({
+    super.key,
+    required this.groupColors,
+    required this.pairs,
+    required this.hasTitle,
+    required this.isLast,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        border: isLast
+            ? null
+            : Border(
+                bottom: BorderSide(
+                    color: theme.dividerColor.withValues(alpha: 0.1)),
+              ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 3,
+        spacing: 5,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 2,
-            children: [
-              Text(
-                pairs.first.subject.trim(),
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+          if (hasTitle)
+            Text(
+              pairs.first.subject.trim(),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
-              if (pairs.hasMultipleGroups) _buildGroupsChips(context),
-            ],
-          ),
-
-          // Аудитория и время
-          Row(
-            spacing: 2,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 2,
-                children: [
-                  Icon(
-                    Icons.meeting_room_outlined,
-                    size: 16,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
-                  ),
-                  Text(
-                    pairs.audience,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.8),
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                '•',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Text(
-                pairs.teachers.join(', '),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.8),
-                ),
-              ),
-              const Spacer(),
-              if (pairs.hasMultipleGroups) LabelGroup(pairs: pairs.length)
-            ],
-          ),
-
+            ),
+          if (pairs.hasMultipleGroups) _buildGroupsChips(),
           Wrap(
-            spacing: 8,
-            runSpacing: 4,
+            spacing: 5,
             children: [
-              // Container(
-              //   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              //   decoration:
-              //       ScheduleStyles.lessonTypeDecoration(pairs.first.lessonType),
-              //   child: Text(
-              //     pairs.first.lessonType,
-              //     style: TextStyle(
-              //       fontSize: 12,
-              //       color: Colors.white,
-              //       fontWeight: FontWeight.w500,
-              //     ),
-              //   ),
-              // ),
+              _buildIconText(
+                  context, Icons.meeting_room_outlined, pairs.audience),
+              _buildIconText(
+                  context, Icons.person_outline, pairs.teachers.join(', ')),
+            ],
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 2,
+            children: [
               if (!pairs.hasMultipleGroups)
                 _buildSingleGroupChip(pairs.first.cleanGroup),
               if (pairs.subgroups.isNotEmpty)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 2,
-                    children: [
-                      Icon(
-                        Icons.account_tree_outlined,
-                        size: 12,
-                        color: Colors.purple,
-                      ),
-                      Text(
-                        'Подгр. ${pairs.subgroups.join(', ')}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.purple,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildSubgroupBadge(pairs.subgroups.join(', ')),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildIconText(BuildContext context, IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: Theme.of(context).hintColor),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.8)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubgroupBadge(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.purple.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        'Подгруппы: $text',
+        style: const TextStyle(
+            fontSize: 11, color: Colors.purple, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -156,40 +121,11 @@ class ScheduleItem extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupsChips(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          spacing: 4,
-          children: [
-            Icon(
-              Icons.groups_outlined,
-              size: 14,
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.5),
-            ),
-            Text(
-              'Группы:',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
-        Wrap(
-          spacing: 4,
-          runSpacing: 3,
-          children: pairs.groups.map(_buildSingleGroupChip).toList(),
-        ),
-      ],
+  Widget _buildGroupsChips() {
+    return Wrap(
+      spacing: 2,
+      runSpacing: 3,
+      children: pairs.groups.map(_buildSingleGroupChip).toList(),
     );
   }
 }

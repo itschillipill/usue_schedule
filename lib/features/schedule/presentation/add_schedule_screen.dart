@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:usue_schedule/core/page_transition/app_page_route.dart';
 import 'package:usue_schedule/features/schedule/widgets/schedule_card.dart';
 import '../models/request_type.dart';
 import '../models/schedule_model.dart';
@@ -6,10 +7,9 @@ import '../services/schedule_search_service.dart';
 
 class AddScheduleScreen extends StatefulWidget {
   static Route<ScheduleModel> route() {
-    return MaterialPageRoute(
-      builder: (_) => const AddScheduleScreen._(),
-      fullscreenDialog: true,
-    );
+    return AppPageRoute.build(
+        page: (_) => AddScheduleScreen._(),
+        transition: PageTransitionType.slideFromBottom);
   }
 
   const AddScheduleScreen._();
@@ -61,8 +61,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
               onPressed: selected == null
                   ? null
                   : () => Navigator.pop(context, selected),
-              icon: Icon(Icons.add, size: 20),
-              label: Text(
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text(
                 "Добавить",
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
@@ -76,7 +76,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                // Тип расписания
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
@@ -88,7 +87,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                     child: DropdownButton<RequestType>(
                       value: requestType,
                       isExpanded: true,
-                      icon: Icon(Icons.arrow_drop_down),
+                      icon: const Icon(Icons.arrow_drop_down),
                       items: RequestType.values.map((type) {
                         return DropdownMenuItem(
                           value: type,
@@ -116,7 +115,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 
                 // Поле поиска
                 TextField(
@@ -124,10 +123,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                   focusNode: _focusNode,
                   decoration: InputDecoration(
                     hintText: 'Начните вводить название...',
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                     suffixIcon: _controller.text.isNotEmpty
                         ? IconButton(
-                            icon: Icon(Icons.clear),
+                            icon: const Icon(Icons.clear),
                             onPressed: () {
                               _controller.clear();
                               selected = null;
@@ -155,19 +154,17 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
           Expanded(
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.vertical(
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(25),
                 ),
                 color: Theme.of(context).cardColor,
               ),
-              child: StreamBuilder<List<ScheduleModel>>(
-                stream: _searchService.results,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData || _controller.text.isEmpty) {
+              child: ValueListenableBuilder<List<ScheduleModel>>(
+                valueListenable: _searchService.resultsNotifier,
+                builder: (context, items, _) {
+                  if (_controller.text.isEmpty) {
                     return _buildEmptyState();
                   }
-
-                  final items = snapshot.data!;
 
                   if (items.isEmpty) {
                     return _buildNoResults();
@@ -176,21 +173,22 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                   return ListView.separated(
                     padding: const EdgeInsets.all(4),
                     itemCount: items.length,
-                    separatorBuilder: (_, __) => SizedBox(height: 1),
+                    separatorBuilder: (_, __) => const SizedBox(height: 1),
                     itemBuilder: (context, index) {
                       final item = items[index];
                       final isSelected = selected == item;
 
                       return ScheduleCard(
-                          scheduleModel: item,
-                          isSelected: isSelected,
-                          onTap: () {
-                            setState(() {
-                              selected = item;
-                              _controller.text = item.queryValue;
-                            });
-                            _focusNode.unfocus();
+                        scheduleModel: item,
+                        isSelected: isSelected,
+                        onTap: () {
+                          setState(() {
+                            selected = item;
+                            _controller.text = item.queryValue;
                           });
+                          _focusNode.unfocus();
+                        },
+                      );
                     },
                   );
                 },
@@ -212,7 +210,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             size: 80,
             color: Colors.grey[300],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             "Начните поиск",
             style: TextStyle(
@@ -221,7 +219,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             "Введите название в поле выше",
             style: TextStyle(
@@ -244,7 +242,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             size: 80,
             color: Colors.grey[300],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             "Ничего не найдено",
             style: TextStyle(
@@ -253,9 +251,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            "Попробуйте другой запрос",
+            "Попробуйте другой запрос или проверьте подключение к интернету и VPN",
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],

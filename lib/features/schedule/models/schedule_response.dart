@@ -32,7 +32,7 @@ class ScheduleResponse extends Equatable {
     } else if (responseData is List) {
       return ScheduleResponse.fromJson(responseData);
     } else {
-      throw FormatException('Некорректный формат данных от API');
+      throw const FormatException('Некорректный формат данных от API');
     }
   }
 
@@ -44,7 +44,7 @@ class ScheduleResponse extends Equatable {
           dayDate.isBefore(endDate.add(const Duration(days: 1)));
     }).toList();
 
-    return ScheduleResponse(schedules: filteredSchedules);
+    return copyWith(schedules: filteredSchedules);
   }
 
   // Получить все уникальные группы из расписания
@@ -62,7 +62,7 @@ class ScheduleResponse extends Equatable {
   // Отфильтровать по группе
   ScheduleResponse filterByGroup([String? groupName]) {
     if (groupName == null) return this;
-    return ScheduleResponse(
+    return copyWith(
       schedules: schedules
           .map((day) => day.filterByGroup(groupName))
           .where((day) => day.pairs.isNotEmpty)
@@ -88,7 +88,7 @@ class ScheduleResponse extends Equatable {
   // Отфильтровать по преподавателю
   ScheduleResponse filterByTeacher([String? teacherName]) {
     if (teacherName == null) return this;
-    return ScheduleResponse(
+    return copyWith(
       schedules: schedules
           .map((day) => day.filterByTeacher(teacherName))
           .where((day) => day.pairs.isNotEmpty)
@@ -103,8 +103,14 @@ class ScheduleResponse extends Equatable {
     };
   }
 
-  ScheduleResponse withException(ApiException? exception) => ScheduleResponse(
-      schedules: schedules, isFromCache: isFromCache, exception: exception);
+  ScheduleResponse copyWith(
+          {List<DaySchedule>? schedules,
+          bool? isFromCache,
+          ApiException? exception}) =>
+      ScheduleResponse(
+          schedules: schedules ?? this.schedules,
+          isFromCache: isFromCache ?? this.isFromCache,
+          exception: exception ?? this.exception);
 
   factory ScheduleResponse.fromJsonString(String jsonString) {
     final json = jsonDecode(jsonString);
@@ -136,9 +142,8 @@ extension ScheduleResponseFiller on ScheduleResponse {
     final filledSchedules = <DaySchedule>[];
 
     // Проходим по всем датам в диапазоне от первой до последней
-    for (var date = normalizedStart;
-        date.isBefore(normalizedEnd.add(const Duration(days: 1)));
-        date = date.add(const Duration(days: 1))) {
+    for (final date
+        in DateTimeUtils.daysInRange(normalizedStart, normalizedEnd)) {
       final apiDateStr =
           DateTimeUtils.formatDate(date, showWeekday: false); // "dd.mm.yyyy"
       final weekDay = DateTimeUtils.getWeekdayName(date.weekday);
@@ -149,10 +154,10 @@ extension ScheduleResponseFiller on ScheduleResponse {
         filledSchedules.add(DaySchedule(
           date: apiDateStr,
           weekDay: weekDay,
-          pairs: [],
+          pairs: const [],
         ));
       }
     }
-    return ScheduleResponse(schedules: filledSchedules);
+    return copyWith(schedules: filledSchedules);
   }
 }

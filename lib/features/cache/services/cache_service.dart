@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:usue_schedule/core/utils/date_utils.dart';
 import 'package:usue_schedule/features/schedule/models/day_schedule.dart';
 import '../../../core/logger/session_logger.dart';
 import '../../schedule/models/schedule_response.dart';
@@ -60,9 +61,8 @@ final class CacheManager implements CacheServiceBase {
         .log(name, "Cache directory initialized: ${cacheDir.path}");
   }
 
-  String _dateKey(DateTime date) {
-    return '${date.year}_${date.month.toString().padLeft(2, '0')}_${date.day.toString().padLeft(2, '0')}';
-  }
+  String _dateKey(DateTime d) =>
+      '${d.year}_${d.month.toString().padLeft(2, '0')}_${d.day.toString().padLeft(2, '0')}';
 
   // Получаем файл для модели (один файл на модель)
   Future<File> _getModelFile(ScheduleModel model) async {
@@ -77,25 +77,29 @@ final class CacheManager implements CacheServiceBase {
 
     final file = await _getModelFile(model);
 
+    // Создаем пустую структуру данных для сохранения
+    Map<String, dynamic> emptyData = {
+      'model': model.toJson(),
+      'days': {}, // Здесь будут храниться дни по ключам
+      'last_updated': "" // Здесь будет храниться время последнего обновления
+    };
+
     // Загружаем существующий кэш или создаем новый
-    Map<String, dynamic> cacheData;
-    if (file.existsSync()) {
-      final content = await file.readAsString();
-      cacheData = jsonDecode(content);
-    } else {
-      cacheData = {
-        'model': model.toJson(),
-        'days': {}, // Здесь будут храниться дни по ключам
-        'last_updated': "" // Здесь будет храниться время последнего обновления
-      };
-    }
+    Map<String, dynamic> cacheData = await (() async {
+      if (!await file.exists()) return emptyData;
+      try {
+        return jsonDecode(await file.readAsString());
+      } catch (_) {
+        return emptyData;
+      }
+    })();
 
     // Добавляем/обновляем каждый день из response
     for (var day in response.schedules) {
       // ставим пустой массив чтобы не заполнять пустыми данными
       if (!day.hasPairs) day = day.empty();
 
-      final dateKey = _dateKey(day.date.toDateTime());
+      final dateKey = _dateKey(DateTimeUtils.parseDate(day.date)!);
       cacheData['days'][dateKey] = day.toJson();
     }
 
@@ -136,9 +140,7 @@ final class CacheManager implements CacheServiceBase {
       // Собираем все дни в диапазоне
       final days = <DaySchedule>[];
 
-      for (DateTime date = start;
-          date.isBefore(end.add(const Duration(days: 1)));
-          date = date.add(const Duration(days: 1))) {
+      for (final date in DateTimeUtils.daysInRange(start, end)) {
         final dateKey = _dateKey(date);
         if (cacheData['days'].containsKey(dateKey)) {
           final dayJson = cacheData['days'][dateKey];
@@ -272,20 +274,5 @@ final class CacheManager implements CacheServiceBase {
     }
 
     return totalSize;
-  }
-}
-
-extension DateStringExtension on String {
-  /// приведение строки в [DateTime]
-  DateTime toDateTime() {
-    final parts = split('.');
-    if (parts.length != 3) {
-      throw FormatException('Invalid date format: $this');
-    }
-    return DateTime(
-      int.parse(parts[2]),
-      int.parse(parts[1]),
-      int.parse(parts[0]),
-    );
   }
 }

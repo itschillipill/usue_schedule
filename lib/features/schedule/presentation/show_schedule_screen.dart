@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:usue_schedule/core/api_exceptions.dart';
+import 'package:usue_schedule/core/page_transition/app_page_route.dart';
 import 'package:usue_schedule/core/theme/theme.dart';
 import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
 import 'package:usue_schedule/features/schedule/widgets/date_picker.dart';
@@ -22,18 +23,21 @@ import '../widgets/custom_range_view.dart';
 
 class ShowScheduleScreen extends StatelessWidget {
   static Route<ScheduleModel> route({required ScheduleModel params}) {
-    return MaterialPageRoute(builder: (context) {
-      final deps = DependenciesScope.of(context);
-      return ChangeNotifierProvider(
-        create: (_) => ScheduleViewProvider(
-          apiService: deps.apiService,
-          onUpdate: deps.scheduleCubit.updateSchedule,
-          params: params,
-          initialViewType: deps.settingsCubit.state.viewType,
-        ),
-        child: ShowScheduleScreen(params: params),
-      );
-    });
+    return AppPageRoute.build(
+        page: (context) {
+          final deps = DependenciesScope.of(context);
+          return ChangeNotifierProvider(
+            create: (_) => ScheduleViewProvider(
+              apiService: deps.apiService,
+              onUpdate: deps.scheduleCubit.updateSchedule,
+              params: params,
+              initialViewType: deps.settingsCubit.state.viewType,
+              isDarkMode: Theme.brightnessOf(context) == Brightness.dark,
+            ),
+            child: ShowScheduleScreen(params: params),
+          );
+        },
+        transition: PageTransitionType.slideFromRight);
   }
 
   final ScheduleModel params;
@@ -143,25 +147,25 @@ class ShowScheduleScreen extends StatelessWidget {
           if (provider.viewType == ScheduleViewType.custom) {
             final range = await showDateRangePicker(
               context: context,
-              firstDate: DateTime.now().subtract(Duration(days: 365)),
-              lastDate: DateTime.now().add(Duration(days: 365)),
-              initialEntryMode: DatePickerEntryMode.inputOnly,
+              firstDate: DateTime.now().subtract(const Duration(days: 365)),
+              lastDate: DateTime.now().add(const Duration(days: 365)),
+              initialEntryMode: DatePickerEntryMode.input,
               initialDateRange: DateTimeRange(
                 start: provider.rangeStart,
                 end: provider.rangeEnd,
               ),
             );
 
-            if (range != null) {
-              provider.setCustomRange(range.start, range.end);
-            }
+            if (range == null) return;
+
+            provider.setCustomRange(range.start, range.end);
           } else {
             DatePicker(
               selectedDate: provider.rangeStart,
               onDateSelected: (date) =>
                   provider.setViewType(provider.viewType, date: date),
               context: context,
-            ).call();
+            )();
           }
         },
       ),
@@ -198,16 +202,17 @@ class ShowScheduleScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text("Текущее расписание может быть устаревшим.",
-                          style: const TextStyle(
+                      const Text("Текущее расписание может быть устаревшим.",
+                          style: TextStyle(
                             fontSize: 14,
                           )),
-                      Text(
-                        exception.tip ?? "",
-                        style: const TextStyle(
-                          fontSize: 14,
+                      if (exception.tip case String tip when tip.isNotEmpty)
+                        Text(
+                          tip,
+                          style: const TextStyle(
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),

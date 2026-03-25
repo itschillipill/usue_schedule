@@ -96,7 +96,8 @@ class ScheduleHeaderDelegate extends SliverPersistentHeaderDelegate {
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<ScheduleViewType>(
-                padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 2.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4.0, horizontal: 2.0),
                 borderRadius: BorderRadius.circular(6),
                 alignment: AlignmentDirectional.center,
                 value: viewType,

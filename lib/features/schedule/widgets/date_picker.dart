@@ -33,7 +33,7 @@ class DatePicker {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 spacing: 5,
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: Text(
                       'Выберите дату',
                       style: TextStyle(

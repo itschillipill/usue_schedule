@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:usue_schedule/core/constants.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_view_type.dart';
-import 'package:usue_schedule/features/settings/controlles/settings_cubit.dart';
+import 'package:usue_schedule/features/settings/controllers/settings_cubit.dart';
 import 'package:usue_schedule/shared/widgets/custom_list_tile.dart';
 
 import '../../core/theme/schedule_styles.dart';
@@ -183,12 +183,6 @@ class SettingsScreen extends StatelessWidget {
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
-                  Text(
-                    Constants.sign,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -215,10 +209,10 @@ class SettingsScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 5,
             children: [
-              Text(
+              const Text(
                 Constants.appName,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue,
@@ -231,15 +225,15 @@ class SettingsScreen extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurface,
                     height: 1.5,
                   ),
-                  children: [
+                  children: const [
                     TextSpan(
                       text: 'Версия: ',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     TextSpan(text: '${Constants.version}\n'),
                     TextSpan(
                       text: 'Сборка: ',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     TextSpan(text: Constants.buildNumber),
                   ],
@@ -279,20 +273,20 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      children: [
-                    const TextSpan(
+                      children: const [
+                    TextSpan(
                       text: 'Это приложение является ',
                     ),
-                    const TextSpan(
+                    TextSpan(
                       text: 'неофициальным клиентом ',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.blue,
                       ),
                     ),
-                    const TextSpan(
+                    TextSpan(
                         text:
-                            """для просмотра расписания УрГЭУ (USUE) и было создано в рамках учебного проекта.
+                            """для просмотра расписания УрГЭУ (USUE) и было создано в для удобного слежения за расписанием, для студентов и преподователей.
 Статус: Студенческий проект
 Разработчик: ${Constants.author}
 Источник данных: Официальный сайт расписания УрГЭУ"""),
@@ -312,9 +306,9 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(color: Colors.grey),
                     ),
                   ])),
-              _LinkCard(
+              const _LinkCard(
                   'Офицальный сайт расписания', Constants.usueScheduleLink),
-              _LinkCard(
+              const _LinkCard(
                   'Исходный код приложения на GitHub', Constants.githubLink),
             ],
           ),

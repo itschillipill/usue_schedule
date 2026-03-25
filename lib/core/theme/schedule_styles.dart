@@ -18,8 +18,11 @@ class ScheduleStyles {
   }
 
   // Цвета для групп (учитывает тему)
-  static Color getGroupColor(int index) =>
-      AppPallete.groupColors[index % AppPallete.groupColors.length];
+  static Color getGroupColor(int index, bool isDarkMode) {
+    final groupColors =
+        isDarkMode ? AppPallete.darkGroupColors : AppPallete.lightGroupColors;
+    return groupColors[index % groupColors.length];
+  }
 
   static Color getLessonTypeColor(String type) {
     switch (type) {

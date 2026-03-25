@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:usue_schedule/core/page_transition/app_page_route.dart';
 import 'package:usue_schedule/shared/services/message_service.dart';
 
 import '../models/guide_answer.dart';
@@ -7,11 +8,9 @@ import '../models/guide_topic.dart';
 part '../guide_topics.dart';
 
 class GuideScreen extends StatelessWidget {
-  static Route route() {
-    return MaterialPageRoute(
-      builder: (context) => const GuideScreen(),
-    );
-  }
+  static Route route() => AppPageRoute.build(
+      transition: PageTransitionType.slideFromTop,
+      page: (_) => const GuideScreen());
 
   const GuideScreen({super.key});
 
@@ -50,8 +49,9 @@ class _TopicCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => _QuestionsScreen(topic: topic),
+            AppPageRoute.build(
+              page: (_) => _QuestionsScreen(topic: topic),
+              transition: PageTransitionType.slideFromRightWithFade,
             ),
           );
         },
@@ -174,11 +174,12 @@ class _QuestionCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => _AnswerScreen(
+            AppPageRoute.build(
+              page: (context) => _AnswerScreen(
                 question: question,
                 color: color,
               ),
+              transition: PageTransitionType.slideFromRightWithFade,
             ),
           );
         },
@@ -351,7 +352,7 @@ class _AnswerScreen extends StatelessWidget {
                       ),
                       Container(
                         padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),

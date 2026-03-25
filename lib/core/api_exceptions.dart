@@ -7,7 +7,7 @@ abstract class ApiException implements Exception {
   ApiException(this.message, [this.originalError, this.tip]);
 
   @override
-  String toString() => "$message: $originalError,${tip != null ? " $tip" : ""}";
+  String toString() => "$message: ${[originalError, tip].nonNulls.join(', ')}";
 }
 
 class NetworkException extends ApiException {

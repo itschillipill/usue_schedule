@@ -209,9 +209,9 @@ class _FilterSelectionSheetState extends State<_FilterSelectionSheet> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Применить фильтр',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

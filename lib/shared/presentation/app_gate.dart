@@ -7,9 +7,9 @@ import '../../features/settings/settings_screen.dart';
 class AppGate extends StatelessWidget {
   AppGate({super.key});
 
-  final ValueNotifier<int> selectedIndex = ValueNotifier(0);
+  final ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
 
-  final List<Widget> screens = [
+  final List<Widget> screens = const [
     ScheduleScreen(),
     SettingsScreen(),
   ];
@@ -30,7 +30,7 @@ class AppGate extends StatelessWidget {
               type: BottomNavigationBarType.shifting,
               selectedItemColor: Theme.of(context).colorScheme.primary,
               unselectedItemColor: Colors.grey,
-              items: [
+              items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                     icon: Icon(Icons.list), label: "Расписания"),
                 BottomNavigationBarItem(
@@ -45,13 +45,13 @@ class AppGate extends StatelessWidget {
                       context,
                       AddScheduleScreen.route(),
                     );
-                    if (newSchedule != null && context.mounted) {
+                    if (newSchedule case final schadule? when context.mounted) {
                       DependenciesScope.of(context)
                           .scheduleCubit
-                          .addSchedule(newSchedule);
+                          .addSchedule(schadule);
                     }
                   },
-                  child: Icon(Icons.add),
+                  child: const Icon(Icons.add),
                 )
               : null,
         ),

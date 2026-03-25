@@ -6,7 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:usue_schedule/core/logger/session_logger.dart';
 import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
 import 'core/theme/theme.dart';
-import 'features/settings/controlles/settings_cubit.dart';
+import 'features/settings/controllers/settings_cubit.dart';
 import 'dependencies/widgets/intialization.dart';
 import 'shared/presentation/app_gate.dart';
 import 'shared/presentation/init_error_screen.dart';
@@ -52,7 +52,7 @@ class App extends StatelessWidget {
             builder: (context, child) {
               return MediaQuery(
                 data: MediaQuery.of(context)
-                    .copyWith(textScaler: TextScaler.linear(1.0)),
+                    .copyWith(textScaler: const TextScaler.linear(1.0)),
                 child: child!,
               );
             },
