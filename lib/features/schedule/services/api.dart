@@ -69,14 +69,13 @@ class ApiService with DebouncedRequestMixin {
     try {
       return await debouncedRequest<ScheduleResponse?>(
           delay: Duration(milliseconds: 500),
-          action: (token) {
+          action: () {
             return getSchedule(
               startDate: params.startDate,
               endDate: params.endDate,
               scheduleModel: params.scheduleModel,
               force: params.forceUpdate,
               onUpdateModel: params.onUpdateModel,
-              cancelToken: token,
             );
           });
     } catch (e, st) {
@@ -95,7 +94,6 @@ class ApiService with DebouncedRequestMixin {
     required ScheduleModel scheduleModel,
     required Function(ScheduleModel model) onUpdateModel,
     bool force = false,
-    CancelToken? cancelToken,
     ApiException? withException,
   }) async {
     SessionLogger.instance.debug(name, "Получение расписания", extra: {
@@ -131,7 +129,7 @@ class ApiService with DebouncedRequestMixin {
 
       try {
         response = await _dio.get(_baseUrl,
-            queryParameters: params, cancelToken: cancelToken);
+            queryParameters: params);
         // throw DioException(
         //     requestOptions: response.requestOptions,
         //     error: SocketException('simulated'));
@@ -162,7 +160,6 @@ class ApiService with DebouncedRequestMixin {
             force: false,
             onUpdateModel: onUpdateModel,
             withException: apiException,
-            cancelToken: cancelToken,
           );
         }
 

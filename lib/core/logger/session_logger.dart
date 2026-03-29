@@ -32,20 +32,22 @@ class LogEntry {
     this.extra,
   }) : timestamp = DateTime.now();
 
-  @override
-  String toString() {
-    final time = timestamp.toIso8601String();
-    final levelStr = level.name.toUpperCase();
-    final extraStr = extra != null && extra!.isNotEmpty
-        ? '\n${extra!.entries.map((e) => '${e.key} : ${e.value}').join(',\n')}'
-        : '';
-
-    if (error != null) {
-      final stack = stackTrace?.toString() ?? '';
-      return '[$time][$levelStr] |$category| $message$extraStr -> $error\n$stack';
-    }
-    return '[$time][$levelStr] |$category| $message$extraStr';
+ @override
+String toString() {
+  final time = timestamp.toIso8601String();
+  final levelStr = level.name.toUpperCase();
+  
+  String extraStr = '';
+  if (extra != null && extra!.isNotEmpty) {
+    extraStr = ' | extra: ${extra!.entries.map((e) => '${e.key}=${e.value}').join(', ')}';
   }
+
+  if (error != null) {
+    final stack = stackTrace!=null? " |${stackTrace.toString()}" : '';
+    return '[$time][$levelStr] |$category| $message$extraStr | ERROR: $error$stack';
+  }
+  return '[$time][$levelStr] |$category| $message$extraStr';
+}
 }
 
 class SessionLogger implements MyObserver {
