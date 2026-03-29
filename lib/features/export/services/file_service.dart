@@ -11,7 +11,7 @@ import '../../../core/logger/session_logger.dart';
 import '../models/export_format.dart';
 import '../../schedule/models/schedule_response.dart';
 import 'ics_converter.dart';
-import 'docx_generator.dart'; // Импортируем WordExporter
+import 'docx_generator.dart';
 
 const platform = MethodChannel('app.channel.files');
 
@@ -30,7 +30,7 @@ class FileService {
         });
         return path as String?;
       } else {
-        // Для других платформ (Windows, macOS, Linux)
+        // Для других платформ
         final directory = await getDownloadsDirectory();
         if (directory == null) {
           throw Exception('Could not find Downloads directory');
@@ -41,14 +41,10 @@ class FileService {
         await file.writeAsBytes(bytes);
         return filePath;
       }
-    } on PlatformException catch (e, s) {
-      SessionLogger.instance
-          .error(name, "Ошибка сохранения на Android", error: e, stackTrace: s);
-      return null;
     } catch (e, s) {
       SessionLogger.instance
           .error(name, "Ошибка сохранения", error: e, stackTrace: s);
-      return null;
+      rethrow;
     }
   }
 
@@ -62,21 +58,15 @@ class FileService {
   }) async {
     final fileName = _generateFileName(dateRange, queryValue);
 
-    late final String? path;
+     final Uint8List bytes = switch (format) {
+       ExportFormat.ics => await _saveAsICS(schedule, fileName, queryValue),
+      ExportFormat.word => await _saveAsWord(schedule, fileName),
+    };
 
-    switch (format) {
-      case ExportFormat.ics:
-        path = await _saveAsICS(schedule, fileName, queryValue);
-        break;
-      case ExportFormat.word:
-        path = await _saveAsWord(schedule, fileName);
-        break;
-    }
+   SessionLogger.instance.debug(name, "✅ Файл сохранён");
 
-    SessionLogger.instance.debug(name, "✅ Файл сохранён: $path");
-
-    if (shareAfterSave && path != null) {
-      await _shareFile(path, format);
+    if (shareAfterSave) {
+      await _shareFile(fileName, bytes, format);
     }
   }
 
@@ -87,17 +77,18 @@ class FileService {
     return _sanitizeFileName(baseName);
   }
 
-  static Future<String?> _saveAsWord(
+  static Future<Uint8List> _saveAsWord(
       ScheduleResponse schedule, String fileName) async {
     final bytes = DocxGenerator.create(schedule, fileName);
 
     // Важно: расширение теперь .docx
     final safeFileName = '$fileName.docx';
-    return saveToDownloads(safeFileName, bytes);
+     saveToDownloads(safeFileName, bytes);
+     return bytes;
   }
 
   // Сохранение в ICS
-  static Future<String?> _saveAsICS(
+  static Future<Uint8List> _saveAsICS(
       ScheduleResponse schedule, String fileName, String? queryValue) async {
     SessionLogger.instance.debug(name, "📅 Экспорт в iCalendar (.ics)");
 
@@ -110,7 +101,8 @@ class FileService {
     final bytes = utf8.encode('\ufeff$icsContent');
 
     final safeFileName = '$fileName.ics';
-    return saveToDownloads(safeFileName, Uint8List.fromList(bytes));
+     saveToDownloads(safeFileName, Uint8List.fromList(bytes));
+     return bytes;
   }
 
   // Сохранение в PDF (заглушка)
@@ -130,22 +122,25 @@ class FileService {
   }
 
   // Шеринг файла
-  static Future<void> _shareFile(String filePath, ExportFormat format) async {
+  static Future<void> _shareFile(String fileName, Uint8List bytes, ExportFormat format) async {
     final mimeType = switch (format) {
       // ExportFormat.pdf => 'application/pdf',
       // ExportFormat.excel =>
       //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       ExportFormat.ics => 'text/calendar',
-      ExportFormat.word => 'application/msword',
+      ExportFormat.word => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     };
-
     await SharePlus.instance.share(
       ShareParams(
-        files: [XFile(filePath, mimeType: mimeType)],
-        subject: 'Расписание УрГЭУ',
-        text: 'Экспорт расписания в ${format.name}',
-      ),
-    );
+    files: [
+      XFile.fromData(
+        bytes,
+        name: '$fileName.${format.extension}',
+        mimeType: mimeType,
+      )
+    ],
+  ),
+);
   }
 
   // Очистка имени файла от недопустимых символов

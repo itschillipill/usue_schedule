@@ -120,23 +120,25 @@ class ScheduleViewProvider extends ChangeNotifier {
 
   /// WEEK RANGE
   void _setWeekRange(DateTime date, {bool notify = true}) {
-    final start = date.subtract(Duration(days: date.weekday - 1));
-    final end = start.add(const Duration(days: 6));
+    // final start = date.subtract(Duration(days: date.weekday - 1));
+    // final end = start.add(const Duration(days: 6));
 
-    rangeStart = DateTime(start.year, start.month, start.day);
-    rangeEnd = DateTime(end.year, end.month, end.day);
-
+    // rangeStart = DateTime(start.year, start.month, start.day);
+    // rangeEnd = DateTime(end.year, end.month, end.day);
+    rangeStart = DateTime(date.year, date.month, date.day);
+    rangeEnd = rangeStart.add(Duration(days: 7));
     if (notify) notifyListeners();
   }
 
   /// MONTH RANGE
   void _setMonthRange(DateTime date, {bool notify = true}) {
-    final start = DateTime(date.year, date.month, 1);
-    final end = DateTime(date.year, date.month + 1, 0);
+    // final start = DateTime(date.year, date.month, 1);
+    // final end = DateTime(date.year, date.month + 1, 0);
 
-    rangeStart = DateTime(start.year, start.month, start.day);
-    rangeEnd = DateTime(end.year, end.month, end.day);
-
+    // rangeStart = DateTime(start.year, start.month, start.day);
+    // rangeEnd = DateTime(end.year, end.month, end.day);
+    rangeStart = DateTime(date.year, date.month, date.day);
+    rangeEnd = rangeStart.add(Duration(days: 30));
     if (notify) notifyListeners();
   }
 

@@ -117,25 +117,60 @@ class MainActivity: FlutterActivity() {
     }
 
     private fun saveFileUsingMediaStore(fileName: String, bytes: ByteArray): String {
-        val resolver = contentResolver
-        val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-            put(MediaStore.Downloads.MIME_TYPE, getMimeType(fileName))
-            put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-        }
-
-        val uri = resolver.insert(collection, contentValues)
-            ?: throw Exception("Failed to create file in Downloads")
-
-        resolver.openOutputStream(uri)?.use { outputStream ->
-            outputStream.write(bytes)
-        } ?: throw Exception("Failed to open OutputStream")
-
-        return uri.toString()
+    val resolver = contentResolver
+    val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+    } else {
+        MediaStore.Downloads.EXTERNAL_CONTENT_URI
     }
 
+    // Ищем, есть ли уже файл с таким именем в папке Downloads
+    val projection = arrayOf(MediaStore.Downloads._ID)
+    val selection = "${MediaStore.Downloads.DISPLAY_NAME} == ?"
+    val selectionArgs = arrayOf(fileName)
+
+    resolver.query(collection, projection, selection, selectionArgs, null)?.use { cursor ->
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID))
+            val existingUri = android.content.ContentUris.withAppendedId(collection, id)
+            
+            // Удаляем старый файл, чтобы новый создался с тем же именем без суффикса (1)
+            try {
+                resolver.delete(existingUri, null, null)
+            } catch (e: Exception) {}
+        }
+    }
+
+    val contentValues = ContentValues().apply {
+        put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+        put(MediaStore.Downloads.MIME_TYPE, getMimeType(fileName))
+        put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            put(MediaStore.Downloads.IS_PENDING, 1)
+        }
+    }
+
+    val uri = resolver.insert(collection, contentValues)
+        ?: throw Exception("Не удалось создать запись в MediaStore")
+
+    try {
+        resolver.openOutputStream(uri)?.use { outputStream ->
+            outputStream.write(bytes)
+            outputStream.flush()
+        } ?: throw Exception("Не удалось открыть поток для записи")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentValues.clear()
+            contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
+            resolver.update(uri, contentValues, null, null)
+        }
+    } catch (e: Exception) {
+        resolver.delete(uri, null, null)
+        throw e
+    }
+
+    return uri.toString()
+}
     private fun saveFileUsingFileSystem(fileName: String, bytes: ByteArray): String {
         val downloadsDir = Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_DOWNLOADS

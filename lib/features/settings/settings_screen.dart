@@ -430,16 +430,3 @@ extension on ThemeMode {
     }
   }
 }
-// showAboutDialog(
-//       context: context,
-//       applicationName: 'USUE Schedule',
-//       applicationVersion: '1.0.2',
-//       applicationIcon: Image.asset('assets/icon.png', width: 50),
-//       applicationLegalese: '© 2026 Mehrob Munimovich', // Твое авторское право
-//       children: [
-//         const Padding(
-//           padding: EdgeInsets.only(top: 20),
-//           child: Text('Это приложение разработано для улучшения доступа к расписанию студентов и преподавателей.'),
-//         ),
-//       ],
-//     );

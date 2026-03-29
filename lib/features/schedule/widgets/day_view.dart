@@ -175,7 +175,7 @@ class _TimelineLessonCard extends StatelessWidget {
                           );
                         }).toList(),
                       ),
-                      Positioned(
+                     if(displayItems.any((e)=> e.hasMultipleGroups)) Positioned(
                           bottom: 0,
                           right: 0,
                           child: LabelGroup(pairs: pair.schedulePairs.length))
