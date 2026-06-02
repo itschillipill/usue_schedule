@@ -1,0 +1,15 @@
+{
+  "name": "Flutter Project",
+  "image": "://microsoft.com",
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1": {},
+    "ghcr.io/community-playbooks/features/flutter:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.flutter"
+      ]
+    }
+  }
+}
