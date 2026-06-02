@@ -59,7 +59,7 @@ class Pair extends Equatable {
 
   Pair filterByTeacher(String teacherName) {
     final filtered =
-        schedulePairs.where((sp) => sp.teacher.contains(teacherName)).toList();
+        schedulePairs.where((sp) => sp.teacher == teacherName).toList();
 
     return Pair(
       number: number,

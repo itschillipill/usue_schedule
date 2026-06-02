@@ -68,7 +68,7 @@ class ApiService with DebouncedRequestMixin {
   Future<ScheduleResponse?> fetch(Params params) async {
     try {
       return await debouncedRequest<ScheduleResponse?>(
-          delay: Duration(milliseconds: 500),
+          delay: Duration(milliseconds: 200),
           action: () {
             return getSchedule(
               startDate: params.startDate,
@@ -128,8 +128,7 @@ class ApiService with DebouncedRequestMixin {
       late final Response response;
 
       try {
-        response = await _dio.get(_baseUrl,
-            queryParameters: params);
+        response = await _dio.get(_baseUrl, queryParameters: params);
         // throw DioException(
         //     requestOptions: response.requestOptions,
         //     error: SocketException('simulated'));

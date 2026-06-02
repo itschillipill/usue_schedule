@@ -17,7 +17,7 @@ class InitializationExecutor
     bool deferFirstFrame = false,
     List<DeviceOrientation>? orientations,
     void Function(int progress, String message)? onProgress,
-    void Function(Dependencies dependencies)? onSuccess,
+    void Function(Dependencies dependencies, Duration t)? onSuccess,
     void Function(Object error, StackTrace stackTrace)? onError,
   }) =>
       _$currentInitialization ??= Future<Dependencies>(() async {
@@ -41,7 +41,7 @@ class InitializationExecutor
             onProgress: notifyProgress,
           ).timeout(const Duration(minutes: 5));
           notifyProgress(100, 'Done');
-          onSuccess?.call(dependencies);
+          onSuccess?.call(dependencies, stopwatch.elapsed);
           return dependencies;
         } on Object catch (error, stackTrace) {
           onError?.call(error, stackTrace);

@@ -6,38 +6,31 @@ import '../services/cache_service.dart';
 
 class CacheProvider extends ChangeNotifier {
   final CacheManager _cacheManager = CacheManager();
-  bool _isInitialized = false;
-  String? cacheDir;
-  Map<DateTime, Set<ScheduleModel>> _availableCache = {};
+  final String? cacheDir;
 
-  CacheProvider({this.cacheDir}) {
-    _initialize();
+  CacheProvider._({this.cacheDir});
+
+  static Future<CacheProvider?> create({String? cacheDir}) async {
+    if (kIsWeb) return null;
+    final provider = CacheProvider._(cacheDir: cacheDir);
+    if (!await provider._initialize()) return null;
+    return provider;
   }
 
-  Future<void> _initialize() async {
-    await _cacheManager.init(cacheDir: cacheDir);
-    _isInitialized = true;
-    await refreshCacheInfo();
-  }
-
-  bool get isInitialized => _isInitialized;
-  Map<DateTime, Set<ScheduleModel>> get availableCache => _availableCache;
-
-  Future<void> refreshCacheInfo() async {
-    _availableCache = await _cacheManager.getAvailableCache();
-    notifyListeners();
+  Future<bool> _initialize() async {
+    try {
+      await _cacheManager.init(cacheDir: cacheDir);
+    } catch (error, stackTrace) {
+      debugPrint(
+          "Error initializing cache provider : $error, stacktrace: $stackTrace");
+      return false;
+    }
+    return true;
   }
 
   /// Сохраняет расписание для модели (может быть день, неделя или произвольный период)
-  Future<void> saveSchedule(
-      ScheduleModel model, ScheduleResponse response) async {
-    try {
-      await _cacheManager.saveSchedule(model, response);
-    } catch (e, st) {
-      debugPrint("Erorr: $e, stacktrace: $st");
-    }
-    await refreshCacheInfo();
-  }
+  Future<void> saveSchedule(ScheduleModel model, ScheduleResponse response) =>
+      _cacheManager.saveSchedule(model, response);
 
   /// Получает расписание для модели за указанный период
   Future<ScheduleResponse?> getSchedule(
@@ -52,34 +45,25 @@ class CacheProvider extends ChangeNotifier {
     for (final model in models) {
       await _cacheManager.clearModelCache(model);
     }
-    await refreshCacheInfo();
   }
 
-  Future<void> clearAllCache() async {
-    await _cacheManager.clearAllCache();
-    await refreshCacheInfo();
-  }
+  Future<void> clearAllCache() => _cacheManager.clearAllCache();
 
   Future<void> clearOldCache(
       {Duration olderThan = const Duration(days: 30)}) async {
     await _cacheManager.clearOldCache(olderThan: olderThan);
-    await refreshCacheInfo();
   }
 
   // --- Информация о кэше ---
-
-  Future<String> getCacheSizeFormatted() async {
-    final size = await _cacheManager.getCacheSize();
-    if (size < 1024) return '$size B';
-    if (size < 1024 * 1024) return '${(size / 1024).toStringAsFixed(1)} KB';
-    return '${(size / (1024 * 1024)).toStringAsFixed(1)} MB';
-  }
-
   Future<int> getAvailableDaysForModel(ScheduleModel model) async {
     return _cacheManager.getAvailableDaysForModel(model);
   }
 
   Future<Map<DateTime, Set<ScheduleModel>>> getAvailableCache() async {
     return _cacheManager.getAvailableCache();
+  }
+
+  Future<({List<CacheInfo> info, String formattedSize})> getCacheInfo() {
+    return _cacheManager.getCacheInfo();
   }
 }

@@ -10,40 +10,6 @@ import '../../schedule/models/schedule_response.dart';
 class ICalendarConverter {
   static String name = "ICalendarConverter";
 
-  // Основной метод - один календарь для преподавателя
-  static ICalendar convertScheduleToCalendar(
-    ScheduleResponse schedule,
-    String calendarName, {
-    String? queryValue,
-    bool splitByGroup = false, // Флаг для разделения по группам (если нужно)
-  }) {
-    final events = <ICalendarEvent>[];
-
-    for (final day in schedule.schedules) {
-      final dayDate = date_utils.DateTimeUtils.parseDate(day.date);
-      if (dayDate == null) continue;
-
-      for (final pair in day.nonEmptyPairs) {
-        for (final schedulePair in pair.schedulePairs) {
-          final event = _convertPairToEvent(
-            schedulePair,
-            pair,
-            dayDate,
-            queryValue: queryValue,
-          );
-          if (event != null) {
-            events.add(event);
-          }
-        }
-      }
-    }
-
-    return ICalendar(
-      calendarName: calendarName,
-      events: events,
-    );
-  }
-
   static ICalendarEvent? _convertPairToEvent(
     SchedulePair schedulePair,
     Pair pair,

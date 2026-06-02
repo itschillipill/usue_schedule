@@ -94,6 +94,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
+            SizedBox(height: 10),
             if (cacheProvider != null)
               _Section(
                 icon: Icons.storage,
@@ -114,235 +115,23 @@ class SettingsScreen extends StatelessWidget {
                       }),
                 ],
               ),
+            SizedBox(height: 10),
             _Section(
-              icon: Icons.info,
-              title: 'О приложении',
+              icon: Icons.more,
+              title: 'Дополнительная информация',
               children: [
                 CustomListTile(
                   leadingIcon: Icons.info_outline,
-                  title: 'О приложении',
-                  subTitle: 'Версия, лицензия, разработчики',
-                  onTap: () => _showAboutDialog(context),
-                ),
-                CustomListTile(
-                  leadingIcon: Icons.star,
-                  title: 'Оценить приложение',
-                  subTitle: 'Оставьте отзыв в магазине',
-                  onTap: () async =>
-                      await launchUrl(Uri.parse(Constants.appLinkRuStore)),
-                ),
-                CustomListTile(
-                  leadingIcon: Icons.share,
-                  title: 'Поделиться приложением',
-                  subTitle: 'Рекомендовать друзьям',
-                  onTap: _shareApp,
+                  title: 'О приложении и контакты',
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const AboutAppScreen())),
                 ),
               ],
-            ),
-            _Section(
-              icon: Icons.contact_support,
-              title: 'Контакты и поддержка',
-              children: [
-                CustomListTile(
-                  leadingIcon: Icons.email,
-                  title: 'Обратная связь',
-                  subTitle: 'Написать разработчикам',
-                  onTap: () => _sendEmail(context),
-                ),
-                CustomListTile(
-                  leadingIcon: Icons.bug_report,
-                  title: 'Сообщить об ошибке',
-                  subTitle: 'Нашли баг? Сообщите нам через Telegram',
-                  onTap: () async =>
-                      await launchUrlString(Constants.telegramContact),
-                ),
-                CustomListTile(
-                  leadingIcon: Icons.group,
-                  title: 'Другие проекты',
-                  subTitle: 'Посмотреть другие приложения',
-                  onTap: () async =>
-                      await launchUrlString(Constants.developerLinkRuStore),
-                ),
-              ],
-            ),
-            const SizedBox(height: 2),
-            Center(
-              child: Column(
-                spacing: 4,
-                children: [
-                  Text(
-                    Constants.appName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  Text(
-                    'Версия ${Constants.version} • Сборка ${Constants.buildNumber}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> _showAboutDialog(BuildContext context) async {
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          spacing: 10,
-          children: [
-            Icon(Icons.school, color: Colors.blue),
-            Text('О приложении'),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            spacing: 5,
-            children: [
-              const Text(
-                Constants.appName,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
-              ),
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    height: 1.5,
-                  ),
-                  children: const [
-                    TextSpan(
-                      text: 'Версия: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(text: '${Constants.version}\n'),
-                    TextSpan(
-                      text: 'Сборка: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(text: Constants.buildNumber),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border:
-                      Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  spacing: 8,
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.orange.shade700,
-                      size: 20,
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Важное примечание',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.orange.shade800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              RichText(
-                  text: TextSpan(
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      children: const [
-                    TextSpan(
-                      text: 'Это приложение является ',
-                    ),
-                    TextSpan(
-                      text: 'неофициальным клиентом ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    TextSpan(
-                        text:
-                            """для просмотра расписания УрГЭУ (USUE) и было создано в для удобного слежения за расписанием, для студентов и преподователей.
-Статус: Студенческий проект
-Разработчик: ${Constants.author}
-Источник данных: Официальный сайт расписания УрГЭУ"""),
-                  ])),
-              RichText(
-                  text: TextSpan(
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface),
-                      children: const [
-                    TextSpan(
-                      text: '⚖️ Лицензия: ',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(
-                      text: 'BSD 3-Clause',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ])),
-              const _LinkCard(
-                  'Офицальный сайт расписания', Constants.usueScheduleLink),
-              const _LinkCard(
-                  'Исходный код приложения на GitHub', Constants.githubLink),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Закрыть'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _shareApp() async {
-    await SharePlus.instance.share(ShareParams(
-      text: Constants.shareText,
-      subject: 'Удобное расписание УрГЭУ',
-    ));
-  }
-
-  Future<void> _sendEmail(BuildContext context) async {
-    final email = Uri(
-      scheme: 'mailto',
-      path: 'development.flutter.contact@gmail.com',
-      queryParameters: {
-        'subject': 'Обратная связь ${Constants.appName}',
-        'body': 'Здравствуйте!\n\n',
-      },
-    );
-
-    if (await canLaunchUrl(email)) {
-      await launchUrl(email);
-    }
   }
 }
 
@@ -380,38 +169,587 @@ class _Section extends StatelessWidget {
   }
 }
 
-class _LinkCard extends StatelessWidget {
-  final String title;
-  final String url;
-  const _LinkCard(this.title, this.url);
+class AboutAppScreen extends StatelessWidget {
+  const AboutAppScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: () => launchUrl(Uri.parse(url)),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue.withValues(alpha: 0.2))),
-          child: Row(children: [
-            Expanded(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      body: Container(
+        decoration: ScheduleStyles.linearBackgroundDecoration(context),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              centerTitle: true,
+              backgroundColor: Colors.transparent,
+              flexibleSpace: FlexibleSpaceBar(
+                title: const Text(
+                  'О приложении',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                centerTitle: true,
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        theme.colorScheme.primary.withValues(alpha: 0.8),
+                        theme.colorScheme.secondary.withValues(alpha: 0.6),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _buildInfoCard(context),
+                  const SizedBox(height: 24),
+
+                  _ModernSection(
+                    title: 'Источники',
+                    icon: Icons.code_outlined,
                     children: [
-                  Text(title,
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.blue.shade700)),
-                  Text(url,
-                      style: const TextStyle(fontSize: 12, color: Colors.blue),
-                      overflow: TextOverflow.ellipsis),
-                ])),
-            const Icon(Icons.open_in_new, size: 16, color: Colors.blue),
-          ]),
+                      _LinkTile(
+                        title: 'Официальный сайт УрГЭУ',
+                        url: Constants.usueScheduleLink,
+                        icon: Icons.school_outlined,
+                      ),
+                      _LinkTile(
+                        title: 'Исходный код',
+                        url: Constants.githubLink,
+                        icon: Icons.code,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  _ModernSection(
+                    title: 'Обратная связь',
+                    icon: Icons.contact_support_outlined,
+                    children: [
+                      _ContactTile(
+                        icon: Icons.email_outlined,
+                        title: 'Электронная почта',
+                        value: 'development.flutter.contact@gmail.com',
+                        onTap: () => _sendEmail(context),
+                      ),
+                      _ContactTile(
+                        icon: Icons.telegram,
+                        title: 'Telegram',
+                        onTap: () => launchUrlString(Constants.telegramContact),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  _ModernSection(
+                    title: 'Информация',
+                    icon: Icons.info_outline,
+                    children: [
+                      _ActionTile(
+                        icon: Icons.verified_outlined,
+                        title: 'Лицензии',
+                        description: 'Информация о лицензиях ПО',
+                        onTap: () => _showLicenseDialog(context),
+                      ),
+                      _ActionTile(
+                        icon: Icons.share_outlined,
+                        title: 'Поделиться',
+                        description: 'Расскажите друзьям о приложении',
+                        onTap: () => SharePlus.instance.share(ShareParams(
+                          text: Constants.shareText,
+                          subject: 'Удобное расписание УрГЭУ',
+                        )),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Футер с версией
+                  _buildFooter(context),
+                  const SizedBox(height: 20),
+                ]),
+              ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+            theme.colorScheme.secondaryContainer.withValues(alpha: 0.2),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        spacing: 10,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.colorScheme.primary,
+                  theme.colorScheme.secondary,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(
+              Icons.info_outline,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
+                  height: 1.5,
+                ),
+                children: [
+                  const TextSpan(
+                    text: 'Это приложение является ',
+                  ),
+                  TextSpan(
+                    text: 'неофициальным клиентом ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const TextSpan(
+                    text: 'для просмотра расписания УрГЭУ (CИНХ). '
+                        'Создано для удобного слежения за расписанием студентов и преподавателей.',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _sendEmail(BuildContext context) async {
+    final email = Uri(
+      scheme: 'mailto',
+      path: 'development.flutter.contact@gmail.com',
+      queryParameters: {
+        'subject': 'Обратная связь ${Constants.appName}',
+        'body': 'Здравствуйте!\n\n',
+      },
+    );
+
+    if (await canLaunchUrl(email)) {
+      await launchUrl(email);
+    }
+  }
+
+  void _showLicenseDialog(BuildContext context) {
+    showAboutDialog(
+      context: context,
+      applicationName: Constants.appName,
+      applicationVersion: Constants.version,
+      applicationLegalese: '© 2026 ${Constants.author}',
+      applicationIcon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Icon(Icons.school, size: 32, color: Colors.white),
+      ),
+    );
+  }
+}
+
+Widget _buildFooter(BuildContext context) {
+  final theme = Theme.of(context);
+
+  return Column(
+    children: [
+      const SizedBox(height: 20),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              theme.colorScheme.primary.withValues(alpha: 0.05),
+              theme.colorScheme.secondary.withValues(alpha: 0.05),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.school,
+                  color: theme.colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  Constants.appName,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    foreground: Paint()
+                      ..shader = LinearGradient(
+                        colors: [
+                          theme.colorScheme.primary,
+                          theme.colorScheme.secondary,
+                        ],
+                      ).createShader(const Rect.fromLTWH(0, 0, 200, 30)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Версия ${Constants.version} (${Constants.buildNumber})',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+// Современная секция с заголовком
+class _ModernSection extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
+
+  const _ModernSection({
+    required this.title,
+    required this.icon,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 12),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Column(
+              children: children,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Улучшенная плитка действия
+class _ActionTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  const _ActionTile({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        splashColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+        highlightColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.15),
+                      theme.colorScheme.secondary.withValues(alpha: 0.1),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  icon,
+                  color: theme.colorScheme.primary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Улучшенная плитка ссылки
+class _LinkTile extends StatelessWidget {
+  final String title;
+  final String url;
+  final IconData icon;
+
+  const _LinkTile({
+    required this.title,
+    required this.url,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => launchUrl(Uri.parse(url)),
+        splashColor: Colors.blue.withValues(alpha: 0.1),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: Colors.blue, size: 22),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      url,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.blue,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.open_in_new,
+                color: theme.colorScheme.outline,
+                size: 18,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Улучшенная контактная плитка
+class _ContactTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? value;
+  final VoidCallback onTap;
+
+  const _ContactTile({
+    required this.icon,
+    required this.title,
+    this.value,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        splashColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.15),
+                      theme.colorScheme.secondary.withValues(alpha: 0.1),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: theme.colorScheme.primary, size: 22),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (value != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        value!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 extension on ThemeMode {

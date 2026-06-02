@@ -18,9 +18,9 @@ enum ExportFormat {
   const ExportFormat(this.icon, this.label, this.description, this.color);
 
   String get extension => switch (this) {
-    ExportFormat.ics => 'ics',
-    // ExportFormat.excel => 'xlsx',
-    // ExportFormat.pdf => 'pdf',
-    ExportFormat.word => 'docx',
-  };
+        ExportFormat.ics => 'ics',
+        // ExportFormat.excel => 'xlsx',
+        // ExportFormat.pdf => 'pdf',
+        ExportFormat.word => 'docx',
+      };
 }

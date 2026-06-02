@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:usue_schedule/features/settings/controllers/settings_cubit.dart';
 import 'package:usue_schedule/core/logger/session_logger.dart';
@@ -42,7 +41,7 @@ List<(String, _InitializationStep)> get _initializationSteps => [
           deps.scheduleCubit = MyScheduleCubit(prefs: prefs);
           deps.settingsCubit = SettingsCubit(prefs: prefs);
           deps.apiService =
-              ApiService(cacheProvider: kIsWeb ? null : CacheProvider());
+              ApiService(cacheProvider: await CacheProvider.create());
         }
       ),
       //   ("Fake Waiting", (_) => Future.delayed(Duration(seconds: 1)))

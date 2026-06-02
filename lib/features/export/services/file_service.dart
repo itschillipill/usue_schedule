@@ -58,12 +58,12 @@ class FileService {
   }) async {
     final fileName = _generateFileName(dateRange, queryValue);
 
-     final Uint8List bytes = switch (format) {
-       ExportFormat.ics => await _saveAsICS(schedule, fileName, queryValue),
+    final Uint8List bytes = switch (format) {
+      ExportFormat.ics => await _saveAsICS(schedule, fileName, queryValue),
       ExportFormat.word => await _saveAsWord(schedule, fileName),
     };
 
-   SessionLogger.instance.debug(name, "✅ Файл сохранён");
+    SessionLogger.instance.debug(name, "✅ Файл сохранён");
 
     if (shareAfterSave) {
       await _shareFile(fileName, bytes, format);
@@ -83,8 +83,8 @@ class FileService {
 
     // Важно: расширение теперь .docx
     final safeFileName = '$fileName.docx';
-     saveToDownloads(safeFileName, bytes);
-     return bytes;
+    saveToDownloads(safeFileName, bytes);
+    return bytes;
   }
 
   // Сохранение в ICS
@@ -101,8 +101,8 @@ class FileService {
     final bytes = utf8.encode('\ufeff$icsContent');
 
     final safeFileName = '$fileName.ics';
-     saveToDownloads(safeFileName, Uint8List.fromList(bytes));
-     return bytes;
+    saveToDownloads(safeFileName, Uint8List.fromList(bytes));
+    return bytes;
   }
 
   // Сохранение в PDF (заглушка)
@@ -122,25 +122,27 @@ class FileService {
   }
 
   // Шеринг файла
-  static Future<void> _shareFile(String fileName, Uint8List bytes, ExportFormat format) async {
+  static Future<void> _shareFile(
+      String fileName, Uint8List bytes, ExportFormat format) async {
     final mimeType = switch (format) {
       // ExportFormat.pdf => 'application/pdf',
       // ExportFormat.excel =>
       //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       ExportFormat.ics => 'text/calendar',
-      ExportFormat.word => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ExportFormat.word =>
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     };
     await SharePlus.instance.share(
       ShareParams(
-    files: [
-      XFile.fromData(
-        bytes,
-        name: '$fileName.${format.extension}',
-        mimeType: mimeType,
-      )
-    ],
-  ),
-);
+        files: [
+          XFile.fromData(
+            bytes,
+            name: '$fileName.${format.extension}',
+            mimeType: mimeType,
+          )
+        ],
+      ),
+    );
   }
 
   // Очистка имени файла от недопустимых символов

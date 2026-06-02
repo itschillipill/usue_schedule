@@ -20,7 +20,11 @@ void main() => runZonedGuarded(() async {
             splashScreen: SplashScreen(
               progress: initialization,
             ),
-            initialization: initialization(onError: $handleInitError),
+            initialization: initialization(
+              onError: $handleInitError,
+              onSuccess: (_, timePassed) => SessionLogger.instance
+                  .debug("Initialization", "Done in $timePassed"),
+            ),
             child: const App()),
       );
     },

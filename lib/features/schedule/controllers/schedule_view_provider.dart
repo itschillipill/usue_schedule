@@ -111,15 +111,13 @@ class ScheduleViewProvider extends ChangeNotifier {
   void updateParams(ScheduleModel model) => params = model;
 
   /// DAY RANGE
-  void _setDayRange(DateTime date, {bool notify = true}) {
+  void _setDayRange(DateTime date) {
     rangeStart = DateTime(date.year, date.month, date.day);
     rangeEnd = rangeStart;
-
-    if (notify) notifyListeners();
   }
 
   /// WEEK RANGE
-  void _setWeekRange(DateTime date, {bool notify = true}) {
+  void _setWeekRange(DateTime date) {
     // final start = date.subtract(Duration(days: date.weekday - 1));
     // final end = start.add(const Duration(days: 6));
 
@@ -127,11 +125,10 @@ class ScheduleViewProvider extends ChangeNotifier {
     // rangeEnd = DateTime(end.year, end.month, end.day);
     rangeStart = DateTime(date.year, date.month, date.day);
     rangeEnd = rangeStart.add(Duration(days: 7));
-    if (notify) notifyListeners();
   }
 
   /// MONTH RANGE
-  void _setMonthRange(DateTime date, {bool notify = true}) {
+  void _setMonthRange(DateTime date) {
     // final start = DateTime(date.year, date.month, 1);
     // final end = DateTime(date.year, date.month + 1, 0);
 
@@ -139,7 +136,6 @@ class ScheduleViewProvider extends ChangeNotifier {
     // rangeEnd = DateTime(end.year, end.month, end.day);
     rangeStart = DateTime(date.year, date.month, date.day);
     rangeEnd = rangeStart.add(Duration(days: 30));
-    if (notify) notifyListeners();
   }
 
   /// CUSTOM RANGE
@@ -178,7 +174,7 @@ class ScheduleViewProvider extends ChangeNotifier {
         break;
 
       case ScheduleViewType.month:
-        _setMonthRange(DateTime(rangeStart.year, rangeStart.month + 1));
+        _setMonthRange(rangeStart.add(Duration(days: 30)));
         break;
 
       default:
@@ -200,7 +196,7 @@ class ScheduleViewProvider extends ChangeNotifier {
         break;
 
       case ScheduleViewType.month:
-        _setMonthRange(DateTime(rangeStart.year, rangeStart.month - 1));
+        _setMonthRange(rangeStart.subtract(Duration(days: 30)));
         break;
 
       default:

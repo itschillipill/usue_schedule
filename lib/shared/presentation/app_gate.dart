@@ -4,9 +4,14 @@ import '../../features/schedule/presentation/add_schedule_screen.dart';
 import '../../features/schedule/presentation/schedule_screen.dart';
 import '../../features/settings/settings_screen.dart';
 
-class AppGate extends StatelessWidget {
-  AppGate({super.key});
+class AppGate extends StatefulWidget {
+  const AppGate({super.key});
 
+  @override
+  State<AppGate> createState() => _AppGateState();
+}
+
+class _AppGateState extends State<AppGate> {
   final ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
 
   final List<Widget> screens = const [
