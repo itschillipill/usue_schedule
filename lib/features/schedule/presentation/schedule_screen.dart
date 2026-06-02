@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
 import 'package:usue_schedule/features/guide/presentation/guide_screen.dart';
 
 import '../../../core/theme/schedule_styles.dart';
@@ -22,6 +23,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheduleCubit = DependenciesScope.of(context).scheduleCubit;
     return PopScope(
       canPop: !isTextFieldVisible,
       // ignore: deprecated_member_use
@@ -32,9 +34,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         });
       },
       child: BlocBuilder<MyScheduleCubit, MyScheduleState>(
+        bloc: scheduleCubit,
         builder: (context, state) {
           final mySchedules = state.schedules..sort();
-          final scheduleCubit = context.read<MyScheduleCubit>();
           final filtredSchedule = mySchedules.where((schedule) =>
               schedule.queryValue.toLowerCase().contains(query.toLowerCase()));
           return Scaffold(
