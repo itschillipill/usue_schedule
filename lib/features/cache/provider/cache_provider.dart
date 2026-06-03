@@ -59,10 +59,6 @@ class CacheProvider extends ChangeNotifier {
     return _cacheManager.getAvailableDaysForModel(model);
   }
 
-  Future<Map<DateTime, Set<ScheduleModel>>> getAvailableCache() async {
-    return _cacheManager.getAvailableCache();
-  }
-
   Future<({List<CacheInfo> info, String formattedSize})> getCacheInfo() {
     return _cacheManager.getCacheInfo();
   }

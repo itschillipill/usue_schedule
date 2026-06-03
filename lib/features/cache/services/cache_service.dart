@@ -29,7 +29,7 @@ abstract base class CacheServiceBase {
   // --- Информация о кэше ---
 
   /// Возвращает информацию о том, что есть в кэше
-  Future<Map<DateTime, Set<ScheduleModel>>> getAvailableCache();
+  Future<({List<CacheInfo> info, String formattedSize})> getCacheInfo();
 
   /// Размер кэша в байтах
   Future<int> getCacheSize();
@@ -182,33 +182,32 @@ final class CacheManager implements CacheServiceBase {
     }
   }
 
-  @override
-  Future<Map<DateTime, Set<ScheduleModel>>> getAvailableCache() async {
-    final result = <DateTime, Set<ScheduleModel>>{};
-    final dir = Directory(_cacheDir);
+  // Future<Map<DateTime, Set<ScheduleModel>>> getAvailableCache() async {
+  //   final result = <DateTime, Set<ScheduleModel>>{};
+  //   final dir = Directory(_cacheDir);
 
-    if (!await dir.exists()) return result;
+  //   if (!await dir.exists()) return result;
 
-    await for (var fileEntity in dir.list()) {
-      if (fileEntity case File file when file.path.endsWith('.json')) {
-        try {
-          final content = await file.readAsString();
-          final data = jsonDecode(content);
+  //   await for (var fileEntity in dir.list()) {
+  //     if (fileEntity case File file when file.path.endsWith('.json')) {
+  //       try {
+  //         final content = await file.readAsString();
+  //         final data = jsonDecode(content);
 
-          if (data['last_updated'] != null && data['model'] != null) {
-            final lastUpdated = DateTime.parse(data['last_updated']);
-            final model = ScheduleModel.fromJson(data['model']);
+  //         if (data['last_updated'] != null && data['model'] != null) {
+  //           final lastUpdated = DateTime.parse(data['last_updated']);
+  //           final model = ScheduleModel.fromJson(data['model']);
 
-            result.putIfAbsent(lastUpdated, () => {}).add(model);
-          }
-        } catch (e) {
-          // Игнорируем битые файлы
-        }
-      }
-    }
+  //           result.putIfAbsent(lastUpdated, () => {}).add(model);
+  //         }
+  //       } catch (e) {
+  //         // Игнорируем битые файлы
+  //       }
+  //     }
+  //   }
 
-    return result;
-  }
+  //   return result;
+  // }
 
   // Вспомогательный метод для получения всех сохраненных дней модели
   Future<int> getAvailableDaysForModel(ScheduleModel model) async {
@@ -225,6 +224,7 @@ final class CacheManager implements CacheServiceBase {
     }
   }
 
+  @override
   Future<({List<CacheInfo> info, String formattedSize})> getCacheInfo() async {
     final dir = Directory(_cacheDir);
     int totalSize = 0;
