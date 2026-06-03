@@ -79,7 +79,6 @@ final class CacheManager implements CacheServiceBase {
     // Создаем пустую структуру данных для сохранения
     Map<String, dynamic> emptyData = {
       'model': model.toJson(),
-      'last_updated': "", // Здесь будет храниться время последнего обновления
       'days_count': 0, // Здесь будет храниться количество дней в кэше
       'days': {}, // Здесь будут храниться дни по ключам
     };
@@ -104,7 +103,6 @@ final class CacheManager implements CacheServiceBase {
     }
 
     // Обновляем метаданные
-    cacheData['last_updated'] = DateTime.now().toIso8601String();
     cacheData['days_count'] = (cacheData['days'] as Map).length;
 
     // Сохраняем файл
@@ -182,33 +180,6 @@ final class CacheManager implements CacheServiceBase {
     }
   }
 
-  // Future<Map<DateTime, Set<ScheduleModel>>> getAvailableCache() async {
-  //   final result = <DateTime, Set<ScheduleModel>>{};
-  //   final dir = Directory(_cacheDir);
-
-  //   if (!await dir.exists()) return result;
-
-  //   await for (var fileEntity in dir.list()) {
-  //     if (fileEntity case File file when file.path.endsWith('.json')) {
-  //       try {
-  //         final content = await file.readAsString();
-  //         final data = jsonDecode(content);
-
-  //         if (data['last_updated'] != null && data['model'] != null) {
-  //           final lastUpdated = DateTime.parse(data['last_updated']);
-  //           final model = ScheduleModel.fromJson(data['model']);
-
-  //           result.putIfAbsent(lastUpdated, () => {}).add(model);
-  //         }
-  //       } catch (e) {
-  //         // Игнорируем битые файлы
-  //       }
-  //     }
-  //   }
-
-  //   return result;
-  // }
-
   // Вспомогательный метод для получения всех сохраненных дней модели
   Future<int> getAvailableDaysForModel(ScheduleModel model) async {
     try {
@@ -240,15 +211,12 @@ final class CacheManager implements CacheServiceBase {
     final results = await Future.wait<CacheInfo?>(files.map((file) async {
       try {
         final data = jsonDecode(await file.readAsString());
-        if (data['last_updated'] == null ||
-            data['model'] == null ||
-            data['days_count'] == null) {
+        if (data['model'] == null || data['days_count'] == null) {
           return null;
         }
-        totalSize += file.statSync().size;
+        totalSize += (await file.stat()).size;
         return (
           model: ScheduleModel.fromJson(data['model']),
-          lastUpdated: DateTime.parse(data['last_updated']),
           daysCount: int.parse(data['days_count'].toString())
         );
       } catch (e) {
@@ -258,7 +226,7 @@ final class CacheManager implements CacheServiceBase {
 
     return (
       info: results.whereType<CacheInfo>().toList()
-        ..sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated)),
+        ..sort((a, b) => b.model.compareTo(a.model)),
       formattedSize: _formatSize(totalSize)
     );
   }
@@ -327,6 +295,5 @@ final class CacheManager implements CacheServiceBase {
 
 typedef CacheInfo = ({
   ScheduleModel model,
-  DateTime lastUpdated,
   int daysCount,
 });

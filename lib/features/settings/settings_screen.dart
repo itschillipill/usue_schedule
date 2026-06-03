@@ -17,7 +17,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsCubit settingsCubit = DependenciesScope.of(context).settingsCubit;
+    final SettingsCubit settingsCubit =
+        DependenciesScope.of(context).settingsCubit;
     final theme = Theme.of(context);
     final cacheProvider =
         DependenciesScope.of(context).apiService.cacheProvider;
@@ -33,72 +34,71 @@ class SettingsScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 4),
           children: [
             BlocBuilder<SettingsCubit, SettingsState>(
-              bloc: settingsCubit,
-              builder: (context, state) {
-                return _Section(
-                  icon: Icons.palette,
-                  title: 'Костомизация',
-                  children: [
-                    CustomListTile(
-                      title: 'Тема приложения',
-                      trailing: DropdownButton<ThemeMode>(
-                        underline: const SizedBox.shrink(),
-                        focusColor: Colors.transparent,
-                        isDense: true,
-                        icon: Icon(
-                          Icons.arrow_drop_down,
-                          color: theme.colorScheme.onSurface,
+                bloc: settingsCubit,
+                builder: (context, state) {
+                  return _Section(
+                    icon: Icons.palette,
+                    title: 'Костомизация',
+                    children: [
+                      CustomListTile(
+                        title: 'Тема приложения',
+                        trailing: DropdownButton<ThemeMode>(
+                          underline: const SizedBox.shrink(),
+                          focusColor: Colors.transparent,
+                          isDense: true,
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          dropdownColor: theme.colorScheme.surface,
+                          value: state.themeMode,
+                          onChanged: settingsCubit.setThemeMode,
+                          items: ThemeMode.values
+                              .map((e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Row(
+                                      spacing: 8,
+                                      children: [
+                                        Icon(
+                                          e.params.icon,
+                                          size: 18,
+                                          color: e.params.color,
+                                        ),
+                                        Text(e.params.text),
+                                      ],
+                                    ),
+                                  ))
+                              .toList(),
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                        dropdownColor: theme.colorScheme.surface,
-                        value: state.themeMode,
-                        onChanged: settingsCubit.setThemeMode,
-                        items: ThemeMode.values
-                            .map((e) => DropdownMenuItem(
-                                  value: e,
-                                  child: Row(
-                                    spacing: 8,
-                                    children: [
-                                      Icon(
-                                        e.params.icon,
-                                        size: 18,
-                                        color: e.params.color,
-                                      ),
-                                      Text(e.params.text),
-                                    ],
-                                  ),
-                                ))
-                            .toList(),
                       ),
-                    ),
-                    CustomListTile(
-                      title: 'Вид расписания',
-                      subTitle: "Тип отображения расписания по умолчанию",
-                      trailing: DropdownButton<ScheduleViewType>(
-                        underline: const SizedBox.shrink(),
-                        focusColor: Colors.transparent,
-                        isDense: true,
-                        icon: Icon(
-                          Icons.arrow_drop_down,
-                          color: theme.colorScheme.onSurface,
+                      CustomListTile(
+                        title: 'Вид расписания',
+                        subTitle: "Тип отображения расписания по умолчанию",
+                        trailing: DropdownButton<ScheduleViewType>(
+                          underline: const SizedBox.shrink(),
+                          focusColor: Colors.transparent,
+                          isDense: true,
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          dropdownColor: theme.colorScheme.surface,
+                          value: state.viewType,
+                          onChanged: settingsCubit.setViewType,
+                          items: ScheduleViewType.values
+                              .where((v) => v != ScheduleViewType.custom)
+                              .map((viewType) => DropdownMenuItem(
+                                    value: viewType,
+                                    child: Text(viewType.text),
+                                  ))
+                              .toList(),
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                        dropdownColor: theme.colorScheme.surface,
-                        value: state.viewType,
-                        onChanged: settingsCubit.setViewType,
-                        items: ScheduleViewType.values
-                            .where((v) => v != ScheduleViewType.custom)
-                            .map((viewType) => DropdownMenuItem(
-                                  value: viewType,
-                                  child: Text(viewType.text),
-                                ))
-                            .toList(),
                       ),
-                    ),
-                  ],
-                );
-              }
-            ),
+                    ],
+                  );
+                }),
             SizedBox(height: 10),
             if (cacheProvider != null)
               _Section(

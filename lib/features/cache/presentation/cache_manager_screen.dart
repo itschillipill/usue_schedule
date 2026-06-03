@@ -25,7 +25,6 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
       ({
         ScheduleModel model,
         int daysCount,
-        DateTime lastUpdated,
       })> _cacheInfo = [];
   String _cacheSize = '0 B';
   bool _isLoading = true;
@@ -61,7 +60,6 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     try {
       await widget.onDelete(models);
       await widget.cacheProvider.clearModelsCache(models);
-      await _loadCacheInfo();
 
       if (mounted) {
         MessageService.showSnackBar(
@@ -71,11 +69,12 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
       MessageService.showErrorSnack('Ошибка удаления',
           error: error, stackTrace: stackTrace);
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      await _loadCacheInfo();
     }
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime? date) {
+    if (date == null) return "null";
     final now = DateTime.now();
     final difference = now.difference(date);
 
@@ -100,7 +99,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     return five;
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -187,8 +186,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     );
   }
 
-  Widget _buildCacheItem(
-      ({ScheduleModel model, int daysCount, DateTime lastUpdated}) info) {
+  Widget _buildCacheItem(({ScheduleModel model, int daysCount}) info) {
     final isSelected = _selectedModels.contains(info.model.cacheKey);
     final color = info.model.requestType.color;
 
@@ -261,7 +259,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
                         ),
                         _buildInfoChip(
                           icon: Icons.access_time,
-                          text: _formatDate(info.lastUpdated),
+                          text: _formatDate(info.model.lastUpdated),
                           color: Colors.grey.shade700,
                         ),
                       ],
