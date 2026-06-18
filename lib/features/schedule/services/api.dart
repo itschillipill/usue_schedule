@@ -68,15 +68,14 @@ class ApiService with DebouncedRequestMixin {
   Future<ScheduleResponse?> fetch(Params params) async {
     try {
       return await debouncedRequest<ScheduleResponse?>(
-          delay: Duration(milliseconds: 500),
-          action: (token) {
+          delay: Duration(milliseconds: 200),
+          action: () {
             return getSchedule(
               startDate: params.startDate,
               endDate: params.endDate,
               scheduleModel: params.scheduleModel,
               force: params.forceUpdate,
               onUpdateModel: params.onUpdateModel,
-              cancelToken: token,
             );
           });
     } catch (e, st) {
@@ -95,7 +94,6 @@ class ApiService with DebouncedRequestMixin {
     required ScheduleModel scheduleModel,
     required Function(ScheduleModel model) onUpdateModel,
     bool force = false,
-    CancelToken? cancelToken,
     ApiException? withException,
   }) async {
     SessionLogger.instance.debug(name, "Получение расписания", extra: {
@@ -104,20 +102,19 @@ class ApiService with DebouncedRequestMixin {
     });
 
     try {
-      // Проверка кэша
-      final cached = force
-          ? null
-          : (await cacheProvider?.getSchedule(
-                  scheduleModel, startDate, endDate))
-              ?.copyWith(exception: withException);
-
-      if (cached != null) return cached;
-
       // Подготовка параметров
       final end = endDate
           .add(Duration(days: cacheProvider == null ? 0 : _prefetchDays));
       final start =
           startDate.subtract(Duration(days: cacheProvider == null ? 0 : 7));
+
+      // Проверка кэша
+      final cached = force
+          ? null
+          : (await cacheProvider?.getSchedule(scheduleModel, start, end))
+              ?.copyWith(exception: withException);
+
+      if (cached != null) return cached;
 
       final params = {
         't': _generateT(),
@@ -130,8 +127,7 @@ class ApiService with DebouncedRequestMixin {
       late final Response response;
 
       try {
-        response = await _dio.get(_baseUrl,
-            queryParameters: params, cancelToken: cancelToken);
+        response = await _dio.get(_baseUrl, queryParameters: params);
         // throw DioException(
         //     requestOptions: response.requestOptions,
         //     error: SocketException('simulated'));
@@ -162,7 +158,6 @@ class ApiService with DebouncedRequestMixin {
             force: false,
             onUpdateModel: onUpdateModel,
             withException: apiException,
-            cancelToken: cancelToken,
           );
         }
 
@@ -199,9 +194,7 @@ class ApiService with DebouncedRequestMixin {
         onUpdateModel(scheduleModel.update());
       }
 
-      // возвращаем расписание только на заданный период,
-      // без учета дополнительных дней которых мы запросили для кеширования
-      return parsed.cut(startDate, endDate);
+      return parsed;
     } on ApiException {
       rethrow;
     } catch (e, st) {

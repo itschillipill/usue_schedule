@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:usue_schedule/features/schedule/presentation/pair_view_screen.dart';
 import 'package:usue_schedule/features/schedule/widgets/label_group.dart';
 import '../models/pair.dart';
 import '../models/schedule_pair.dart';
@@ -24,11 +25,10 @@ class DayView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedDateStr = DateFormat('dd.MM.yyyy').format(selectedDate);
     final daySchedule = data.schedules.firstWhere(
-      (day) => day.date == selectedDateStr,
+      (day) => day.date == selectedDate,
       orElse: () => DaySchedule(
-        date: selectedDateStr,
+        date: selectedDate,
         weekDay: DateFormat('EEEE').format(selectedDate),
         pairs: const [],
       ),
@@ -85,106 +85,111 @@ class _TimelineLessonCard extends StatelessWidget {
     }
     final displayItems = groupedPairs.values.toList();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(20),
-        border: isCurrent
-            ? Border(
-                bottom: BorderSide(
-                  color: theme.colorScheme.primary,
-                  width: 1.5,
+    return GestureDetector(
+      onTap: () => Navigator.push(context, PairViewScreen.route(pair: pair)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          borderRadius: BorderRadius.circular(20),
+          border: isCurrent
+              ? Border(
+                  bottom: BorderSide(
+                    color: theme.colorScheme.primary,
+                    width: 1.5,
+                  ),
+                  top: BorderSide(
+                    color: theme.colorScheme.primary,
+                    width: 1.5,
+                  ),
+                  left: BorderSide(
+                    color: theme.colorScheme.primary,
+                    width: 6,
+                  ),
+                  right: BorderSide(
+                    color: theme.colorScheme.primary,
+                    width: 1.5,
+                  ),
+                )
+              : Border.all(
+                  color: theme.dividerColor.withValues(alpha: 0.1),
+                  width: 1,
                 ),
-                top: BorderSide(
-                  color: theme.colorScheme.primary,
-                  width: 1.5,
-                ),
-                left: BorderSide(
-                  color: theme.colorScheme.primary,
-                  width: 6,
-                ),
-                right: BorderSide(
-                  color: theme.colorScheme.primary,
-                  width: 1.5,
-                ),
-              )
-            : Border.all(
-                color: theme.dividerColor.withValues(alpha: 0.1),
-                width: 1,
-              ),
-      ),
-      padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: isCurrent
-                                ? theme.colorScheme.primary
-                                : theme.hintColor.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            '${pair.number} пара',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+        ),
+        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isCurrent
+                                  ? theme.colorScheme.primary
+                                  : theme.hintColor.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '${pair.number} пара',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          pair.pairTime,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                          const SizedBox(width: 12),
+                          Text(
+                            pair.pairTime,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
                           ),
+                          const Spacer(),
+                          if (isCurrent) _buildLiveIndicator(theme),
+                        ],
+                      ),
+                    ),
+                    Stack(
+                      children: [
+                        Column(
+                          children: displayItems.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final group = entry.value;
+
+                            final hasTitle = index == 0 ||
+                                group.first.subject !=
+                                    displayItems[index - 1].first.subject;
+                            return ScheduleItem(
+                              pairs: group,
+                              groupColors: groupColors,
+                              hasTitle: hasTitle,
+                              isLast: index == displayItems.length - 1,
+                            );
+                          }).toList(),
                         ),
-                        const Spacer(),
-                        if (isCurrent) _buildLiveIndicator(theme),
+                        if (displayItems.any((e) => e.hasMultipleGroups))
+                          Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child:
+                                  LabelGroup(pairs: pair.schedulePairs.length))
                       ],
                     ),
-                  ),
-                  Stack(
-                    children: [
-                      Column(
-                        children: displayItems.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final group = entry.value;
-
-                          final hasTitle = index == 0 ||
-                              group.first.subject !=
-                                  displayItems[index - 1].first.subject;
-                          return ScheduleItem(
-                            pairs: group,
-                            groupColors: groupColors,
-                            hasTitle: hasTitle,
-                            isLast: index == displayItems.length - 1,
-                          );
-                        }).toList(),
-                      ),
-                      Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: LabelGroup(pairs: pair.schedulePairs.length))
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

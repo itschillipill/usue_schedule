@@ -46,11 +46,10 @@ class ScheduleSearchService with DebouncedRequestMixin {
     try {
       final list = await debouncedRequest<List<ScheduleModel>?>(
         delay: const Duration(milliseconds: 500),
-        action: (token) => _load(
+        action: () => _load(
           action: '${model.requestType.query}-list',
           query: model.queryValue,
           type: model.requestType,
-          cancelToken: token,
         ),
       );
 
@@ -72,12 +71,10 @@ class ScheduleSearchService with DebouncedRequestMixin {
     required String action,
     required String query,
     required RequestType type,
-    CancelToken? cancelToken,
   }) async {
     final response = await _dio.get(
       '/schedule/',
       queryParameters: {'action': action, 'term': query},
-      cancelToken: cancelToken,
     );
 
     final List data = response.data;

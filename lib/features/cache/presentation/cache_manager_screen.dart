@@ -12,6 +12,7 @@ class CacheManagerScreen extends StatefulWidget {
 
   final CacheProvider cacheProvider;
   final Future<void> Function(List<ScheduleModel> model) onDelete;
+
   const CacheManagerScreen(
       {super.key, required this.cacheProvider, required this.onDelete});
 
@@ -20,12 +21,14 @@ class CacheManagerScreen extends StatefulWidget {
 }
 
 class _CacheManagerScreenState extends State<CacheManagerScreen> {
-  List<ScheduleModel> _cachedModels = [];
-  Map<String, int> _daysCount = {};
-  Map<String, DateTime> _lastUpdated = {};
+  List<
+      ({
+        ScheduleModel model,
+        int daysCount,
+      })> _cacheInfo = [];
   String _cacheSize = '0 B';
   bool _isLoading = true;
-  Set<String> _selectedModels = {}; // для множественного выбора
+  Set<String> _selectedModels = {};
 
   @override
   void initState() {
@@ -37,40 +40,10 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final available = await widget.cacheProvider.getAvailableCache();
-      final models = <ScheduleModel>[];
-      final daysCount = <String, int>{};
-      final lastUpdated = <String, DateTime>{};
+      final cacheInfo = await widget.cacheProvider.getCacheInfo();
 
-      for (var entry in available.entries) {
-        for (var model in entry.value) {
-          if (!models.contains(model)) {
-            models.add(model);
-            // Получаем количество дней для модели
-            final days =
-                await widget.cacheProvider.getAvailableDaysForModel(model);
-            daysCount[model.cacheKey] = days;
-            lastUpdated[model.cacheKey] = entry.key;
-          }
-        }
-      }
-
-      // Сортируем по дате последнего обновления (новые сверху)
-      models.sort((a, b) {
-        final aTime =
-            lastUpdated[a.cacheKey] ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final bTime =
-            lastUpdated[b.cacheKey] ?? DateTime.fromMillisecondsSinceEpoch(0);
-        return bTime.compareTo(aTime);
-      });
-
-      _cacheSize = await widget.cacheProvider.getCacheSizeFormatted();
-      setState(() {
-        _cachedModels = models;
-        _daysCount = daysCount;
-        _lastUpdated = lastUpdated;
-        _isLoading = false;
-      });
+      _cacheInfo = cacheInfo.info;
+      _cacheSize = cacheInfo.formattedSize;
     } catch (error, stackTrace) {
       MessageService.showErrorSnack('Ошибка загрузки кэша',
           error: error, stackTrace: stackTrace);
@@ -79,30 +52,51 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     }
   }
 
-  Future<void> _deleteModel(List<ScheduleModel> models) async {
-    _selectedModels.clear();
-    await widget.onDelete(models);
-    await widget.cacheProvider.clearModelsCache(models);
+  Future<void> _deleteModels(List<ScheduleModel> models) async {
+    if (models.isEmpty) return;
 
-    await _loadCacheInfo().then((_) {
-      MessageService.showSnackBar('Удалено ${models.length} кэшей');
-    });
+    setState(() => _isLoading = true);
+
+    try {
+      await widget.onDelete(models);
+      await widget.cacheProvider.clearModelsCache(models);
+
+      if (mounted) {
+        MessageService.showSnackBar(
+            'Удалено ${models.length} кэш${models.length > 1 ? 'ей' : 'а'}');
+      }
+    } catch (error, stackTrace) {
+      MessageService.showErrorSnack('Ошибка удаления',
+          error: error, stackTrace: stackTrace);
+    } finally {
+      await _loadCacheInfo();
+    }
   }
 
   String _formatDate(DateTime? date) {
-    if (date == null) return 'никогда';
+    if (date == null) return "null";
     final now = DateTime.now();
     final difference = now.difference(date);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays} дн. назад';
+      return '${difference.inDays} ${_declension(difference.inDays, "день", "дня", "дней")} назад';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} ч. назад';
+      return '${difference.inHours} ${_declension(difference.inHours, "час", "часа", "часов")} назад';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} мин. назад';
+      return '${difference.inMinutes} ${_declension(difference.inMinutes, "минуту", "минуты", "минут")} назад';
     } else {
       return 'только что';
     }
+  }
+
+  String _declension(int number, String one, String two, String five) {
+    if (number % 10 == 1 && number % 100 != 11) return one;
+    if (number % 10 >= 2 &&
+        number % 10 <= 4 &&
+        (number % 100 < 10 || number % 100 >= 20)) {
+      return two;
+    }
+    return five;
   }
 
   @override
@@ -114,31 +108,11 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
           if (_selectedModels.isNotEmpty) ...[
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              onPressed: () => MessageService.confirmAction(
-                title: 'Удалить выбранное',
-                message: 'Удалить кэш для ${_selectedModels.length} элементов?',
-                onOk: () async {
-                  final models = _cachedModels
-                      .where(
-                        (m) => _selectedModels.contains(m.cacheKey),
-                      )
-                      .toList();
-                  await _deleteModel(models);
-                },
-              ),
+              onPressed: () => _confirmDeleteSelected(),
             ),
             IconButton(
               icon: const Icon(Icons.select_all),
-              onPressed: () {
-                setState(() {
-                  if (_selectedModels.length == _cachedModels.length) {
-                    _selectedModels.clear();
-                  } else {
-                    _selectedModels =
-                        _cachedModels.map((m) => m.cacheKey).toSet();
-                  }
-                });
-              },
+              onPressed: _toggleSelectAll,
             ),
           ],
           IconButton(
@@ -147,11 +121,180 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _cachedModels.isEmpty
-              ? _buildEmptyState()
-              : _buildCacheList(),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_cacheInfo.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return Column(
+      children: [
+        _buildStatsBar(),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: _cacheInfo.length,
+            itemBuilder: (context, index) => _buildCacheItem(_cacheInfo[index]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsBar() {
+    final totalDays = _cacheInfo.fold(0, (sum, info) => sum + info.daysCount);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem(
+            icon: Icons.storage,
+            value: _cacheInfo.length.toString(),
+            label: 'Расписаний',
+            color: Colors.blue,
+          ),
+          _buildStatItem(
+            icon: Icons.calendar_month,
+            value: totalDays.toString(),
+            label: 'Дней',
+            color: Colors.green,
+          ),
+          _buildStatItem(
+            icon: Icons.data_usage,
+            value: _cacheSize,
+            label: 'Объем',
+            color: Colors.orange,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCacheItem(({ScheduleModel model, int daysCount}) info) {
+    final isSelected = _selectedModels.contains(info.model.cacheKey);
+    final color = info.model.requestType.color;
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: isSelected ? BorderSide(color: color, width: 2) : BorderSide.none,
+      ),
+      child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                  child: Column(
+                      spacing: 10,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            info.model.requestType.icon,
+                            color: color,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                info.model.queryValue,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                info.model.requestType.text,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildInfoChip(
+                          icon: Icons.calendar_today,
+                          text:
+                              '${info.daysCount} ${_declension(info.daysCount, "день", "дня", "дней")}',
+                          color: Colors.grey.shade700,
+                        ),
+                        _buildInfoChip(
+                          icon: Icons.access_time,
+                          text: _formatDate(info.model.lastUpdated),
+                          color: Colors.grey.shade700,
+                        ),
+                      ],
+                    ),
+                  ])),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 10,
+                children: [
+                  Checkbox(
+                    value: isSelected,
+                    fillColor:
+                        isSelected ? WidgetStateProperty.all(color) : null,
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedModels.add(info.model.cacheKey);
+                        } else {
+                          _selectedModels.remove(info.model.cacheKey);
+                        }
+                      });
+                    },
+                  ),
+                  if (_selectedModels.isEmpty)
+                    IconButton(
+                      onPressed: () => _deleteModels([info.model]),
+                      icon: const Icon(Icons.delete_outline),
+                      style: IconButton.styleFrom(
+                        foregroundColor: Colors.red.shade700,
+                      ),
+                    ),
+                ],
+              )
+            ],
+          )),
     );
   }
 
@@ -194,187 +337,6 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildCacheList() {
-    return Column(
-      children: [
-        // Статистика
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem(
-                icon: Icons.storage,
-                value: _cachedModels.length.toString(),
-                label: 'Расписаний',
-                color: Colors.blue,
-              ),
-              _buildStatItem(
-                icon: Icons.calendar_month,
-                value: _daysCount.values.fold(0, (a, b) => a + b).toString(),
-                label: 'Дней',
-                color: Colors.green,
-              ),
-              _buildStatItem(
-                icon: Icons.data_usage,
-                value: _cacheSize,
-                label: 'Объем',
-                color: Colors.orange,
-              ),
-            ],
-          ),
-        ),
-
-        // Список кэшированных моделей
-        Expanded(
-          child: ListView.builder(
-            itemCount: _cachedModels.length,
-            itemBuilder: (context, index) {
-              final model = _cachedModels[index];
-              final isSelected = _selectedModels.contains(model.cacheKey);
-
-              return Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: isSelected
-                      ? BorderSide(color: model.requestType.color, width: 2)
-                      : BorderSide.none,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Заголовок с иконкой и типом
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: model.requestType.color
-                                  .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              model.requestType.icon,
-                              color: model.requestType.color,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  model.queryValue,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  model.requestType.text,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Checkbox(
-                            value: isSelected,
-                            fillColor: isSelected
-                                ? WidgetStateProperty.all(
-                                    model.requestType.color)
-                                : null,
-                            onChanged: (value) {
-                              setState(() {
-                                if (value == true) {
-                                  _selectedModels.add(model.cacheKey);
-                                } else {
-                                  _selectedModels.remove(model.cacheKey);
-                                }
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // Информация о кэше
-                      Row(
-                        children: [
-                          _buildInfoChip(
-                            icon: Icons.calendar_today,
-                            text: '${_daysCount[model.cacheKey] ?? 0} дней',
-                            color: Colors.grey.shade700,
-                          ),
-                          const SizedBox(width: 8),
-                          _buildInfoChip(
-                            icon: Icons.access_time,
-                            text: _formatDate(_lastUpdated[model.cacheKey]),
-                            color: Colors.grey.shade700,
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 5),
-
-                      // Кнопки действий
-                      AnimatedSize(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        child: _selectedModels.isEmpty
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                spacing: 8,
-                                children: [
-                                  // TextButton.icon(
-                                  //   onPressed: () => _deleteOldForModel(model),
-                                  //   icon: const Icon(Icons.delete_sweep, size: 18),
-                                  //   label: const Text('Удалить старые'),
-                                  //   style: TextButton.styleFrom(
-                                  //     foregroundColor: Colors.orange.shade700,
-                                  //   ),
-                                  // ),
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      onPressed: () => _deleteModel([model]),
-                                      icon: const Icon(Icons.delete_outline),
-                                      label: const Text('Удалить'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red.shade50,
-                                        foregroundColor: Colors.red.shade700,
-                                        elevation: 0,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 
@@ -439,5 +401,31 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
         ],
       ),
     );
+  }
+
+  void _confirmDeleteSelected() {
+    final count = _selectedModels.length;
+    MessageService.confirmAction(
+      title: 'Удалить выбранное',
+      message: 'Удалить кэш для $count элементов?',
+      onOk: () async {
+        final models = _cacheInfo
+            .where((info) => _selectedModels.contains(info.model.cacheKey))
+            .map((info) => info.model)
+            .toList();
+        await _deleteModels(models);
+        _selectedModels.clear();
+      },
+    );
+  }
+
+  void _toggleSelectAll() {
+    setState(() {
+      if (_selectedModels.length == _cacheInfo.length) {
+        _selectedModels.clear();
+      } else {
+        _selectedModels = _cacheInfo.map((info) => info.model.cacheKey).toSet();
+      }
+    });
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:intl/intl.dart';
 
 import 'log_config.dart';
 
@@ -34,15 +35,17 @@ class LogEntry {
 
   @override
   String toString() {
-    final time = timestamp.toIso8601String();
     final levelStr = level.name.toUpperCase();
-    final extraStr = extra != null && extra!.isNotEmpty
-        ? '\n${extra!.entries.map((e) => '${e.key} : ${e.value}').join(',\n')}'
-        : '';
+    final time = DateFormat('HH:mm:ss').format(timestamp);
+    String extraStr = '';
+    if (extra != null && extra!.isNotEmpty) {
+      extraStr =
+          ' | extra: ${extra!.entries.map((e) => '${e.key}=${e.value}').join(', ')}';
+    }
 
     if (error != null) {
-      final stack = stackTrace?.toString() ?? '';
-      return '[$time][$levelStr] |$category| $message$extraStr -> $error\n$stack';
+      final stack = stackTrace != null ? " |${stackTrace.toString()}" : '';
+      return '[$time][$levelStr] |$category| $message$extraStr | ERROR: $error$stack';
     }
     return '[$time][$levelStr] |$category| $message$extraStr';
   }

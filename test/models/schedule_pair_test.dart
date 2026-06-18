@@ -66,7 +66,7 @@ void main() {
     });
 
     test("returns null if no subgroup", () {
-      const pair = SchedulePair(
+      final pair = SchedulePair(
         subject: '',
         teacher: '',
         group: 'ИВТ-23-1',
@@ -87,7 +87,7 @@ void main() {
     });
 
     test("returns default when unknown", () {
-      const pair = SchedulePair(
+      final pair = SchedulePair(
         subject: 'Что-то странное',
         teacher: '',
         group: '',
@@ -104,14 +104,14 @@ void main() {
 
   group("SchedulePair - isSubgroup", () {
     test("true when subgroup exists", () {
-      expect(schedulePair.isSubgroup, true);
+      expect(schedulePair.subgroupNumber != null, true);
     });
   });
 
   group("SchedulePair List extension", () {
     test("groups returns unique clean groups", () {
       final list = [
-        const SchedulePair(
+        SchedulePair(
           subject: '',
           teacher: '',
           group: 'ИВТ-23-1 (1 п/гр.)',
@@ -121,7 +121,7 @@ void main() {
           groupId: 0,
           pairId: 0,
         ),
-        const SchedulePair(
+        SchedulePair(
           subject: '',
           teacher: '',
           group: 'ИВТ-23-1 (2 п/гр.)',
@@ -139,7 +139,7 @@ void main() {
 
     test("hasMultipleGroups true when more than one clean group", () {
       final list = [
-        const SchedulePair(
+        SchedulePair(
           subject: '',
           teacher: '',
           group: 'ИВТ-23-1',
@@ -149,7 +149,7 @@ void main() {
           groupId: 0,
           pairId: 0,
         ),
-        const SchedulePair(
+        SchedulePair(
           subject: '',
           teacher: '',
           group: 'ИВТ-24-1',
@@ -166,7 +166,7 @@ void main() {
 
     test("teachers returns unique teachers", () {
       final list = [
-        const SchedulePair(
+        SchedulePair(
           subject: '',
           teacher: 'Иванов',
           group: '',
@@ -176,7 +176,7 @@ void main() {
           groupId: 0,
           pairId: 0,
         ),
-        const SchedulePair(
+        SchedulePair(
           subject: '',
           teacher: 'Иванов',
           group: '',
@@ -193,7 +193,7 @@ void main() {
 
     test("subgroups returns unique subgroup numbers", () {
       final list = [
-        const SchedulePair(
+        SchedulePair(
           subject: '',
           teacher: '',
           group: 'ИВТ-23-1 (1 п/гр.)',
@@ -203,7 +203,7 @@ void main() {
           groupId: 0,
           pairId: 0,
         ),
-        const SchedulePair(
+        SchedulePair(
           subject: '',
           teacher: '',
           group: 'ИВТ-23-1 (2 п/гр.)',

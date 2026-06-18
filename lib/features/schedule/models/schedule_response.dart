@@ -38,13 +38,20 @@ class ScheduleResponse extends Equatable {
 
   ScheduleResponse cut(DateTime startDate, DateTime endDate) {
     final filteredSchedules = schedules.where((day) {
-      final dayDate = DateTimeUtils.parseDate(day.date);
-      if (dayDate == null) return false;
-      return dayDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
-          dayDate.isBefore(endDate.add(const Duration(days: 1)));
+      return day.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
+          day.date.isBefore(endDate.add(const Duration(days: 1)));
     }).toList();
 
     return copyWith(schedules: filteredSchedules);
+  }
+
+  bool hasRange(DateTime startDate, DateTime endDate) {
+    final hasStart = schedules.first.date.isBefore(startDate) ||
+        schedules.first.date.isAtSameMomentAs(startDate);
+    final hasEnd = schedules.last.date.isAfter(endDate) ||
+        schedules.last.date.isAtSameMomentAs(endDate);
+
+    return hasStart && hasEnd;
   }
 
   // Получить все уникальные группы из расписания
@@ -134,7 +141,7 @@ extension ScheduleResponseFiller on ScheduleResponse {
 
     // Создаем Map существующих дней для быстрого доступа
     // КЛЮЧ: дата в формате API "dd.mm.yyyy"
-    final existingDays = <String, DaySchedule>{};
+    final existingDays = <DateTime, DaySchedule>{};
     for (var day in schedules) {
       existingDays[day.date] = day;
     }
@@ -144,15 +151,13 @@ extension ScheduleResponseFiller on ScheduleResponse {
     // Проходим по всем датам в диапазоне от первой до последней
     for (final date
         in DateTimeUtils.daysInRange(normalizedStart, normalizedEnd)) {
-      final apiDateStr =
-          DateTimeUtils.formatDate(date, showWeekday: false); // "dd.mm.yyyy"
       final weekDay = DateTimeUtils.getWeekdayName(date.weekday);
 
-      if (existingDays.containsKey(apiDateStr)) {
-        filledSchedules.add(existingDays[apiDateStr]!);
+      if (existingDays.containsKey(date)) {
+        filledSchedules.add(existingDays[date]!);
       } else {
         filledSchedules.add(DaySchedule(
-          date: apiDateStr,
+          date: date,
           weekDay: weekDay,
           pairs: const [],
         ));

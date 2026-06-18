@@ -81,22 +81,24 @@ class ScheduleViewProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      final response = await apiService.fetch(
-        (
-          startDate: rangeStart,
-          endDate: rangeEnd,
-          scheduleModel: params,
-          forceUpdate: force,
-          onUpdateModel: (model) {
-            onUpdate(model);
-            updateParams(model);
-          },
-        ),
-      );
+      final response = lastResponse?.hasRange(rangeStart, rangeEnd) == true
+          ? lastResponse
+          : await apiService.fetch(
+              (
+                startDate: rangeStart,
+                endDate: rangeEnd,
+                scheduleModel: params,
+                forceUpdate: force,
+                onUpdateModel: (model) {
+                  onUpdate(model);
+                  updateParams(model);
+                },
+              ),
+            );
 
       if (response case final r?) {
         lastResponse = r;
-        _extractParamsFrom(r);
+        _extractParamsFrom(r.cut(rangeStart, rangeEnd));
       }
     } on ApiException catch (e) {
       error = [e.message, e.tip].whereType<String>().join('\n');
@@ -111,33 +113,31 @@ class ScheduleViewProvider extends ChangeNotifier {
   void updateParams(ScheduleModel model) => params = model;
 
   /// DAY RANGE
-  void _setDayRange(DateTime date, {bool notify = true}) {
+  void _setDayRange(DateTime date) {
     rangeStart = DateTime(date.year, date.month, date.day);
     rangeEnd = rangeStart;
-
-    if (notify) notifyListeners();
   }
 
   /// WEEK RANGE
-  void _setWeekRange(DateTime date, {bool notify = true}) {
-    final start = date.subtract(Duration(days: date.weekday - 1));
-    final end = start.add(const Duration(days: 6));
+  void _setWeekRange(DateTime date) {
+    // final start = date.subtract(Duration(days: date.weekday - 1));
+    // final end = start.add(const Duration(days: 6));
 
-    rangeStart = DateTime(start.year, start.month, start.day);
-    rangeEnd = DateTime(end.year, end.month, end.day);
-
-    if (notify) notifyListeners();
+    // rangeStart = DateTime(start.year, start.month, start.day);
+    // rangeEnd = DateTime(end.year, end.month, end.day);
+    rangeStart = DateTime(date.year, date.month, date.day);
+    rangeEnd = rangeStart.add(Duration(days: 7));
   }
 
   /// MONTH RANGE
-  void _setMonthRange(DateTime date, {bool notify = true}) {
-    final start = DateTime(date.year, date.month, 1);
-    final end = DateTime(date.year, date.month + 1, 0);
+  void _setMonthRange(DateTime date) {
+    // final start = DateTime(date.year, date.month, 1);
+    // final end = DateTime(date.year, date.month + 1, 0);
 
-    rangeStart = DateTime(start.year, start.month, start.day);
-    rangeEnd = DateTime(end.year, end.month, end.day);
-
-    if (notify) notifyListeners();
+    // rangeStart = DateTime(start.year, start.month, start.day);
+    // rangeEnd = DateTime(end.year, end.month, end.day);
+    rangeStart = DateTime(date.year, date.month, date.day);
+    rangeEnd = rangeStart.add(Duration(days: 30));
   }
 
   /// CUSTOM RANGE
@@ -176,7 +176,7 @@ class ScheduleViewProvider extends ChangeNotifier {
         break;
 
       case ScheduleViewType.month:
-        _setMonthRange(DateTime(rangeStart.year, rangeStart.month + 1));
+        _setMonthRange(rangeStart.add(Duration(days: 30)));
         break;
 
       default:
@@ -198,7 +198,7 @@ class ScheduleViewProvider extends ChangeNotifier {
         break;
 
       case ScheduleViewType.month:
-        _setMonthRange(DateTime(rangeStart.year, rangeStart.month - 1));
+        _setMonthRange(rangeStart.subtract(Duration(days: 30)));
         break;
 
       default:

@@ -16,8 +16,7 @@ class DocxGenerator {
     final documentXml = _buildDocumentXml(schedule, title);
     _addFile(archive, 'word/document.xml', documentXml);
 
-    final encoder = ZipEncoder();
-    final encoded = encoder.encode(archive);
+    final encoded = ZipEncoder().encode(archive);
     return Uint8List.fromList(encoded);
   }
 
@@ -40,14 +39,12 @@ class DocxGenerator {
 
     buffer.writeln('<w:body>');
 
-    _addParagraph(buffer, title, fontSize: 36, bold: true, center: true);
-    _addParagraph(buffer, '');
+    _addParagraph(buffer, title, fontSize: 24, bold: true, center: true);
 
     for (final day in schedule.schedules.where((d) => d.hasPairs)) {
-      final dayDate = DateTimeUtils.parseDate(day.date)!;
       final dayTitle =
-          "${DateTimeUtils.getWeekdayName(dayDate.weekday)}, ${day.date}";
-      _addParagraph(buffer, dayTitle, fontSize: 28, bold: true, keepNext: true);
+          "${DateTimeUtils.getWeekdayName(day.date.weekday)}, ${day.date}";
+      _addParagraph(buffer, dayTitle, fontSize: 24, bold: true, keepNext: true);
       buffer.writeln('<w:tbl>');
 
       buffer.writeln('<w:tblPr>');
@@ -77,22 +74,6 @@ class DocxGenerator {
       buffer.writeln('<w:gridCol w:w="1500"/>');
       buffer.writeln('</w:tblGrid>');
 
-      //  buffer.writeln('<w:tr>');
-      //   buffer.writeln('<w:trPr><w:cantSplit/></w:trPr>');
-
-      //   _addTableCell(buffer, dayTitle,
-      //       bold: true, bgColor: 'F0F0F0', percentage: '15', keepNext: true);
-      //   _addTableCell(buffer, '',
-      //       bold: true, bgColor: 'F0F0F0', percentage: '30', keepNext: true);
-      //   _addTableCell(buffer, '',
-      //       bold: true, bgColor: 'F0F0F0', percentage: '15', keepNext: true);
-      //   _addTableCell(buffer, '',
-      //       bold: true, bgColor: 'F0F0F0', percentage: '15', keepNext: true);
-      //   _addTableCell(buffer, '',
-      //       bold: true, bgColor: 'F0F0F0', percentage: '15', keepNext: true);
-
-      //   buffer.writeln('</w:tr>');
-
       /// HEADER
       buffer.writeln('<w:tr>');
       buffer.writeln('<w:trPr><w:cantSplit/></w:trPr>');
@@ -110,21 +91,8 @@ class DocxGenerator {
 
       buffer.writeln('</w:tr>');
 
-//           buffer.writeln('<w:tr>');
-// buffer.writeln('<w:trPr><w:cantSplit/></w:trPr>');
-
-// _addDayHeaderCell(
-//   buffer,
-//   dayTitle,
-//   gridSpan: 5,
-//   bgColor: 'F0F0F0',
-//   keepNext: true,
-// );
-
-// buffer.writeln('</w:tr>');
-
       /// FLATTEN ROWS
-      final rows = <MapEntry<dynamic, dynamic>>[];
+      final rows = <MapEntry>[];
 
       for (final pair in day.nonEmptyPairs) {
         for (final sp in pair.schedulePairs) {
@@ -148,13 +116,9 @@ class DocxGenerator {
 
         _addTableCell(buffer, pair.pairTime,
             bold: true, percentage: '15', keepNext: keepNext);
-
         _addTableCell(buffer, sp.subject, percentage: '30', keepNext: keepNext);
-
         _addTableCell(buffer, sp.group, percentage: '15', keepNext: keepNext);
-
         _addTableCell(buffer, sp.teacher, percentage: '15', keepNext: keepNext);
-
         _addTableCell(buffer, audience, percentage: '15', keepNext: keepNext);
 
         buffer.writeln('</w:tr>');
@@ -229,7 +193,7 @@ class DocxGenerator {
     if (keepNext) {
       buffer.writeln('<w:keepNext/>');
     }
-    buffer.writeln('<w:spacing w:line="300" w:lineRule="auto"/>');
+    buffer.writeln('<w:spacing w:line="200" w:lineRule="auto"/>');
     buffer.writeln('</w:pPr>');
 
     buffer.writeln('<w:r>');
@@ -252,11 +216,12 @@ class DocxGenerator {
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&apos;');
   }
+}
 
-  // ==================== СИСТЕМНЫЕ ФАЙЛЫ ====================
+// ==================== СИСТЕМНЫЕ ФАЙЛЫ ====================
 
-  static const String _contentTypesXml =
-      '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+const String _contentTypesXml =
+    '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
@@ -264,20 +229,20 @@ class DocxGenerator {
   <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
 </Types>''';
 
-  static const String _relsXml =
-      '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+const String _relsXml =
+    '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
 </Relationships>''';
 
-  static const String _documentRelsXml =
-      '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+const String _documentRelsXml =
+    '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
 </Relationships>''';
 
-  static const String _stylesXml =
-      '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+const String _stylesXml =
+    '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:docDefaults>
     <w:rPrDefault>
@@ -333,4 +298,3 @@ class DocxGenerator {
     </w:tblPr>
   </w:style>
 </w:styles>''';
-}

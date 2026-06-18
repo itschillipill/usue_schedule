@@ -2,7 +2,19 @@ import 'package:equatable/equatable.dart';
 
 import '../../../core/utils/date_utils.dart';
 
-class SchedulePair extends Equatable {
+final class SchedulePair extends Equatable {
+  SchedulePair({
+    required this.subject,
+    required this.teacher,
+    required this.group,
+    required this.audience,
+    required this.comment,
+    required this.teacherId,
+    required this.groupId,
+    required this.pairId,
+  })  : cleanGroup = group.replaceAll(_groupCleanupRegex, '').trim(),
+        subgroupNumber = _extractSubgroup(group);
+
   final String subject;
   final String teacher;
   final String group;
@@ -12,16 +24,20 @@ class SchedulePair extends Equatable {
   final int groupId;
   final int pairId;
 
-  const SchedulePair({
-    required this.subject,
-    required this.teacher,
-    required this.group,
-    required this.audience,
-    required this.comment,
-    required this.teacherId,
-    required this.groupId,
-    required this.pairId,
-  });
+  final String cleanGroup;
+  final int? subgroupNumber;
+
+  static final RegExp _groupCleanupRegex = RegExp(r'\([^)]*\)');
+  static final RegExp _subgroupRegex = RegExp(r'\((\d+)\s*п/гр\.\)');
+
+  static const List<(String, String)> _lessonTypes = [
+    ('лекц', 'Лекция'),
+    ('практ', 'Практика'),
+    ('лаб', 'Лабораторная'),
+    ('экза', 'Экзамен'),
+    ('зач', 'Зачет'),
+    ('консул', 'Консультация'),
+  ];
 
   factory SchedulePair.fromJson(Map<String, dynamic> json) {
     return SchedulePair(
@@ -36,15 +52,8 @@ class SchedulePair extends Equatable {
     );
   }
 
-  String get cleanGroup {
-    // Убираем "(1 п/гр.)" и подобные приписки
-    final regex = RegExp(r'\(.*\)');
-    return group.replaceAll(regex, '').trim();
-  }
-
-  // Извлечь номер подгруппы, если есть
-  int? get subgroupNumber {
-    final match = RegExp(r'\((\d+)\s*п/гр\.\)').firstMatch(group);
+  static int? _extractSubgroup(String group) {
+    final match = _subgroupRegex.firstMatch(group);
     if (match != null) {
       return int.tryParse(match.group(1)!);
     }
@@ -52,16 +61,16 @@ class SchedulePair extends Equatable {
   }
 
   String get lessonType {
-    if (subject.toLowerCase().contains('лекц')) return 'Лекция';
-    if (subject.toLowerCase().contains('лаб')) return 'Лабораторная';
-    if (subject.toLowerCase().contains('консул')) return 'Консультация';
-    if (subject.toLowerCase().contains('экза')) return 'Экзамен';
-    if (subject.toLowerCase().contains('зач')) return 'Зачет';
-    if (subject.toLowerCase().contains('практ')) return 'Практика';
+    final s = subject.toLowerCase();
+
+    for (final lt in _lessonTypes) {
+      if (s.contains(lt.$1)) {
+        return lt.$2;
+      }
+    }
+
     return 'Занятие';
   }
-
-  bool get isSubgroup => subgroupNumber != null;
 
   Map<String, dynamic> toJson() {
     return {
@@ -79,21 +88,34 @@ class SchedulePair extends Equatable {
   String? get correctedTime => DateTimeUtils.parseTimeFromComment(comment);
 
   @override
-  List<Object?> get props =>
-      [subject, teacher, group, audience, comment, teacherId, groupId, pairId];
+  List<Object?> get props => [
+        subject,
+        teacher,
+        group,
+        audience,
+        comment,
+        teacherId,
+        groupId,
+        pairId,
+      ];
 }
 
 extension X on List<SchedulePair> {
   bool get hasMultipleGroups => groups.length > 1;
 
-  Iterable<String> get groups => map((p) => p.cleanGroup).toSet();
+  Set<String> get groups => {for (final p in this) p.cleanGroup};
 
-  Iterable<String> get teachers => map((p) => p.teacher).toSet();
+  Set<String> get teachers => {for (final p in this) p.teacher};
 
-  Iterable<String> get subgroups =>
-      where((p) => p.isSubgroup).map((p) => '${p.subgroupNumber}').toSet();
+  Set<String> get subgroups => {
+        for (final p in this)
+          if (p.subgroupNumber != null) '${p.subgroupNumber}'
+      };
 
-  String get audience => any((p) => p.audience.isNotEmpty)
-      ? firstWhere((p) => p.audience.isNotEmpty).audience
-      : 'Не указана';
+  String get audience {
+    for (final p in this) {
+      if (p.audience.isNotEmpty) return p.audience;
+    }
+    return 'Не указана';
+  }
 }

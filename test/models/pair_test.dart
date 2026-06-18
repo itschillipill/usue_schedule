@@ -107,8 +107,8 @@ void main() {
     });
 
     test("filterByTeacher matches by partial name", () {
-      final filtered = pair.filterByTeacher("Кольева");
-
+      final filtered = pair.filterByTeacher("Кольева Н.С.");
+      
       expect(filtered.schedulePairs.length, 1);
     });
 

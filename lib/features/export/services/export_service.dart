@@ -63,7 +63,7 @@ class ExportService {
             format: exportFormat,
             queryValue:
                 "${provider.params.queryValue}${filter == null ? '' : ' - $filter'}",
-            shareAfterSave: false,
+            shareAfterSave: true,
           );
           return true;
         },

@@ -20,7 +20,11 @@ void main() => runZonedGuarded(() async {
             splashScreen: SplashScreen(
               progress: initialization,
             ),
-            initialization: initialization(onError: $handleInitError),
+            initialization: initialization(
+              onError: $handleInitError,
+              onSuccess: (_, timePassed) => SessionLogger.instance
+                  .debug("Initialization", "Done in $timePassed"),
+            ),
             child: const App()),
       );
     },
@@ -33,35 +37,30 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deps = DependenciesScope.of(context);
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => deps.scheduleCubit),
-        BlocProvider(create: (_) => deps.settingsCubit),
-      ],
-      child: BlocSelector<SettingsCubit, SettingsState, ThemeMode>(
-        selector: (state) => state.themeMode,
-        builder: (context, themeMode) {
-          return MaterialApp(
-            navigatorKey: MessageService.navigatorKey,
-            scaffoldMessengerKey: MessageService.scaffoldMessengerKey,
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeMode,
-            home: AppGate(),
-            builder: (context, child) {
-              return MediaQuery(
-                data: MediaQuery.of(context)
-                    .copyWith(textScaler: const TextScaler.linear(1.0)),
-                child: child!,
-              );
-            },
-            locale: const Locale('ru'),
-            supportedLocales: const [Locale('ru')],
-            localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          );
-        },
-      ),
+    return BlocSelector<SettingsCubit, SettingsState, ThemeMode>(
+      bloc: deps.settingsCubit,
+      selector: (state) => state.themeMode,
+      builder: (context, themeMode) {
+        return MaterialApp(
+          navigatorKey: MessageService.navigatorKey,
+          scaffoldMessengerKey: MessageService.scaffoldMessengerKey,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          home: AppGate(),
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: const TextScaler.linear(1.0)),
+              child: child!,
+            );
+          },
+          locale: const Locale('ru'),
+          supportedLocales: const [Locale('ru')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        );
+      },
     );
   }
 }
