@@ -98,7 +98,7 @@ final class CacheManager implements CacheServiceBase {
       // ставим пустой массив чтобы не заполнять пустыми данными
       if (!day.hasPairs) day = day.empty();
 
-      final dateKey = _dateKey(DateTimeUtils.parseDate(day.date)!);
+      final dateKey = _dateKey(day.date);
       cacheData['days'][dateKey] = day.toJson();
     }
 

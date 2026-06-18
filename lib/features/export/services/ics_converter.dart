@@ -1,6 +1,5 @@
 import 'package:usue_schedule/core/logger/session_logger.dart';
 
-import '../../../core/utils/date_utils.dart' as date_utils;
 import '../../../core/utils/date_utils.dart';
 import '../models/i_calendar_event.dart';
 import '../../schedule/models/pair.dart';
@@ -91,15 +90,12 @@ class ICalendarConverter {
 
     // Сначала группируем события по дате и времени
     for (final day in schedule.schedules) {
-      final dayDate = date_utils.DateTimeUtils.parseDate(day.date);
-      if (dayDate == null) continue;
-
       for (final pair in day.nonEmptyPairs) {
         for (final schedulePair in pair.schedulePairs) {
           final event = _convertPairToEvent(
             schedulePair,
             pair,
-            dayDate,
+            day.date,
             queryValue: queryValue,
           );
 

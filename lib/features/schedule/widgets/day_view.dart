@@ -25,11 +25,10 @@ class DayView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedDateStr = DateFormat('dd.MM.yyyy').format(selectedDate);
     final daySchedule = data.schedules.firstWhere(
-      (day) => day.date == selectedDateStr,
+      (day) => day.date == selectedDate,
       orElse: () => DaySchedule(
-        date: selectedDateStr,
+        date: selectedDate,
         weekDay: DateFormat('EEEE').format(selectedDate),
         pairs: const [],
       ),

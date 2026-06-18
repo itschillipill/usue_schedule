@@ -239,6 +239,9 @@ class ShowScheduleScreen extends StatelessWidget {
     }
 
     final filteredData = provider.lastResponse!
+        // возвращаем расписание только на заданный период,
+        // без учета дополнительных дней которых мы запросили для кеширования
+        .cut(provider.rangeStart, provider.rangeEnd)
         .getFiltredData(params.requestType, provider.selectedFilter);
 
     final emptyState = BuildEmptyState(

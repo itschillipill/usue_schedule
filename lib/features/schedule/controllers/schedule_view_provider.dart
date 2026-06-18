@@ -81,22 +81,24 @@ class ScheduleViewProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      final response = await apiService.fetch(
-        (
-          startDate: rangeStart,
-          endDate: rangeEnd,
-          scheduleModel: params,
-          forceUpdate: force,
-          onUpdateModel: (model) {
-            onUpdate(model);
-            updateParams(model);
-          },
-        ),
-      );
+      final response = lastResponse?.hasRange(rangeStart, rangeEnd) == true
+          ? lastResponse
+          : await apiService.fetch(
+              (
+                startDate: rangeStart,
+                endDate: rangeEnd,
+                scheduleModel: params,
+                forceUpdate: force,
+                onUpdateModel: (model) {
+                  onUpdate(model);
+                  updateParams(model);
+                },
+              ),
+            );
 
       if (response case final r?) {
         lastResponse = r;
-        _extractParamsFrom(r);
+        _extractParamsFrom(r.cut(rangeStart, rangeEnd));
       }
     } on ApiException catch (e) {
       error = [e.message, e.tip].whereType<String>().join('\n');

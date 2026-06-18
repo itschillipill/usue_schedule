@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:usue_schedule/core/utils/date_utils.dart';
 import 'package:usue_schedule/features/schedule/widgets/label_group.dart';
 
 import '../models/day_schedule.dart';
@@ -32,7 +31,7 @@ class CustomRangeView extends StatelessWidget {
         .where((day) => day.hasPairs)
         .map((day) => (
               day: day,
-              date: DateTimeUtils.parseDate(day.date)!,
+              date: day.date,
             ))
         .toList();
 

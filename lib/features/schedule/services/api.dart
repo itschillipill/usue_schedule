@@ -102,20 +102,19 @@ class ApiService with DebouncedRequestMixin {
     });
 
     try {
-      // Проверка кэша
-      final cached = force
-          ? null
-          : (await cacheProvider?.getSchedule(
-                  scheduleModel, startDate, endDate))
-              ?.copyWith(exception: withException);
-
-      if (cached != null) return cached;
-
       // Подготовка параметров
       final end = endDate
           .add(Duration(days: cacheProvider == null ? 0 : _prefetchDays));
       final start =
           startDate.subtract(Duration(days: cacheProvider == null ? 0 : 7));
+
+      // Проверка кэша
+      final cached = force
+          ? null
+          : (await cacheProvider?.getSchedule(scheduleModel, start, end))
+              ?.copyWith(exception: withException);
+
+      if (cached != null) return cached;
 
       final params = {
         't': _generateT(),
@@ -195,9 +194,7 @@ class ApiService with DebouncedRequestMixin {
         onUpdateModel(scheduleModel.update());
       }
 
-      // возвращаем расписание только на заданный период,
-      // без учета дополнительных дней которых мы запросили для кеширования
-      return parsed.cut(startDate, endDate);
+      return parsed;
     } on ApiException {
       rethrow;
     } catch (e, st) {

@@ -99,7 +99,7 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
     return five;
   }
 
- @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       // Используем CustomScrollView для приятного эффекта схлопывания шапки
@@ -107,7 +107,8 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
         slivers: [
           _buildAppBar(),
           if (_isLoading)
-            const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+            const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()))
           else if (_cacheInfo.isEmpty)
             SliverFillRemaining(child: _buildEmptyState())
           else ...[
@@ -134,10 +135,11 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
       actions: [
         if (_cacheInfo.isNotEmpty && _selectedModels.isEmpty)
           TextButton(
-            onPressed: (){
+            onPressed: () {
               //
             },
-            child: const Text('Очистить всё', style: TextStyle(color: Colors.red)),
+            child:
+                const Text('Очистить всё', style: TextStyle(color: Colors.red)),
           ),
         if (_selectedModels.isNotEmpty)
           IconButton(
@@ -155,7 +157,10 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -169,31 +174,32 @@ class _CacheManagerScreenState extends State<CacheManagerScreen> {
       ),
     );
   }
-Widget _buildStatTile(String value, String label) {
-  return Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text(
-        value,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
+
+  Widget _buildStatTile(String value, String label) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
-      ),
-      const SizedBox(height: 4),
-      Text(
-        label.toUpperCase(),
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        const SizedBox(height: 4),
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   Widget _buildCacheList() {
     return SliverPadding(
@@ -203,7 +209,7 @@ Widget _buildStatTile(String value, String label) {
           (context, index) {
             final info = _cacheInfo[index];
             final isSelected = _selectedModels.contains(info.model.cacheKey);
-            
+
             // Добавляем Dismissible для быстрого удаления свайпом
             return Dismissible(
               key: Key(info.model.cacheKey),
@@ -218,17 +224,21 @@ Widget _buildStatTile(String value, String label) {
               child: ListTile(
                 selected: isSelected,
                 leading: CircleAvatar(
-                  backgroundColor: info.model.requestType.color.withValues(alpha: 0.1),
-                  child: Icon(info.model.requestType.icon, color: info.model.requestType.color, size: 20),
+                  backgroundColor:
+                      info.model.requestType.color.withValues(alpha: 0.1),
+                  child: Icon(info.model.requestType.icon,
+                      color: info.model.requestType.color, size: 20),
                 ),
-                title: Text(info.model.queryValue, style: const TextStyle(fontWeight: FontWeight.w500)),
-                subtitle: Text('${info.daysCount} дн. • ${_formatDate(info.model.lastUpdated)}'),
-                trailing: _selectedModels.isNotEmpty 
-                  ? Checkbox(
-                      value: isSelected,
-                      onChanged: (_) => _toggleSelect(info.model.cacheKey),
-                    )
-                  : null,
+                title: Text(info.model.queryValue,
+                    style: const TextStyle(fontWeight: FontWeight.w500)),
+                subtitle: Text(
+                    '${info.daysCount} дн. • ${_formatDate(info.model.lastUpdated)}'),
+                trailing: _selectedModels.isNotEmpty
+                    ? Checkbox(
+                        value: isSelected,
+                        onChanged: (_) => _toggleSelect(info.model.cacheKey),
+                      )
+                    : null,
                 onTap: () {
                   if (_selectedModels.isNotEmpty) {
                     _toggleSelect(info.model.cacheKey);
@@ -298,7 +308,8 @@ Widget _buildStatTile(String value, String label) {
       ),
     );
   }
-void _confirmDeleteSelected() {
+
+  void _confirmDeleteSelected() {
     final count = _selectedModels.length;
     MessageService.confirmAction(
       title: 'Удалить выбранное',

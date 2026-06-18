@@ -1,9 +1,10 @@
 import 'package:equatable/equatable.dart';
+import 'package:usue_schedule/core/utils/date_utils.dart';
 
 import 'pair.dart';
 
 class DaySchedule extends Equatable {
-  final String date;
+  final DateTime date;
   final String weekDay;
   final List<Pair> pairs;
 
@@ -15,7 +16,8 @@ class DaySchedule extends Equatable {
 
   factory DaySchedule.fromJson(Map<String, dynamic> json) {
     return DaySchedule(
-      date: json['date'] as String? ?? '',
+      date: DateTimeUtils.parseDate(json['date'] as String? ?? '') ??
+          DateTime.now(),
       weekDay: json['weekDay'] as String? ?? '',
       pairs: (json['pairs'] as List<dynamic>?)
               ?.map((e) => Pair.fromJson(e))
@@ -63,7 +65,7 @@ class DaySchedule extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'date': date,
+      'date': DateTimeUtils.formatDate(date, showWeekday: false),
       'weekDay': weekDay,
       'pairs': nonEmptyPairs.map((e) => e.toJson()).toList(),
     };

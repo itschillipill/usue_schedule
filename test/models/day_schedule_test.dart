@@ -5,7 +5,7 @@ import 'package:usue_schedule/features/schedule/models/schedule_pair.dart';
 
 void main() {
   DaySchedule dayScheduleExample = DaySchedule(
-    date: "16.02.2026",
+    date: DateTime(2026, 2, 16),
     weekDay: "Понедельник",
     pairs: [
       Pair(number: 4, time: "17:10-18:40", schedulePairs: [
