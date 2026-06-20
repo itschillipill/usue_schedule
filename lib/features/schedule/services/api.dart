@@ -178,20 +178,23 @@ class ApiService with DebouncedRequestMixin {
         throw ParseException(e);
       }
 
+      ScheduleModel? updatedModel;
+
+      if (scheduleModel.needsUpdate() || force) {
+        updatedModel = scheduleModel.update();
+        onUpdateModel(updatedModel);
+      }
+
       // Сохранение в кэш
       try {
         cacheProvider?.saveSchedule(
-          scheduleModel,
+          updatedModel ?? scheduleModel,
           parsed.fillEmptyDates(start, end,
               skip: scheduleModel.requestType != RequestType.audience),
         );
       } catch (e) {
         SessionLogger.instance
             .warning(name, "Ошибка сохранения в кэш", error: e);
-      }
-
-      if (scheduleModel.needsUpdate()) {
-        onUpdateModel(scheduleModel.update());
       }
 
       return parsed;

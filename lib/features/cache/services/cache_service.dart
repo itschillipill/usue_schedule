@@ -78,7 +78,7 @@ final class CacheManager implements CacheServiceBase {
 
     // Создаем пустую структуру данных для сохранения
     Map<String, dynamic> emptyData = {
-      'model': model.toJson(),
+      'model': null,
       'days_count': 0, // Здесь будет храниться количество дней в кэше
       'days': {}, // Здесь будут храниться дни по ключам
     };
@@ -104,6 +104,7 @@ final class CacheManager implements CacheServiceBase {
 
     // Обновляем метаданные
     cacheData['days_count'] = (cacheData['days'] as Map).length;
+    cacheData['model'] = model.toJson();
 
     // Сохраняем файл
     try {

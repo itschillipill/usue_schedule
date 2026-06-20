@@ -81,20 +81,21 @@ class ScheduleViewProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      final response = lastResponse?.hasRange(rangeStart, rangeEnd) == true
-          ? lastResponse
-          : await apiService.fetch(
-              (
-                startDate: rangeStart,
-                endDate: rangeEnd,
-                scheduleModel: params,
-                forceUpdate: force,
-                onUpdateModel: (model) {
-                  onUpdate(model);
-                  updateParams(model);
-                },
-              ),
-            );
+      final response =
+          (!force && lastResponse?.hasRange(rangeStart, rangeEnd) == true)
+              ? lastResponse
+              : await apiService.fetch(
+                  (
+                    startDate: rangeStart,
+                    endDate: rangeEnd,
+                    scheduleModel: params,
+                    forceUpdate: force,
+                    onUpdateModel: (model) {
+                      onUpdate(model);
+                      updateParams(model);
+                    },
+                  ),
+                );
 
       if (response case final r?) {
         lastResponse = r;
