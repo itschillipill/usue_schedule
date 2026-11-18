@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:usue_schedule/shared/widgets/custom_list_tile.dart';
 
 import '../models/schedule_model.dart';
@@ -23,13 +23,13 @@ class ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final typeColor = scheduleModel.requestType.color;
+    final typeColor = scheduleModel.scheduleType.color;
 
     return CustomListTile(
       mainColor: typeColor,
       title: scheduleModel.queryValue,
-      subTitle: scheduleModel.requestType.text,
-      leadingIcon: scheduleModel.requestType.icon,
+      subTitle: scheduleModel.scheduleType.text,
+      leadingIcon: scheduleModel.scheduleType.icon,
       onTap: onTap,
       onLongPress: onLongPress,
       // Делаем бордер более акцентным, если карточка выбрана

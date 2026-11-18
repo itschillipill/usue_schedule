@@ -1,19 +1,17 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../core/utils/date_utils.dart';
 import '../models/day_schedule.dart';
 
 class DayHeader extends StatelessWidget {
   final DaySchedule day;
-  final DateTime date;
 
-  const DayHeader({super.key, required this.day, required this.date});
+  const DayHeader({super.key, required this.day});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dayName = day.weekDay.isNotEmpty ? day.weekDay : date.toString();
-    final isToday = DateTimeUtils.isToday(date);
+    final isToday = DateTimeUtils.isToday(day.date);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -46,7 +44,7 @@ class DayHeader extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    DateTimeUtils.getMonthName(date).toUpperCase(),
+                    DateTimeUtils.getMonthName(day.date).toUpperCase(),
                     style: theme.textTheme.labelSmall?.copyWith(
                       color:
                           isToday ? theme.colorScheme.primary : theme.hintColor,
@@ -55,7 +53,7 @@ class DayHeader extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    date.day.toString(),
+                    day.date.day.toString(),
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: isToday
@@ -74,7 +72,7 @@ class DayHeader extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        dayName[0].toUpperCase() + dayName.substring(1),
+                        day.weekDay,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isToday ? theme.colorScheme.primary : null,

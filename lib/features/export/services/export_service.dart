@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:usue_schedule/features/export/models/export_format.dart';
 import 'package:usue_schedule/shared/services/message_service.dart';
 
@@ -10,13 +10,12 @@ import '../services/file_service.dart';
 
 class ExportService {
   static Future<void> exportSchedule(
-    BuildContext context,
-    ScheduleViewProvider provider,
-  ) async {
+      BuildContext context, ScheduleViewProvider provider,
+      {bool shareAfterSave = false}) async {
     String? filter;
 
     // проверяем есть ли расписание
-    if (provider.lastResponse == null) return;
+    if (provider.cuttedResponse == null) return;
 
     // показываем диалог выбора формата
     ExportFormat? exportFormat = await ExportFormatPicker.show(context);
@@ -33,28 +32,22 @@ class ExportService {
       // показываем диалог выбора и ждем результат
       final shouldUseFilter = await ExportDialog.show(context);
       if (shouldUseFilter == null) return;
-      if (shouldUseFilter == true) {
-        if (shouldUseFilter && context.mounted) {
-          // показываем диалог выбора фильтра
-          filter = await FilterSelector.show(context, provider);
-        }
+
+      if (shouldUseFilter && context.mounted) {
+        // показываем диалог выбора фильтра
+        filter = await FilterSelector.show(context, provider);
       }
 
-      final filtredData = provider.lastResponse!
-          .getFiltredData(provider.params.requestType, filter);
-      await MessageService.showLoading<bool>(
-        message: "Экспорт расписания...",
-        fn: () async {
-          if (filtredData.schedules.isEmpty) {
-            MessageService.showSnackBar(
-              filter != null
-                  ? 'На этот период нет расписания для выбранного фильтра'
-                  : 'На этот период расписание не найдено',
-            );
-            return false;
-          }
+      final filtredData = provider.cuttedResponse!
+          .getFiltredData(provider.params.scheduleType, filter);
 
-          await FileService.saveSchedule(
+      await MessageService.showLoading<ShareFileData?>(
+        message: "Экспорт расписания...",
+        delay: const Duration(milliseconds: 350),
+        fn: () async {
+          if (filtredData.schedules.isEmpty) return null;
+
+          return FileService.saveSchedule(
             dateRange: DateTimeRange(
               start: provider.rangeStart,
               end: provider.rangeEnd,
@@ -63,14 +56,19 @@ class ExportService {
             format: exportFormat,
             queryValue:
                 "${provider.params.queryValue}${filter == null ? '' : ' - $filter'}",
-            shareAfterSave: true,
           );
-          return true;
         },
         onSuccess: (result) {
-          if (result) {
+          if (result case final data?) {
             MessageService.showSuccessSnack(
                 "Расписание успешно экспортировано");
+            if (shareAfterSave) FileService.shareFile(data);
+          } else if (shareAfterSave) {
+            MessageService.showSnackBar(
+              filter != null
+                  ? 'На этот период нет расписания для выбранного фильтра'
+                  : 'На этот период расписание не найдено',
+            );
           }
         },
         onError: (e, stacktrace) {

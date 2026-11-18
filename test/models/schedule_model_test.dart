@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_model.dart';
-import 'package:usue_schedule/features/schedule/models/request_type.dart';
+import 'package:usue_schedule/features/schedule/models/schedule_type.dart';
 
 void main() {
   group("ScheduleModel - factory constructors", () {
     test("teacher factory creates correct model", () {
       final model = ScheduleModel.teacher("Иванов");
 
-      expect(model.requestType, RequestType.teacher);
+      expect(model.scheduleType, ScheduleType.teacher);
       expect(model.queryValue, "Иванов");
       expect(model.lastUpdated, isNull);
     });
@@ -15,7 +15,7 @@ void main() {
     test("group factory creates correct model", () {
       final model = ScheduleModel.group("ИВТ-23-1");
 
-      expect(model.requestType, RequestType.group);
+      expect(model.scheduleType, ScheduleType.group);
       expect(model.queryValue, "ИВТ-23-1");
       expect(model.lastUpdated, isNull);
     });
@@ -23,7 +23,7 @@ void main() {
     test("audience factory creates correct model", () {
       final model = ScheduleModel.audience("338TV");
 
-      expect(model.requestType, RequestType.audience);
+      expect(model.scheduleType, ScheduleType.audience);
       expect(model.queryValue, "338TV");
       expect(model.lastUpdated, isNull);
     });
@@ -55,7 +55,7 @@ void main() {
 
       expect(
         model.displayName,
-        "${RequestType.teacher}: Иванов",
+        "${ScheduleType.teacher}: Иванов",
       );
     });
   });
@@ -66,7 +66,7 @@ void main() {
 
       final json = model.toJson();
 
-      expect(json['requestType'], RequestType.group.index);
+      expect(json['scheduleType'], ScheduleType.group.index);
       expect(json['queryValue'], "ИВТ-23-1");
       expect(json['lastUpdated'], isNull);
     });
@@ -87,7 +87,7 @@ void main() {
 
       expect(
         model.toString(),
-        "ScheduleModel(requestType: teacher, value: Иванов, lastUpdated: null)",
+        "ScheduleModel(scheduleType: teacher, value: Иванов, lastUpdated: null)",
       );
     });
   });
@@ -129,11 +129,12 @@ void main() {
       expect(model.needsUpdate(), false);
     });
 
-    test("needsUpdate returns true when lastUpdated is older than maxAge", () {
+    test("needsUpdate returns true when lastUpdated is older than maxCacheAge",
+        () {
       final oldDate = DateTime.now().subtract(const Duration(days: 10));
       final model = ScheduleModel.teacher("Иванов", lastUpdated: oldDate);
 
-      expect(model.needsUpdate(maxAge: const Duration(days: 7)), true);
+      expect(model.needsUpdate(), true);
     });
 
     test("update returns new model with updated lastUpdated", () {
@@ -142,7 +143,7 @@ void main() {
       final updated = model.update();
 
       expect(updated.queryValue, model.queryValue);
-      expect(updated.requestType, model.requestType);
+      expect(updated.scheduleType, model.scheduleType);
       expect(updated.lastUpdated, isNotNull);
       expect(
           updated.lastUpdated!

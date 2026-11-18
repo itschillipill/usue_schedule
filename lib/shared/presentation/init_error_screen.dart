@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart' show launchUrl;
 import 'package:usue_schedule/core/logger/session_logger.dart';
 

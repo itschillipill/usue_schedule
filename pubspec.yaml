@@ -2,15 +2,13 @@ name: usue_schedule
 description: "An app for traking your schedule in USUE"
 publish_to: 'none'
 
-version: 4.3.12+95
+version: 4.5.15+122
 
 environment:
   sdk: ^3.5.3
 
 dependencies:
   flutter:
-    sdk: flutter
-  flutter_localizations:
     sdk: flutter
   intl: any
   cupertino_icons: ^1.0.8
@@ -23,7 +21,8 @@ dependencies:
   path_provider: ^2.1.5
   equatable: ^2.0.8
   archive: ^4.0.9
-
+  material_ui: any
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:usue_schedule/core/api_exceptions.dart';
 import 'package:usue_schedule/core/utils/date_utils.dart';
 import 'day_schedule.dart';
-import 'request_type.dart';
+import 'schedule_type.dart';
 
 class ScheduleResponse extends Equatable {
   const ScheduleResponse(
@@ -46,12 +46,8 @@ class ScheduleResponse extends Equatable {
   }
 
   bool hasRange(DateTime startDate, DateTime endDate) {
-    final hasStart = schedules.first.date.isBefore(startDate) ||
-        schedules.first.date.isAtSameMomentAs(startDate);
-    final hasEnd = schedules.last.date.isAfter(endDate) ||
-        schedules.last.date.isAtSameMomentAs(endDate);
-
-    return hasStart && hasEnd;
+    return schedules.first.date.compareTo(startDate) <= 0 &&
+        schedules.last.date.compareTo(endDate) >= 0;
   }
 
   // Получить все уникальные группы из расписания
@@ -78,14 +74,14 @@ class ScheduleResponse extends Equatable {
   }
 
   ScheduleResponse getFiltredData(
-    RequestType requestType,
+    ScheduleType scheduleType,
     String? filter,
   ) {
     if (filter == null) return this;
-    switch (requestType) {
-      case RequestType.group:
+    switch (scheduleType) {
+      case ScheduleType.group:
         return filterByTeacher(filter);
-      case RequestType.teacher:
+      case ScheduleType.teacher:
         return filterByGroup(filter);
       default:
         return this;

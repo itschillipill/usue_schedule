@@ -17,8 +17,8 @@ abstract base class CacheServiceBase {
 
   // --- Управление памятью ---
 
-  /// Очищает старые данные
-  Future<void> clearOldCache({Duration olderThan = const Duration(days: 30)});
+  /// Очищает данные
+  Future<Map<String, dynamic>> clearCache(Map<String, dynamic> data);
 
   /// Очищает кэш для конкретной модели
   Future<void> clearModelCache(ScheduleModel model);
@@ -37,6 +37,12 @@ abstract base class CacheServiceBase {
 
 final class CacheManager implements CacheServiceBase {
   static String name = "CacheManager";
+
+  /// Максимально допустимый размер для одного файла кэша.
+  static const double maxFileSize = 2 * 1024 * 1024;
+
+  /// Максимально допустимое количество дней.
+  static const int maxDayCount = 150;
 
   static final CacheManager _instance = CacheManager._internal();
   factory CacheManager() => _instance;
@@ -87,7 +93,7 @@ final class CacheManager implements CacheServiceBase {
     Map<String, dynamic> cacheData = await (() async {
       if (!await file.exists()) return emptyData;
       try {
-        return jsonDecode(await file.readAsString());
+        return await _readJsonFile(file);
       } catch (_) {
         return emptyData;
       }
@@ -106,9 +112,18 @@ final class CacheManager implements CacheServiceBase {
     cacheData['days_count'] = (cacheData['days'] as Map).length;
     cacheData['model'] = model.toJson();
 
+    // Проверяем примерный размер будущей строки JSON.
+    // Если он превышает лимит, запускаем очистку старых данных.
+    String encodedData = jsonEncode(cacheData);
+    if (cacheData['days_count'] > maxDayCount ||
+        encodedData.length > maxFileSize) {
+      cacheData = await clearCache(cacheData);
+      encodedData = jsonEncode(cacheData);
+    }
+
     // Сохраняем файл
     try {
-      await file.writeAsString(jsonEncode(cacheData));
+      await file.writeAsString(encodedData);
 
       SessionLogger.instance
           .debug(name, "Расписание успешно сохранено в кеш", extra: {
@@ -131,10 +146,7 @@ final class CacheManager implements CacheServiceBase {
     }
 
     try {
-      final content = await file.readAsString();
-      final cacheData = jsonDecode(content);
-
-      // Нормализуем даты
+      final cacheData = await _readJsonFile(file);
 
       // Собираем все дни в диапазоне
       final days = <DaySchedule>[];
@@ -181,26 +193,9 @@ final class CacheManager implements CacheServiceBase {
     }
   }
 
-  // Вспомогательный метод для получения всех сохраненных дней модели
-  Future<int> getAvailableDaysForModel(ScheduleModel model) async {
-    try {
-      final file = await _getModelFile(model);
-
-      if (!await file.exists()) return 0;
-
-      final content = await file.readAsString();
-      final data = jsonDecode(content);
-      return int.parse(data['days_count'].toString());
-    } catch (e) {
-      return 0;
-    }
-  }
-
   @override
   Future<({List<CacheInfo> info, String formattedSize})> getCacheInfo() async {
     final dir = Directory(_cacheDir);
-    int totalSize = 0;
-
     if (!await dir.exists()) return (info: <CacheInfo>[], formattedSize: '0 B');
 
     final files = await dir
@@ -209,61 +204,95 @@ final class CacheManager implements CacheServiceBase {
         .cast<File>()
         .toList();
 
-    final results = await Future.wait<CacheInfo?>(files.map((file) async {
+    final results = await Future.wait(files.map((file) async {
       try {
-        final data = jsonDecode(await file.readAsString());
+        final data = await _readJsonFile(file);
         if (data['model'] == null || data['days_count'] == null) {
           return null;
         }
-        totalSize += (await file.stat()).size;
+
+        final size = await file.length();
+
         return (
-          model: ScheduleModel.fromJson(data['model']),
-          daysCount: int.parse(data['days_count'].toString())
+          info: (
+            model: ScheduleModel.fromJson(data['model']),
+            daysCount: int.parse(data['days_count'].toString()),
+          ),
+          size: size,
         );
       } catch (e) {
         return null;
       }
     }));
 
+    final validResults =
+        results.whereType<({CacheInfo info, int size})>().toList();
+
+    int totalSize = validResults.fold(0, (sum, item) => sum + item.size);
+
+    final infoList = validResults.map((e) => e.info).toList()
+      ..sort((a, b) => a.model.compareTo(b.model));
+
     return (
-      info: results.whereType<CacheInfo>().toList()
-        ..sort((a, b) => b.model.compareTo(a.model)),
-      formattedSize: _formatSize(totalSize)
+      info: infoList,
+      formattedSize: switch (totalSize) {
+        < 1024 => '$totalSize B',
+        < 1024 * 1024 => '${(totalSize / 1024).toStringAsFixed(1)} KB',
+        _ => '${(totalSize / (1024 * 1024)).toStringAsFixed(1)} MB',
+      },
     );
   }
 
   @override
-  Future<void> clearOldCache(
-      {Duration olderThan = const Duration(days: 30)}) async {
-    final cutoff = DateTime.now().subtract(olderThan);
-    final dir = Directory(_cacheDir);
+  Future<Map<String, dynamic>> clearCache(Map<String, dynamic> data) async {
+    final daysMap = data['days'] as Map<String, dynamic>?;
+    if (daysMap == null || daysMap.isEmpty) return data;
 
-    if (!await dir.exists()) return;
+    final now = DateTime.now();
+    final keysToRemove = <String>[];
 
-    await for (var fileEntity in dir.list()) {
-      if (fileEntity case File file when file.path.endsWith('.json')) {
-        try {
-          final content = await file.readAsString();
-          final data = jsonDecode(content);
-          final lastUpdated = DateTime.parse(data['last_updated']);
+    daysMap.forEach((dateKey, value) {
+      try {
+        final parts = dateKey.split('_');
+        if (parts.length == 3) {
+          final year = int.parse(parts[0]);
+          final month = int.parse(parts[1]);
+          final day = int.parse(parts[2]);
+          final date = DateTime(year, month, day);
 
-          if (lastUpdated.isBefore(cutoff)) {
-            await file.delete();
+          final difference = now.difference(date).inDays;
+          if (difference > 60) {
+            keysToRemove.add(dateKey);
           }
-        } catch (e) {
-          // Если не можем прочитать - удаляем
-          await file.delete();
         }
+      } catch (_) {
+        // Если формат ключа поврежден — помечаем на удаление
+        keysToRemove.add(dateKey);
       }
+    });
+
+    for (var key in keysToRemove) {
+      daysMap.remove(key);
     }
+
+    // Обновляем счетчик дней
+    data['days_count'] = daysMap.length;
+    SessionLogger.instance.log(name,
+        '🧹 Очистка старого кэша выполнена. Осталось дней: ${daysMap.length}');
+
+    return data;
   }
 
   @override
   Future<void> clearAllCache() async {
     final dir = Directory(_cacheDir);
-    if (await dir.exists()) {
-      await dir.delete(recursive: true);
-      await dir.create();
+    try {
+      if (await dir.exists()) {
+        await dir.delete(recursive: true);
+      }
+    } catch (error, stackTrace) {
+      SessionLogger.instance.error(name, 'Возникла ошибка при удалении кэша',
+          error: error, stackTrace: stackTrace);
     }
     SessionLogger.instance.log(name, '🗑️ Весь кэш очищен');
   }
@@ -285,12 +314,20 @@ final class CacheManager implements CacheServiceBase {
     return totalSize;
   }
 
-  String _formatSize(int size) {
-    return switch (size) {
-      < 1024 => '$size B',
-      < 1024 * 1024 => '${(size / 1024).toStringAsFixed(1)} KB',
-      _ => '${(size / (1024 * 1024)).toStringAsFixed(1)} MB',
-    };
+  /// Безопасное чтение и парсинг JSON в изоляте
+  Future<Map<String, dynamic>> _readJsonFile(File file) async {
+    if (!await file.exists()) return {};
+    try {
+      final content = await file.readAsString();
+      if (content.isEmpty) return {};
+      final decoded = await jsonDecode(content);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      return {};
+    } catch (_) {
+      return {};
+    }
   }
 }
 

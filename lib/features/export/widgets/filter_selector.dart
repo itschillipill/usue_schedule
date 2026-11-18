@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:usue_schedule/features/schedule/models/request_type.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:usue_schedule/features/schedule/models/schedule_type.dart';
 
 import '../../schedule/controllers/schedule_view_provider.dart';
 
@@ -12,7 +12,7 @@ class FilterSelector {
       isScrollControlled: true,
       builder: (context) => _FilterSelectionSheet(
         availableFilters: provider.availableFilters,
-        requestType: provider.params.requestType,
+        scheduleType: provider.params.scheduleType,
         generatedColors: provider.groupColors,
         selectedFilter: filter,
       ),
@@ -22,13 +22,13 @@ class FilterSelector {
 
 class _FilterSelectionSheet extends StatefulWidget {
   final List<String> availableFilters;
-  final RequestType requestType;
+  final ScheduleType scheduleType;
   final Map<String, Color> generatedColors;
   final String? selectedFilter;
 
   const _FilterSelectionSheet({
     required this.availableFilters,
-    required this.requestType,
+    required this.scheduleType,
     required this.generatedColors,
     this.selectedFilter,
   });
@@ -68,7 +68,7 @@ class _FilterSelectionSheetState extends State<_FilterSelectionSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isGroup = widget.requestType == RequestType.group;
+    final isGroup = widget.scheduleType == ScheduleType.group;
     final mediaQuery = MediaQuery.of(context);
     final availableHeight = mediaQuery.size.height * 0.75;
 

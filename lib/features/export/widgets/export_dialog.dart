@@ -1,12 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ExportDialog {
-  static Future<bool?> show(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => const _ExportDialog(),
-    );
-  }
+  static Future<bool?> show(BuildContext context) => showDialog<bool>(
+        context: context,
+        builder: (context) => const _ExportDialog(),
+      );
 }
 
 class _ExportDialog extends StatelessWidget {

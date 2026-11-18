@@ -2,7 +2,7 @@
 
 import 'dart:convert' show utf8;
 import 'dart:io' show Platform, File;
-import 'package:flutter/material.dart' show DateTimeRange;
+import 'package:material_ui/material_ui.dart' show DateTimeRange;
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
 import 'package:share_plus/share_plus.dart';
@@ -15,6 +15,12 @@ import 'docx_generator.dart';
 
 const platform = MethodChannel('app.channel.files');
 
+typedef ShareFileData = ({
+  String fileName,
+  Uint8List bytes,
+  ExportFormat format
+});
+
 class FileService {
   static String name = "FileService";
 
@@ -24,11 +30,11 @@ class FileService {
     try {
       if (Platform.isAndroid) {
         // Android использует нативный код
-        final path = await platform.invokeMethod('saveFile', {
+        await platform.invokeMethod('saveFile', {
           'fileName': fileName,
           'bytes': bytes,
         });
-        return path as String?;
+        return null /*path as String? */;
       } else {
         // Для других платформ
         final directory = await getDownloadsDirectory();
@@ -49,14 +55,15 @@ class FileService {
   }
 
   // Основной метод сохранения расписания в разных форматах
-  static Future<void> saveSchedule({
+  static Future<ShareFileData> saveSchedule({
     required DateTimeRange dateRange,
     required ScheduleResponse schedule,
     required ExportFormat format,
     String? queryValue,
-    bool shareAfterSave = true,
   }) async {
-    final fileName = _generateFileName(dateRange, queryValue);
+    // Генерация имени файла
+    final fileName = _sanitizeFileName(
+        'Расписание_УрГЭУ_${queryValue ?? ""}_(${DateTimeUtils.formatDate(dateRange.start, showWeekday: false)}-${DateTimeUtils.formatDate(dateRange.end, showWeekday: false)})');
 
     final Uint8List bytes = switch (format) {
       ExportFormat.ics => await _saveAsICS(schedule, fileName, queryValue),
@@ -65,23 +72,13 @@ class FileService {
 
     SessionLogger.instance.debug(name, "✅ Файл сохранён");
 
-    if (shareAfterSave) {
-      await _shareFile(fileName, bytes, format);
-    }
-  }
-
-  // Генерация имени файла
-  static String _generateFileName(DateTimeRange dateRange, String? queryValue) {
-    final baseName =
-        'Расписание_УрГЭУ_${queryValue ?? ""}_(${DateTimeUtils.formatDate(dateRange.start, showWeekday: false)}-${DateTimeUtils.formatDate(dateRange.end, showWeekday: false)})';
-    return _sanitizeFileName(baseName);
+    return (fileName: fileName, bytes: bytes, format: format);
   }
 
   static Future<Uint8List> _saveAsWord(
       ScheduleResponse schedule, String fileName) async {
     final bytes = DocxGenerator.create(schedule, fileName);
 
-    // Важно: расширение теперь .docx
     final safeFileName = '$fileName.docx';
     saveToDownloads(safeFileName, bytes);
     return bytes;
@@ -101,7 +98,7 @@ class FileService {
     final bytes = utf8.encode('\ufeff$icsContent');
 
     final safeFileName = '$fileName.ics';
-    saveToDownloads(safeFileName, Uint8List.fromList(bytes));
+    saveToDownloads(safeFileName, bytes);
     return bytes;
   }
 
@@ -110,7 +107,7 @@ class FileService {
       ScheduleResponse schedule, String fileName) async {
     final bytes = utf8.encode('PDF экспорт будет реализован позже');
     final safeFileName = '$fileName.pdf';
-    return saveToDownloads(safeFileName, Uint8List.fromList(bytes));
+    return saveToDownloads(safeFileName, bytes);
   }
 
   // Сохранение в Excel (заглушка)
@@ -118,13 +115,12 @@ class FileService {
       ScheduleResponse schedule, String fileName) async {
     final bytes = utf8.encode('Excel экспорт будет реализован позже');
     final safeFileName = '$fileName.xlsx';
-    return saveToDownloads(safeFileName, Uint8List.fromList(bytes));
+    return saveToDownloads(safeFileName, bytes);
   }
 
   // Шеринг файла
-  static Future<void> _shareFile(
-      String fileName, Uint8List bytes, ExportFormat format) async {
-    final mimeType = switch (format) {
+  static Future<void> shareFile(ShareFileData data) async {
+    final mimeType = switch (data.format) {
       // ExportFormat.pdf => 'application/pdf',
       // ExportFormat.excel =>
       //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -136,8 +132,8 @@ class FileService {
       ShareParams(
         files: [
           XFile.fromData(
-            bytes,
-            name: '$fileName.${format.extension}',
+            data.bytes,
+            name: '${data.fileName}.${data.format.extension}',
             mimeType: mimeType,
           )
         ],

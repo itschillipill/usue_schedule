@@ -25,14 +25,6 @@ class Pair extends Equatable {
     );
   }
 
-  (String startTime, String endTime) get timeRange {
-    final parts = time.split('-');
-    if (parts.length == 2) {
-      return (parts[0].trim(), parts[1].trim());
-    }
-    return ('', '');
-  }
-
   String get pairTime => schedulePairs.first.correctedTime ?? time;
 
   bool isCurrentPair(DateTime date) =>

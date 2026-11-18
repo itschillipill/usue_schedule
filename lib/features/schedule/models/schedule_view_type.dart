@@ -1,9 +1,12 @@
+import 'package:material_ui/material_ui.dart' show IconData, Icons;
+
 enum ScheduleViewType {
-  day("День"),
-  week("Неделя"),
-  month("Месяц"),
-  custom("Произвольно");
+  day("День", Icons.today_outlined),
+  week("Неделя", Icons.view_week_outlined),
+  month("Месяц", Icons.calendar_month_outlined),
+  custom("Произвольно", Icons.date_range_outlined);
 
   final String text;
-  const ScheduleViewType(this.text);
+  final IconData icon;
+  const ScheduleViewType(this.text, this.icon);
 }

@@ -1,15 +1,15 @@
 import 'dart:async' show TimeoutException, FutureOr;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:usue_schedule/core/logger/session_logger.dart';
 
 class MessageService {
   static String name = "MessageService";
 
   static final GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>(debugLabel: "navigatorKey");
   static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
+      GlobalKey<ScaffoldMessengerState>(debugLabel: "scaffoldMessengerKey");
 
   static OverlayEntry? _loadingOverlay;
 
@@ -67,7 +67,7 @@ class MessageService {
     required Future<T> Function() fn,
     void Function(T result)? onSuccess,
     void Function(Object e, StackTrace? stacktrace)? onError,
-    Duration delay = const Duration(milliseconds: 500),
+    Duration? delay,
     Duration timeout = const Duration(seconds: 10),
   }) async {
     _showLoading(message: message);
@@ -79,11 +79,9 @@ class MessageService {
             'Операция превысила время ожидания $timeout'),
       );
 
-      await Future.delayed(delay);
+      if (delay != null) await Future.delayed(delay);
 
-      if (result != null) {
-        onSuccess?.call(result);
-      }
+      onSuccess?.call(result);
     } catch (e, stackTrace) {
       SessionLogger.instance.error(name, "Error in showLoading",
           error: e, stackTrace: stackTrace);

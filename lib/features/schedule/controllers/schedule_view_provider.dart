@@ -1,41 +1,51 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart' show ChangeNotifier, Color;
 import 'package:usue_schedule/core/api_exceptions.dart';
-import 'package:usue_schedule/core/theme/schedule_styles.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_model.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_response.dart';
 import 'package:usue_schedule/features/schedule/services/api.dart';
 
-import '../models/request_type.dart';
+import '../models/schedule_type.dart';
 import '../models/schedule_view_type.dart';
 
 class ScheduleViewProvider extends ChangeNotifier {
-  final ApiService apiService;
-  final Function(ScheduleModel model) onUpdate;
-  final ScheduleViewType initialViewType;
-  final bool isDarkMode;
-  ScheduleModel params;
-
   ScheduleViewProvider({
     required this.apiService,
     required this.params,
     required this.onUpdate,
-    required this.isDarkMode,
+    required this.gColors,
+    required this.onSave,
+    this.savedSchedule = true,
     this.initialViewType = ScheduleViewType.day,
   }) {
     _init();
   }
 
+  final ApiService apiService;
+  final Function(ScheduleModel model) onUpdate;
+  final Function(ScheduleModel model) onSave;
+  final ScheduleViewType initialViewType;
+  final List<Color> gColors;
+  ScheduleModel params;
+
+  /// этот флаг устанавливает сохраненное ли расписание.
+  late bool savedSchedule;
+
   /// режим отображения
   late ScheduleViewType _viewType;
-
   ScheduleViewType get viewType => _viewType;
 
-  List<String> get _activeFilters => params.requestType == RequestType.group
+  List<String> get _activeFilters => params.scheduleType == ScheduleType.group
       ? availableTeachers
       : availableGroups;
 
   bool get hasFilters => _activeFilters.isNotEmpty;
   List<String> get availableFilters => _activeFilters;
+
+  bool _disposed = false;
+
+  // допустимые границы дат
+  late final DateTime minDate;
+  late final DateTime maxDate;
 
   /// диапазон дат
   DateTime rangeStart = DateTime.now();
@@ -52,7 +62,8 @@ class ScheduleViewProvider extends ChangeNotifier {
   final Map<String, Color> groupColors = {};
 
   /// данные
-  ScheduleResponse? lastResponse;
+  ScheduleResponse? _response;
+  ScheduleResponse? cuttedResponse;
 
   /// состояние
   String? error;
@@ -60,21 +71,58 @@ class ScheduleViewProvider extends ChangeNotifier {
 
   bool get isFiltered => selectedFilter != null;
 
-  /// инициализация
-  void _init() {
-    // устанавливаем параметры по умолчанию
-    setViewType(initialViewType);
+  /// Проверка возможности навигации (для UI)
+  bool get canNavigateNext {
+    switch (_viewType) {
+      case ScheduleViewType.day:
+        return rangeStart.add(const Duration(days: 1)).compareTo(maxDate) <= 0;
+      case ScheduleViewType.week:
+        return rangeStart.add(const Duration(days: 7)).compareTo(maxDate) <= 0;
+      case ScheduleViewType.month:
+        final nextMonth = DateTime(rangeStart.year, rangeStart.month + 1, 1);
+        return nextMonth.compareTo(maxDate) <= 0;
+      case ScheduleViewType.custom:
+        return rangeEnd.compareTo(maxDate) < 0;
+    }
   }
 
-  /// проверяем нужно ли обновить расписание, на случай если расписание обновили.
-  bool _checkForceUpdate(bool force, ScheduleModel model) {
-    if (force) return true;
-    return model.needsUpdate();
+  bool get canNavigatePrevious {
+    switch (_viewType) {
+      case ScheduleViewType.day:
+        return rangeStart
+                .subtract(const Duration(days: 1))
+                .compareTo(minDate) >=
+            0;
+      case ScheduleViewType.week:
+        return rangeStart
+                .subtract(const Duration(days: 7))
+                .compareTo(minDate) >=
+            0;
+      case ScheduleViewType.month:
+        final prevMonth = DateTime(rangeStart.year, rangeStart.month - 1, 1);
+        // Сравниваем с началом месяца minDate
+        final minMonth = DateTime(minDate.year, minDate.month, 1);
+        return prevMonth.compareTo(minMonth) >= 0;
+      case ScheduleViewType.custom:
+        return rangeStart.compareTo(minDate) > 0;
+    }
+  }
+
+  /// инициализация
+  void _init() {
+    final now = DateTime.now();
+    minDate = DateTime(now.year, now.month, now.day)
+        .subtract(const Duration(days: 60));
+    maxDate =
+        DateTime(now.year, now.month, now.day).add(const Duration(days: 90));
+
+    // устанавливаем параметры по умолчанию (с проверкой на границы)
+    setViewType(initialViewType, date: now);
   }
 
   /// загрузка расписания
   Future<void> loadSchedule({bool force = false}) async {
-    force = _checkForceUpdate(force, params);
+    force = force || params.needsUpdate();
 
     try {
       isLoading = true;
@@ -82,24 +130,21 @@ class ScheduleViewProvider extends ChangeNotifier {
       notifyListeners();
 
       final response =
-          (!force && lastResponse?.hasRange(rangeStart, rangeEnd) == true)
-              ? lastResponse
+          (!force && _response?.hasRange(rangeStart, rangeEnd) == true)
+              ? _response
               : await apiService.fetch(
-                  (
-                    startDate: rangeStart,
-                    endDate: rangeEnd,
-                    scheduleModel: params,
-                    forceUpdate: force,
-                    onUpdateModel: (model) {
-                      onUpdate(model);
-                      updateParams(model);
-                    },
-                  ),
+                  startDate: rangeStart,
+                  endDate: rangeEnd,
+                  scheduleModel: params,
+                  forceUpdate: force,
+                  saveSchedule: savedSchedule,
+                  onUpdateModel: updateParams,
                 );
 
       if (response case final r?) {
-        lastResponse = r;
-        _extractParamsFrom(r.cut(rangeStart, rangeEnd));
+        _response = r;
+        cuttedResponse = r.cut(rangeStart, rangeEnd);
+        _extractParamsFrom(cuttedResponse!);
       }
     } on ApiException catch (e) {
       error = [e.message, e.tip].whereType<String>().join('\n');
@@ -111,40 +156,61 @@ class ScheduleViewProvider extends ChangeNotifier {
     }
   }
 
-  void updateParams(ScheduleModel model) => params = model;
+  void updateParams(ScheduleModel model) {
+    params = model;
+    onUpdate(model);
+  }
+
+  void onSaveSchedule() {
+    if (_response != null) apiService.saveCachedSchedule(params, _response!);
+    updateParams(params.update());
+    onSave(params);
+    savedSchedule = true;
+    notifyListeners();
+  }
+
+  /// клиппинг даты по границам min/max
+  DateTime _clampDate(DateTime date) {
+    if (date.isBefore(minDate)) return minDate;
+    if (date.isAfter(maxDate)) return maxDate;
+    return date;
+  }
 
   /// DAY RANGE
   void _setDayRange(DateTime date) {
-    rangeStart = DateTime(date.year, date.month, date.day);
+    final clamped = _clampDate(date);
+    rangeStart = DateTime(clamped.year, clamped.month, clamped.day);
     rangeEnd = rangeStart;
   }
 
   /// WEEK RANGE
   void _setWeekRange(DateTime date) {
-    // final start = date.subtract(Duration(days: date.weekday - 1));
-    // final end = start.add(const Duration(days: 6));
+    final clamped = _clampDate(date);
+    final start = clamped.subtract(Duration(days: clamped.weekday - 1));
+    final end = start.add(const Duration(days: 6));
 
-    // rangeStart = DateTime(start.year, start.month, start.day);
-    // rangeEnd = DateTime(end.year, end.month, end.day);
-    rangeStart = DateTime(date.year, date.month, date.day);
-    rangeEnd = rangeStart.add(Duration(days: 7));
+    rangeStart = DateTime(start.year, start.month, start.day);
+    rangeEnd = DateTime(end.year, end.month, end.day);
   }
 
   /// MONTH RANGE
   void _setMonthRange(DateTime date) {
-    // final start = DateTime(date.year, date.month, 1);
-    // final end = DateTime(date.year, date.month + 1, 0);
+    final clamped = _clampDate(date);
+    final start = DateTime(clamped.year, clamped.month, 1);
+    final end = DateTime(clamped.year, clamped.month + 1, 0);
 
-    // rangeStart = DateTime(start.year, start.month, start.day);
-    // rangeEnd = DateTime(end.year, end.month, end.day);
-    rangeStart = DateTime(date.year, date.month, date.day);
-    rangeEnd = rangeStart.add(Duration(days: 30));
+    rangeStart = DateTime(start.year, start.month, start.day);
+    rangeEnd = DateTime(end.year, end.month, end.day);
   }
 
   /// CUSTOM RANGE
   void setCustomRange(DateTime start, DateTime end) {
-    rangeStart = DateTime(start.year, start.month, start.day);
-    rangeEnd = DateTime(end.year, end.month, end.day);
+    final clampedStart = _clampDate(start);
+    final clampedEnd = _clampDate(end);
+
+    rangeStart =
+        DateTime(clampedStart.year, clampedStart.month, clampedStart.day);
+    rangeEnd = DateTime(clampedEnd.year, clampedEnd.month, clampedEnd.day);
 
     loadSchedule();
   }
@@ -152,21 +218,30 @@ class ScheduleViewProvider extends ChangeNotifier {
   /// переключение режима
   void setViewType(ScheduleViewType type, {DateTime? date}) {
     _viewType = type;
+    setDate(date ?? rangeStart, load: false);
+    loadSchedule();
+  }
 
-    final fn = switch (type) {
+  /// установка даты
+  void setDate(DateTime date, {bool load = true}) {
+    final fn = switch (_viewType) {
       ScheduleViewType.day => _setDayRange,
       ScheduleViewType.week => _setWeekRange,
       ScheduleViewType.month => _setMonthRange,
-      ScheduleViewType.custom => (_) {},
+      _ => (_) {}
     };
 
-    fn(date ?? DateTime.now());
+    fn(date);
 
-    loadSchedule();
+    if (load) {
+      loadSchedule();
+    }
   }
 
   /// навигация вперед
   void navigateNext() {
+    if (!canNavigateNext) return;
+
     switch (_viewType) {
       case ScheduleViewType.day:
         _setDayRange(rangeStart.add(const Duration(days: 1)));
@@ -177,7 +252,7 @@ class ScheduleViewProvider extends ChangeNotifier {
         break;
 
       case ScheduleViewType.month:
-        _setMonthRange(rangeStart.add(Duration(days: 30)));
+        _setMonthRange(DateTime(rangeStart.year, rangeStart.month + 1, 1));
         break;
 
       default:
@@ -189,6 +264,8 @@ class ScheduleViewProvider extends ChangeNotifier {
 
   /// навигация назад
   void navigatePrevious() {
+    if (!canNavigatePrevious) return;
+
     switch (_viewType) {
       case ScheduleViewType.day:
         _setDayRange(rangeStart.subtract(const Duration(days: 1)));
@@ -199,7 +276,7 @@ class ScheduleViewProvider extends ChangeNotifier {
         break;
 
       case ScheduleViewType.month:
-        _setMonthRange(rangeStart.subtract(Duration(days: 30)));
+        _setMonthRange(DateTime(rangeStart.year, rangeStart.month - 1, 1));
         break;
 
       default:
@@ -209,10 +286,21 @@ class ScheduleViewProvider extends ChangeNotifier {
     loadSchedule();
   }
 
+  @override
+  void notifyListeners() {
+    if (_disposed) return;
+    super.notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   /// фильтр
   void toggleFilter({required String? filter}) {
     selectedFilter = filter;
-    _generateGroupColors();
     notifyListeners();
   }
 
@@ -230,18 +318,9 @@ class ScheduleViewProvider extends ChangeNotifier {
 
   /// генерация цветов
   void _generateGroupColors() {
-    groupColors
-      ..clear()
-      ..addEntries(
-        availableGroups.asMap().entries.map((entry) {
-          final index = entry.key;
-          final group = entry.value;
-
-          return MapEntry(
-            group,
-            ScheduleStyles.getGroupColor(index, isDarkMode),
-          );
-        }),
-      );
+    groupColors.clear();
+    for (var (index, group) in availableGroups.indexed) {
+      groupColors[group] = gColors[index % gColors.length];
+    }
   }
 }

@@ -10,17 +10,9 @@ import 'package:usue_schedule/shared/mixins/debounce_mixin.dart';
 
 import '../../../core/logger/session_logger.dart';
 import '../../cache/provider/cache_provider.dart';
-import '../models/request_type.dart';
+import '../models/schedule_type.dart';
 import '../models/schedule_model.dart';
 import '../models/schedule_response.dart';
-
-typedef Params = ({
-  DateTime startDate,
-  DateTime endDate,
-  ScheduleModel scheduleModel,
-  bool forceUpdate,
-  Function(ScheduleModel model) onUpdateModel,
-});
 
 class ApiService with DebouncedRequestMixin {
   static const String name = "ApiService";
@@ -30,15 +22,16 @@ class ApiService with DebouncedRequestMixin {
 
   final int _prefetchDays;
 
-  final CacheProvider? cacheProvider;
+  final CacheProvider? _cacheProvider;
 
   final Dio _dio;
 
   ApiService({
-    this.cacheProvider,
+    CacheProvider? cacheProvider,
     Dio? dio,
     int prefetchDays = defaultPrefetchDays,
   })  : _prefetchDays = prefetchDays,
+        _cacheProvider = cacheProvider,
         _dio = dio ?? Dio() {
     if (dio == null) {
       _configureDio();
@@ -56,7 +49,7 @@ class ApiService with DebouncedRequestMixin {
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
 
-    if (kDebugMode && !kIsWeb) {
+    if (!kIsWeb) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
         client.badCertificateCallback = (cert, host, port) => true;
@@ -65,19 +58,24 @@ class ApiService with DebouncedRequestMixin {
     }
   }
 
-  Future<ScheduleResponse?> fetch(Params params) async {
+  Future<ScheduleResponse?> fetch({
+    required DateTime startDate,
+    required DateTime endDate,
+    required ScheduleModel scheduleModel,
+    required bool forceUpdate,
+    required Function(ScheduleModel model) onUpdateModel,
+    bool saveSchedule = true,
+  }) async {
     try {
       return await debouncedRequest<ScheduleResponse?>(
-          delay: Duration(milliseconds: 200),
-          action: () {
-            return getSchedule(
-              startDate: params.startDate,
-              endDate: params.endDate,
-              scheduleModel: params.scheduleModel,
-              force: params.forceUpdate,
-              onUpdateModel: params.onUpdateModel,
-            );
-          });
+          delay: Duration(milliseconds: 350),
+          action: () => getSchedule(
+              startDate: startDate,
+              endDate: endDate,
+              scheduleModel: scheduleModel,
+              force: forceUpdate,
+              onUpdateModel: onUpdateModel,
+              saveSchedule: saveSchedule));
     } catch (e, st) {
       if (e case DioException error when CancelToken.isCancel(error)) {
         return null;
@@ -94,6 +92,7 @@ class ApiService with DebouncedRequestMixin {
     required ScheduleModel scheduleModel,
     required Function(ScheduleModel model) onUpdateModel,
     bool force = false,
+    bool saveSchedule = true,
     ApiException? withException,
   }) async {
     SessionLogger.instance.debug(name, "Получение расписания", extra: {
@@ -104,24 +103,24 @@ class ApiService with DebouncedRequestMixin {
     try {
       // Подготовка параметров
       final end = endDate
-          .add(Duration(days: cacheProvider == null ? 0 : _prefetchDays));
+          .add(Duration(days: _cacheProvider == null ? 0 : _prefetchDays));
       final start =
-          startDate.subtract(Duration(days: cacheProvider == null ? 0 : 7));
+          startDate.subtract(Duration(days: _cacheProvider == null ? 0 : 7));
 
       // Проверка кэша
       final cached = force
           ? null
-          : (await cacheProvider?.getSchedule(scheduleModel, start, end))
+          : (await _cacheProvider?.getSchedule(scheduleModel, start, end))
               ?.copyWith(exception: withException);
 
       if (cached != null) return cached;
 
       final params = {
-        't': _generateT(),
+        't': _generate$T(),
         'action': 'show',
         'startDate': _formatDate(start),
         'endDate': _formatDate(end),
-        scheduleModel.requestType.query: scheduleModel.queryValue,
+        scheduleModel.scheduleType.query: scheduleModel.queryValue,
       };
 
       late final Response response;
@@ -132,18 +131,18 @@ class ApiService with DebouncedRequestMixin {
         //     requestOptions: response.requestOptions,
         //     error: SocketException('simulated'));
       } on DioException catch (e) {
-        late final ApiException apiException;
-
-        if (e.error is SocketException) {
-          apiException = NetworkException(e.error);
-        } else if (e.type == DioExceptionType.connectionTimeout ||
-            e.type == DioExceptionType.receiveTimeout) {
-          apiException = TimeoutException(e);
-        } else if (e.response?.statusCode != null) {
-          apiException = ServerException(e.response!.statusCode!, e);
-        } else {
-          apiException = UnknownException('Ошибка сети: ${e.message}', e);
-        }
+        final apiException = switch (e) {
+          _ when e.error is SocketException => NetworkException(e.error),
+          _
+              when e.type == DioExceptionType.connectionTimeout ||
+                  e.type == DioExceptionType.receiveTimeout =>
+            TimeoutException(e),
+          _ when e.response?.statusCode != null =>
+            ServerException(e.response!.statusCode!, e),
+          _ => UnknownException(
+              "Ошибка сети: ${e.message ?? defaultDioExceptionReadableStringBuilder(e)}",
+              e),
+        };
 
         if (force) {
           SessionLogger.instance.error(
@@ -151,11 +150,12 @@ class ApiService with DebouncedRequestMixin {
             "Ошибка при force-запросе, пробуем без force",
             error: apiException,
           );
-          return getSchedule(
+          return await getSchedule(
             startDate: startDate,
             endDate: endDate,
             scheduleModel: scheduleModel,
             force: false,
+            saveSchedule: saveSchedule,
             onUpdateModel: onUpdateModel,
             withException: apiException,
           );
@@ -178,23 +178,25 @@ class ApiService with DebouncedRequestMixin {
         throw ParseException(e);
       }
 
-      ScheduleModel? updatedModel;
-
-      if (scheduleModel.needsUpdate() || force) {
-        updatedModel = scheduleModel.update();
-        onUpdateModel(updatedModel);
-      }
-
       // Сохранение в кэш
-      try {
-        cacheProvider?.saveSchedule(
-          updatedModel ?? scheduleModel,
-          parsed.fillEmptyDates(start, end,
-              skip: scheduleModel.requestType != RequestType.audience),
-        );
-      } catch (e) {
-        SessionLogger.instance
-            .warning(name, "Ошибка сохранения в кэш", error: e);
+      if (saveSchedule) {
+        try {
+          ScheduleModel? updatedModel;
+
+          if (scheduleModel.needsUpdate() || force) {
+            updatedModel = scheduleModel.update();
+            onUpdateModel(updatedModel);
+          }
+
+          saveCachedSchedule(
+            updatedModel ?? scheduleModel,
+            parsed.fillEmptyDates(start, end,
+                skip: scheduleModel.scheduleType != ScheduleType.audience),
+          );
+        } catch (e) {
+          SessionLogger.instance
+              .warning(name, "Ошибка сохранения в кэш", error: e);
+        }
       }
 
       return parsed;
@@ -213,7 +215,10 @@ class ApiService with DebouncedRequestMixin {
         '${date.year}';
   }
 
+  void saveCachedSchedule(ScheduleModel model, ScheduleResponse resp) =>
+      _cacheProvider?.saveSchedule(model, resp);
+
   // генерируем t для запроса, как на офицальном сайте
-  String _generateT() =>
-      '0.${List<int>.generate(16, (_) => Random().nextInt(10)).join()}';
+  String _generate$T() =>
+      '0.${List<int>.generate(16, (_) => Random().nextInt(10), growable: false).join()}';
 }

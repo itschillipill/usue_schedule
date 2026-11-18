@@ -5,15 +5,18 @@ import '../../schedule/models/schedule_response.dart';
 import '../services/cache_service.dart';
 
 class CacheProvider extends ChangeNotifier {
-  final CacheManager _cacheManager = CacheManager();
-  final String? cacheDir;
-
   CacheProvider._({this.cacheDir});
 
-  static Future<CacheProvider?> create({String? cacheDir}) async {
-    if (kIsWeb) return null;
+  final CacheManager _cacheManager = CacheManager();
+  final String? cacheDir;
+  bool canCacheSchedule = false;
+
+  List<ScheduleModel> schedules = [];
+
+  static Future<CacheProvider> create({String? cacheDir}) async {
     final provider = CacheProvider._(cacheDir: cacheDir);
-    if (!await provider._initialize()) return null;
+    provider.canCacheSchedule =
+        (kIsWeb || kIsWasm) ? false : await provider._initialize();
     return provider;
   }
 
@@ -48,16 +51,6 @@ class CacheProvider extends ChangeNotifier {
   }
 
   Future<void> clearAllCache() => _cacheManager.clearAllCache();
-
-  Future<void> clearOldCache(
-      {Duration olderThan = const Duration(days: 30)}) async {
-    await _cacheManager.clearOldCache(olderThan: olderThan);
-  }
-
-  // --- Информация о кэше ---
-  Future<int> getAvailableDaysForModel(ScheduleModel model) async {
-    return _cacheManager.getAvailableDaysForModel(model);
-  }
 
   Future<({List<CacheInfo> info, String formattedSize})> getCacheInfo() {
     return _cacheManager.getCacheInfo();

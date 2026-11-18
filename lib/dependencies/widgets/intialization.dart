@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' as material
+import 'package:material_ui/material_ui.dart' as material
     show WidgetsBinding, WidgetsFlutterBinding;
 import 'package:flutter/services.dart';
 import 'package:usue_schedule/dependencies/dependencies.dart';

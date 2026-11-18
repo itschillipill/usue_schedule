@@ -1,12 +1,10 @@
-import 'dart:io' show HttpClient;
-
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
-import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb, ValueNotifier;
+import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:usue_schedule/core/logger/session_logger.dart';
+import 'package:usue_schedule/core/network/dio_factory.dart';
 import 'package:usue_schedule/shared/mixins/debounce_mixin.dart';
 
-import '../models/request_type.dart';
+import '../models/schedule_type.dart';
 import '../models/schedule_model.dart';
 
 class ScheduleSearchService with DebouncedRequestMixin {
@@ -18,20 +16,7 @@ class ScheduleSearchService with DebouncedRequestMixin {
   final ValueNotifier<bool> isSearchingNotifier = ValueNotifier(false);
 
   ScheduleSearchService({Dio? dio}) {
-    _dio = dio ??
-        Dio(BaseOptions(
-          baseUrl: 'https://www.usue.ru',
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 10),
-        ));
-
-    if (dio == null && kDebugMode && !kIsWeb) {
-      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-        final client = HttpClient();
-        client.badCertificateCallback = (cert, host, port) => true;
-        return client;
-      };
-    }
+    _dio = dio ?? DioFactory.createDio(baseUrl: 'https://www.usue.ru/');
   }
 
   /// Метод поиска, вызываемый из TextField
@@ -45,11 +30,11 @@ class ScheduleSearchService with DebouncedRequestMixin {
 
     try {
       final list = await debouncedRequest<List<ScheduleModel>?>(
-        delay: const Duration(milliseconds: 500),
+        delay: const Duration(milliseconds: 350),
         action: () => _load(
-          action: '${model.requestType.query}-list',
+          action: '${model.scheduleType.query}-list',
           query: model.queryValue,
-          type: model.requestType,
+          type: model.scheduleType,
         ),
       );
 
@@ -70,7 +55,7 @@ class ScheduleSearchService with DebouncedRequestMixin {
   Future<List<ScheduleModel>> _load({
     required String action,
     required String query,
-    required RequestType type,
+    required ScheduleType type,
   }) async {
     final response = await _dio.get(
       '/schedule/',
@@ -80,10 +65,10 @@ class ScheduleSearchService with DebouncedRequestMixin {
     final List data = response.data;
     return data
         .map((e) => ScheduleModel(
-              queryValue: type == RequestType.teacher && e is Map
+              queryValue: type == ScheduleType.teacher && e is Map
                   ? e["label"].toString()
                   : e.toString(),
-              requestType: type,
+              scheduleType: type,
             ))
         .toList();
   }

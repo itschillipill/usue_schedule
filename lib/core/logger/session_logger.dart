@@ -187,10 +187,10 @@ class SessionLogger implements MyObserver {
   List<LogEntry> getLogs() => List.unmodifiable(_logs);
 
   List<LogEntry> getLogsByLevel(LogLevel level) =>
-      _logs.where((log) => log.level == level).toList();
+      _logs.where((log) => log.level == level).toList(growable: false);
 
   List<LogEntry> getLogsByCategory(String category) =>
-      _logs.where((log) => log.category == category).toList();
+      _logs.where((log) => log.category == category).toList(growable: false);
 
   void clearLogs() => _logs.clear();
 }

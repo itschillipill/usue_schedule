@@ -1,6 +1,6 @@
 import 'dart:ui' show Color;
 
-import 'package:flutter/material.dart' show Icons, IconData, Colors;
+import 'package:material_ui/material_ui.dart' show Icons, IconData, Colors;
 
 enum ExportFormat {
   ics(Icons.calendar_today, 'ICS (Календарь)',

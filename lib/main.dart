@@ -1,14 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:usue_schedule/core/logger/session_logger.dart';
 import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
 import 'core/theme/theme.dart';
+import 'features/schedule/presentation/schedule_screen.dart';
 import 'features/settings/controllers/settings_cubit.dart';
 import 'dependencies/widgets/intialization.dart';
-import 'shared/presentation/app_gate.dart';
 import 'shared/presentation/init_error_screen.dart';
 import 'shared/presentation/splash_screen.dart';
 import 'shared/services/message_service.dart';
@@ -48,7 +47,7 @@ class App extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeMode,
-          home: AppGate(),
+          home: ScheduleScreen(),
           builder: (context, child) {
             return MediaQuery(
               data: MediaQuery.of(context)
@@ -56,8 +55,8 @@ class App extends StatelessWidget {
               child: child!,
             );
           },
-          locale: const Locale('ru'),
-          supportedLocales: const [Locale('ru')],
+          locale: const Locale('ru', "RU"),
+          supportedLocales: const [Locale('ru', "RU")],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
         );
       },
@@ -65,7 +64,7 @@ class App extends StatelessWidget {
   }
 }
 
-void $handleInitError(Object error, StackTrace stackTrace) async {
+void $handleInitError(Object error, StackTrace stackTrace) {
   SessionLogger.instance.onError("Initialization", error, stackTrace);
   runApp(
     MaterialApp(

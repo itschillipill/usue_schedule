@@ -42,8 +42,7 @@ class DocxGenerator {
     _addParagraph(buffer, title, fontSize: 24, bold: true, center: true);
 
     for (final day in schedule.schedules.where((d) => d.hasPairs)) {
-      final dayTitle =
-          "${DateTimeUtils.getWeekdayName(day.date.weekday)}, ${day.date}";
+      final dayTitle = DateTimeUtils.formatDate(day.date);
       _addParagraph(buffer, dayTitle, fontSize: 24, bold: true, keepNext: true);
       buffer.writeln('<w:tbl>');
 

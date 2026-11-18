@@ -1,19 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:usue_schedule/features/schedule/widgets/label_group.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
+import '../controllers/schedule_view_provider.dart';
 import '../models/day_schedule.dart';
 import '../models/pair.dart';
 import '../models/schedule_pair.dart';
-import '../models/schedule_response.dart';
+import '../models/schedule_type.dart';
 import '../presentation/pair_view_screen.dart';
 import 'day_header.dart';
-import 'custom_range_header.dart';
+import 'custom_view_header.dart';
 
 class CustomRangeView extends StatelessWidget {
-  final ScheduleResponse data;
+  final Iterable<DaySchedule> data;
   final DateTime rangeStart;
   final DateTime rangeEnd;
-  final Map<String, Color> groupColors;
   final Widget buildEmptyState;
 
   const CustomRangeView({
@@ -21,82 +21,68 @@ class CustomRangeView extends StatelessWidget {
     required this.data,
     required this.rangeStart,
     required this.rangeEnd,
-    required this.groupColors,
     required this.buildEmptyState,
   });
 
   @override
   Widget build(BuildContext context) {
-    final daysWithPairs = data.schedules
-        .where((day) => day.hasPairs)
-        .map((day) => (
-              day: day,
-              date: day.date,
-            ))
-        .toList();
+    final now = DateTime.now();
+    final todayDate = DateTime(now.year, now.month, now.day);
+
+    final daysWithPairs =
+        data.where((day) => day.hasPairs).toList(growable: false);
 
     if (daysWithPairs.isEmpty) return buildEmptyState;
 
-    final todayDate = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-    );
+    final List<int> previousDays = [];
+    final List<int> currentFutureDays = [];
 
-    final List<({DaySchedule day, DateTime date})> previousDays = [];
-    final List<({DaySchedule day, DateTime date})> currentFutureDays = [];
-
-    for (final item in daysWithPairs) {
-      final dayDateOnly = DateTime(
-        item.date.year,
-        item.date.month,
-        item.date.day,
-      );
-
-      if (dayDateOnly.isBefore(todayDate)) {
-        previousDays.add(item);
+    for (int i = 0; i < daysWithPairs.length; i++) {
+      if (daysWithPairs[i].date.isBefore(todayDate)) {
+        previousDays.add(i);
       } else {
-        currentFutureDays.add(item);
+        currentFutureDays.add(i);
       }
     }
 
-    previousDays.sort((a, b) => a.date.compareTo(b.date));
-    currentFutureDays.sort((a, b) => a.date.compareTo(b.date));
+    final hasCurrentDays = currentFutureDays.isNotEmpty;
+    final activeDaysList = hasCurrentDays ? currentFutureDays : previousDays;
 
-    final hasFutureDays = currentFutureDays.isNotEmpty;
+    final totalPairsCount = daysWithPairs.fold<int>(
+      0,
+      (sum, item) => sum + item.nonEmptyPairs.length,
+    );
 
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: CustomRangeHeader(
+          child: CustomViewHeader(
             days: daysWithPairs.length,
-            pairs: daysWithPairs.expand((e) => e.day.nonEmptyPairs).length,
+            pairs: totalPairsCount,
             startDate: rangeStart,
             endDate: rangeEnd,
           ),
         ),
-        if (previousDays.isNotEmpty && hasFutureDays)
+        if (previousDays.isNotEmpty && hasCurrentDays)
           SliverToBoxAdapter(
             child: _PreviousDaysSection(
-              days: previousDays,
-              groupColors: groupColors,
+              day: previousDays.map(((e) => daysWithPairs[e])),
             ),
           ),
         SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
-              final item =
-                  (hasFutureDays ? currentFutureDays : previousDays)[index];
-              final isToday = item.date.isAtSameMomentAs(todayDate);
+              final item = daysWithPairs[activeDaysList[index]];
+              final isToday = item.date.year == todayDate.year &&
+                  item.date.month == todayDate.month &&
+                  item.date.day == todayDate.day;
+
               return _LessonCard(
-                daySchedule: item.day,
-                date: item.date,
-                groupColors: groupColors,
+                daySchedule: item,
                 isToday: isToday,
               );
             },
-            childCount:
-                (hasFutureDays ? currentFutureDays : previousDays).length,
+            childCount: activeDaysList.length,
           ),
         ),
       ],
@@ -105,12 +91,10 @@ class CustomRangeView extends StatelessWidget {
 }
 
 class _PreviousDaysSection extends StatelessWidget {
-  final List<({DaySchedule day, DateTime date})> days;
-  final Map<String, Color> groupColors;
+  final Iterable<DaySchedule> day;
 
   const _PreviousDaysSection({
-    required this.days,
-    required this.groupColors,
+    required this.day,
   });
 
   @override
@@ -150,7 +134,7 @@ class _PreviousDaysSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                '${days.length}',
+                '${day.length}',
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -160,11 +144,9 @@ class _PreviousDaysSection extends StatelessWidget {
             ),
           ],
         ),
-        children: days.map((item) {
+        children: day.map((item) {
           return _LessonCard(
-            daySchedule: item.day,
-            date: item.date,
-            groupColors: groupColors,
+            daySchedule: item,
             isPrevious: true,
           );
         }).toList(),
@@ -176,15 +158,11 @@ class _PreviousDaysSection extends StatelessWidget {
 // Виджет карточки дня
 class _LessonCard extends StatelessWidget {
   final DaySchedule daySchedule;
-  final DateTime date;
-  final Map<String, Color> groupColors;
   final bool isToday;
   final bool isPrevious;
 
   const _LessonCard({
     required this.daySchedule,
-    required this.date,
-    required this.groupColors,
     this.isToday = false,
     this.isPrevious = false,
   });
@@ -208,26 +186,19 @@ class _LessonCard extends StatelessWidget {
           vertical: VisualDensity.minimumDensity),
       title: Opacity(
         opacity: opacity,
-        child: DayHeader(
-          day: daySchedule,
-          date: date,
-        ),
+        child: DayHeader(day: daySchedule),
       ),
       children: daySchedule.nonEmptyPairs
           .map(
-            (pair) => Padding(
-              padding: const EdgeInsets.only(bottom: 5),
-              child: Opacity(
-                opacity: opacity,
-                child: PairCard(
-                  pair: pair,
-                  groupColors: groupColors,
-                  date: date,
-                ),
+            (pair) => Opacity(
+              opacity: opacity,
+              child: PairCard(
+                pair: pair,
+                date: daySchedule.date,
               ),
             ),
           )
-          .toList(),
+          .toList(growable: false),
     );
   }
 }
@@ -235,13 +206,11 @@ class _LessonCard extends StatelessWidget {
 class PairCard extends StatelessWidget {
   final Pair pair;
   final DateTime date;
-  final Map<String, Color> groupColors;
 
   const PairCard({
     super.key,
     required this.pair,
     required this.date,
-    required this.groupColors,
   });
 
   @override
@@ -249,12 +218,18 @@ class PairCard extends StatelessWidget {
     final isCurrent = pair.isCurrentPair(date);
     final theme = Theme.of(context);
 
+    // Группируем пары по предмету, типу и аудитории
     final groupedPairs = <String, List<SchedulePair>>{};
     for (var sp in pair.schedulePairs) {
       final key = "${sp.subject}|${sp.lessonType}|${sp.audience}";
       groupedPairs.putIfAbsent(key, () => []).add(sp);
     }
     final displayItems = groupedPairs.values.toList();
+
+    // Извлекаем время начала и окончания
+    final timeParts = pair.pairTime.split('-');
+    final startTime = timeParts.isNotEmpty ? timeParts[0].trim() : '';
+    final endTime = timeParts.length > 1 ? timeParts[1].trim() : '';
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -264,92 +239,95 @@ class PairCard extends StatelessWidget {
         ),
       ),
       child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
         decoration: BoxDecoration(
           color: isCurrent
-              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.1)
-              : theme.scaffoldBackgroundColor,
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.12)
+              : theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isCurrent
                 ? theme.colorScheme.primary
-                : theme.dividerColor.withValues(alpha: 0.1),
+                : theme.dividerColor.withValues(alpha: 0.15),
             width: isCurrent ? 1.5 : 1,
           ),
         ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                decoration: BoxDecoration(
-                  color: isCurrent
-                      ? theme.colorScheme.primary.withValues(alpha: 0.05)
-                      : null,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    bottomLeft: Radius.circular(16),
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding:
+                  const EdgeInsets.only(left: 12, top: 8, bottom: 4, right: 12),
+              decoration: BoxDecoration(
+                color: isCurrent
+                    ? theme.colorScheme.primary.withValues(alpha: 0.08)
+                    : theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: isCurrent
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
                       '${pair.number} пара',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: isCurrent
-                            ? theme.colorScheme.primary
-                            : theme.hintColor,
-                        fontWeight: FontWeight.bold,
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.primary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      pair.pairTime.split('-')[0].trim(),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isCurrent ? theme.colorScheme.primary : null,
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$startTime – $endTime',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isCurrent
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.8),
                     ),
-                    Text(
-                      pair.pairTime.split('-')[1].trim(),
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: theme.hintColor),
+                  ),
+                  const Spacer(),
+                  if (isCurrent) ...[
+                    Icon(
+                      Icons.access_time_filled,
+                      size: 16,
+                      color: theme.colorScheme.primary,
                     ),
-                    if (isCurrent) ...[
-                      const SizedBox(height: 8),
-                      Icon(Icons.access_time_filled,
-                          size: 14, color: theme.colorScheme.primary),
-                    ]
                   ],
-                ),
+                ],
               ),
-              const VerticalDivider(width: 1),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: displayItems.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final List<SchedulePair> group = entry.value;
-                    final isLast = index == displayItems.length - 1;
+            ),
 
-                    final first = group.first;
-                    final hasTitle = index == 0 ||
-                        first.subject.trim() !=
-                            displayItems[index - 1].first.subject.trim();
-                    return _ScheduleItem(
-                      first: first,
-                      hasTitle: hasTitle,
-                      group: group,
-                      isLast: isLast,
-                      groupColors: groupColors,
-                      totalPairsCount: pair.schedulePairs.length,
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),
+            // Список элементов пары
+            Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: List.generate(displayItems.length, (index) {
+                  final List<SchedulePair> group = displayItems[index];
+
+                  final hasTitle = index == 0 ||
+                      group.first.subject.trim() !=
+                          displayItems[index - 1].first.subject.trim();
+                  return _ScheduleItem(
+                    hasTitle: hasTitle,
+                    group: group,
+                    isLast: index == displayItems.length - 1,
+                  );
+                }, growable: false)),
+          ],
         ),
       ),
     );
@@ -357,160 +335,151 @@ class PairCard extends StatelessWidget {
 }
 
 class _ScheduleItem extends StatelessWidget {
-  final SchedulePair first;
   final List<SchedulePair> group;
   final bool isLast;
   final bool hasTitle;
-  final int totalPairsCount;
-  final Map<String, Color> groupColors;
-  const _ScheduleItem(
-      {required this.first,
-      required this.group,
-      required this.isLast,
-      required this.hasTitle,
-      required this.totalPairsCount,
-      required this.groupColors});
+
+  const _ScheduleItem({
+    required this.group,
+    required this.isLast,
+    required this.hasTitle,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final provider = context.read<ScheduleViewProvider>();
+    final ScheduleType scheduleType = provider.params.scheduleType;
+
+    final bool showTeacher = scheduleType != ScheduleType.teacher;
+    final bool showGroup = scheduleType != ScheduleType.group;
+
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.only(left: 12, right: 12, bottom: 8, top: 6),
       decoration: BoxDecoration(
         border: isLast
             ? null
             : Border(
                 bottom: BorderSide(
-                    color: theme.dividerColor.withValues(alpha: 0.1)),
+                  color: theme.dividerColor.withValues(alpha: 0.1),
+                ),
               ),
       ),
       child: Column(
-        spacing: 2,
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (hasTitle)
-                Text(
-                  first.subject.trim(),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              if (group.hasMultipleGroups)
-                Wrap(
-                    spacing: 2,
-                    children: group.groups.map(_buildSingleGroupChip).toList()),
-            ],
-          ),
-          Row(
-            spacing: 2,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.meeting_room_outlined,
-                    size: 16,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
-                  ),
-                  Text(
-                    group.audience,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.8),
+          if (hasTitle)
+            Text(
+              group.first.subject.trim(),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          RichText(
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            text: TextSpan(
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+              children: [
+                if (group.audience.isNotEmpty) ...[
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: Icon(
+                        Icons.meeting_room_outlined,
+                        size: 14,
+                        color: theme.hintColor,
+                      ),
                     ),
                   ),
+                  TextSpan(
+                    text: group.audience,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
                 ],
-              ),
-              Text(
-                '•',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  softWrap: true,
-                  group.teachers.join(','),
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.8),
+                if (group.audience.isNotEmpty && showTeacher)
+                  TextSpan(
+                    text: ' • ',
+                    style: TextStyle(color: theme.hintColor),
                   ),
-                ),
-              ),
-              if (group.hasMultipleGroups && isLast)
-                LabelGroup(pairs: totalPairsCount)
-            ],
+                if (showTeacher)
+                  TextSpan(
+                    text: group.teachers.join(', '),
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+              ],
+            ),
           ),
-          Wrap(
-            spacing: 2,
-            children: [
-              if (!group.hasMultipleGroups)
-                _buildSingleGroupChip(first.cleanGroup),
-              if (group.subgroups.isNotEmpty)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
+          if (showGroup || group.subgroups.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: [
+                if (group.hasMultipleGroups)
+                  ...group.map(
+                    (p) {
+                      return _buildChip(
+                        text: p.cleanGroup,
+                        color: provider.groupColors[group.first.cleanGroup] ??
+                            theme.colorScheme.primary,
+                      );
+                    },
+                  )
+                else if (showGroup)
+                  _buildChip(
+                    text: group.first.cleanGroup,
+                    color: provider.groupColors[group.first.cleanGroup] ??
+                        theme.colorScheme.primary,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.account_tree_outlined,
-                        size: 12,
-                        color: Colors.purple,
-                      ),
-                      Text(
-                        'Подгр. ${group.subgroups.join(', ')}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.purple,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                if (group.subgroups.isNotEmpty)
+                  _buildChip(
+                    text: 'Подгр. ${group.subgroups.join(', ')}',
+                    color: Colors.purple,
+                    icon: Icons.account_tree_outlined,
                   ),
-                ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildSingleGroupChip(String group) {
+  Widget _buildChip({
+    required String text,
+    required Color color,
+    IconData? icon,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: (groupColors[group] ?? Colors.grey).withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(
-        group,
-        style: TextStyle(
-          fontSize: 12,
-          color: groupColors[group] ?? Colors.grey,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 11, color: color),
+            const SizedBox(width: 3),
+          ],
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

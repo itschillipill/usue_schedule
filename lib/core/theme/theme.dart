@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'app_pallete.dart';
 
@@ -135,6 +135,10 @@ class AppTheme {
           color: AppPallete.blueSecondary,
         ),
       ),
+    ),
+
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      foregroundColor: Colors.white,
     ),
 
     // Чипы (фильтры)
@@ -396,6 +400,10 @@ class AppTheme {
       ),
     ),
 
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      foregroundColor: Colors.white,
+    ),
+
     // Чипы (фильтры)
     chipTheme: ChipThemeData(
       backgroundColor: AppPallete.grey100,
@@ -574,15 +582,29 @@ extension ThemeExtension on BuildContext {
   Color get onSurfaceColor => Theme.of(this).colorScheme.onSurface;
   Color get cardColor => Theme.of(this).cardColor;
 
-  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
+  bool get isDarkMode => Theme.brightnessOf(this) == Brightness.dark;
 
-  // Цвет для текущей пары
-  Color get currentPairColor => isDarkMode
-      ? AppPallete.orange.withValues(alpha: 0.2)
-      : AppPallete.orange.withValues(alpha: 0.1);
+  List<Color> get groupColors =>
+      isDarkMode ? AppPallete.darkGroupColors : AppPallete.lightGroupColors;
 
-  // Цвет для сегодняшней даты
-  Color get todayColor => isDarkMode
-      ? AppPallete.bluePrimary.withValues(alpha: 0.3)
-      : AppPallete.blueLight;
+  Color lessonTypeColor(String keyWord) => switch (keyWord) {
+        'Лекция' => Colors.blue,
+        'Лабораторная' => Colors.green,
+        'Консультация' => Colors.orange,
+        'Экзамен' => Colors.purple,
+        'Зачет' => Colors.deepOrange,
+        'Практика' => Colors.indigo,
+        _ => Colors.grey
+      };
+
+  BoxDecoration get linearBkgDec => BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            primaryColor.withValues(alpha: 0.05),
+            surfaceColor,
+          ],
+        ),
+      );
 }

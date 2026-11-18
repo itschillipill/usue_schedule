@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:usue_schedule/features/schedule/models/schedule_view_type.dart';
 
@@ -8,7 +8,7 @@ class ScheduleHeaderDelegate extends SliverPersistentHeaderDelegate {
   final DateTime rangeEnd;
   final VoidCallback navigatePrevious;
   final VoidCallback navigateNext;
-  final Function(ScheduleViewType viewType) onViewTypeChanged;
+  final Function(ScheduleViewType viewType, {DateTime date}) onViewTypeChanged;
   final VoidCallback showCalendar;
 
   ScheduleHeaderDelegate({
@@ -115,7 +115,9 @@ class ScheduleHeaderDelegate extends SliverPersistentHeaderDelegate {
                         ))
                     .toList(),
                 onChanged: (value) {
-                  if (value != null) onViewTypeChanged(value);
+                  if (value != null) {
+                    onViewTypeChanged(value, date: DateTime.now());
+                  }
                 },
               ),
             ),

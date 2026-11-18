@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
-enum RequestType {
+enum ScheduleType {
   group(text: "Группа", query: "group", icon: Icons.group),
   audience(text: "Аудитория", query: "aud", icon: Icons.meeting_room),
   teacher(text: "Преподаватель", query: "teacher", icon: Icons.person);
@@ -8,16 +8,16 @@ enum RequestType {
   final String text;
   final String query;
   final IconData icon;
-  const RequestType(
+  const ScheduleType(
       {required this.text, required this.query, required this.icon});
 
   Color get color => switch (this) {
-        RequestType.group => Colors.green,
-        RequestType.audience => Colors.orange,
-        RequestType.teacher => Colors.blue,
+        ScheduleType.group => Colors.green,
+        ScheduleType.audience => Colors.orange,
+        ScheduleType.teacher => Colors.blue,
       };
 
-  bool get isGroup => this == RequestType.group;
-  bool get isAudience => this == RequestType.audience;
-  bool get isTeacher => this == RequestType.teacher;
+  bool get isGroup => this == ScheduleType.group;
+  bool get isAudience => this == ScheduleType.audience;
+  bool get isTeacher => this == ScheduleType.teacher;
 }

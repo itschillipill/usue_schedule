@@ -37,11 +37,13 @@ List<(String, _InitializationStep)> get _initializationSteps => [
         ("Setting up dependencies"),
         (deps) async {
           final prefs = await SharedPreferences.getInstance();
-
+          final CacheProvider cacheProvider = await CacheProvider.create();
+          deps.cacheProvider = cacheProvider;
+          deps.apiService = ApiService(
+              cacheProvider:
+                  cacheProvider.canCacheSchedule ? cacheProvider : null);
           deps.scheduleCubit = MyScheduleCubit(prefs: prefs);
           deps.settingsCubit = SettingsCubit(prefs: prefs);
-          deps.apiService =
-              ApiService(cacheProvider: await CacheProvider.create());
         }
       ),
       //   ("Fake Waiting", (_) => Future.delayed(Duration(seconds: 1)))

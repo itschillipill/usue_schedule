@@ -53,26 +53,6 @@ void main() {
       });
     });
 
-    test("timeRange returns correct start and end", () {
-      final (start, end) = pair.timeRange;
-
-      expect(start, "10:10");
-      expect(end, "11:40");
-    });
-
-    test("timeRange returns empty values for invalid format", () {
-      const invalidPair = Pair(
-        number: 1,
-        time: "invalid",
-        schedulePairs: [],
-      );
-
-      final (start, end) = invalidPair.timeRange;
-
-      expect(start, "");
-      expect(end, "");
-    });
-
     test("getAllGroups returns unique groups", () {
       final groups = pair.getAllGroups();
 

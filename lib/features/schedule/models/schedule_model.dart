@@ -1,16 +1,16 @@
 import 'package:equatable/equatable.dart';
 
-import 'request_type.dart';
+import 'schedule_type.dart';
 
 class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
   const ScheduleModel({
-    required this.requestType,
+    required this.scheduleType,
     required this.queryValue,
     this.lastUpdated,
   });
 
   // Тип запроса
-  final RequestType requestType;
+  final ScheduleType scheduleType;
 
   // Значение запроса
   final String queryValue;
@@ -18,19 +18,25 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
   // Последнее обновление
   final DateTime? lastUpdated;
 
+  static const maxCacheAge = Duration(days: 3);
+
   // проверяем необходимость обновления, на случай если расписание обновили
-  bool needsUpdate({Duration maxAge = const Duration(days: 3)}) {
+  bool needsUpdate() {
     if (lastUpdated == null) return true;
-    return DateTime.now().difference(lastUpdated!) > maxAge;
+    return DateTime.now().difference(lastUpdated!) > maxCacheAge;
   }
 
   // сбрасываем последнее обновление
-  ScheduleModel resetUpdate() => _copyWith(lastUpdated: null);
+  ScheduleModel resetUpdate() => ScheduleModel(
+        scheduleType: scheduleType,
+        queryValue: queryValue,
+        lastUpdated: null,
+      );
 
   // Фабричные конструкторы
   factory ScheduleModel.teacher(String teacherName, {DateTime? lastUpdated}) {
     return ScheduleModel(
-      requestType: RequestType.teacher,
+      scheduleType: ScheduleType.teacher,
       queryValue: teacherName,
       lastUpdated: lastUpdated,
     );
@@ -38,7 +44,7 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
 
   factory ScheduleModel.group(String groupName, {DateTime? lastUpdated}) {
     return ScheduleModel(
-      requestType: RequestType.group,
+      scheduleType: ScheduleType.group,
       queryValue: groupName,
       lastUpdated: lastUpdated,
     );
@@ -46,7 +52,7 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
 
   factory ScheduleModel.audience(String audienceName, {DateTime? lastUpdated}) {
     return ScheduleModel(
-      requestType: RequestType.audience,
+      scheduleType: ScheduleType.audience,
       queryValue: audienceName,
       lastUpdated: lastUpdated,
     );
@@ -54,7 +60,7 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
 
   // Генерация ключа для кэша
   String get cacheKey {
-    return '${requestType.name}_${_sanitizeKey(queryValue)}';
+    return '${scheduleType.name}_${_sanitizeKey(queryValue)}';
   }
 
   String _sanitizeKey(String value) {
@@ -67,12 +73,13 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
   }
 
   // Для отображения
-  String get displayName => '$requestType: $queryValue';
+  String get displayName => '$scheduleType: $queryValue';
 
   // Сериализация
   factory ScheduleModel.fromJson(Map<String, dynamic> json) {
     return ScheduleModel(
-      requestType: RequestType.values[json['requestType']],
+      scheduleType:
+          ScheduleType.values[json['scheduleType'] ?? json["requestType"]],
       queryValue: json['queryValue'].toString(),
       lastUpdated: json['lastUpdated'] != null
           ? DateTime.parse(json['lastUpdated'])
@@ -82,7 +89,7 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
 
   Map<String, dynamic> toJson() {
     return {
-      'requestType': requestType.index,
+      'scheduleType': scheduleType.index,
       'queryValue': queryValue,
       'lastUpdated': lastUpdated?.toIso8601String(),
     };
@@ -91,22 +98,22 @@ class ScheduleModel extends Equatable implements Comparable<ScheduleModel> {
   ScheduleModel update() => _copyWith(lastUpdated: DateTime.now());
 
   ScheduleModel _copyWith({
-    RequestType? requestType,
+    ScheduleType? scheduleType,
     String? queryValue,
     DateTime? lastUpdated,
   }) =>
       ScheduleModel(
-        requestType: requestType ?? this.requestType,
+        scheduleType: scheduleType ?? this.scheduleType,
         queryValue: queryValue ?? this.queryValue,
         lastUpdated: lastUpdated ?? this.lastUpdated,
       );
 
   @override
   String toString() =>
-      "ScheduleModel(requestType: ${requestType.name}, value: $queryValue, lastUpdated: $lastUpdated)";
+      "ScheduleModel(scheduleType: ${scheduleType.name}, value: $queryValue, lastUpdated: $lastUpdated)";
 
   @override
-  List<Object?> get props => [requestType, queryValue];
+  List<Object?> get props => [scheduleType, queryValue];
 
   // Сравнение для сортировки списка расписаний
   @override

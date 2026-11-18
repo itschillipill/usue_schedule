@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:usue_schedule/core/page_transition/app_page_route.dart';
 import 'package:usue_schedule/shared/services/message_service.dart';
 
@@ -284,10 +284,8 @@ class _AnswerScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            ...answer.steps.asMap().entries.map((entry) {
-              final index = entry.key + 1;
-              final step = entry.value;
-              return Padding(
+            for (var i = 0; i < answer.steps.length; i++)
+              Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,7 +299,7 @@ class _AnswerScreen extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          '$index',
+                          '${i + 1}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -312,14 +310,13 @@ class _AnswerScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        step,
+                        answer.steps[i],
                         style: const TextStyle(fontSize: 15),
                       ),
                     ),
                   ],
                 ),
-              );
-            }),
+              ),
 
             const SizedBox(height: 24),
 

@@ -15,10 +15,13 @@ class DaySchedule extends Equatable {
   });
 
   factory DaySchedule.fromJson(Map<String, dynamic> json) {
+    final DateTime dateTime =
+        DateTimeUtils.parseDate(json['date'] as String? ?? '') ??
+            DateTime.now();
     return DaySchedule(
-      date: DateTimeUtils.parseDate(json['date'] as String? ?? '') ??
-          DateTime.now(),
-      weekDay: json['weekDay'] as String? ?? '',
+      date: dateTime,
+      weekDay: json['weekDay'] as String? ??
+          DateTimeUtils.getWeekdayName(dateTime.weekday),
       pairs: (json['pairs'] as List<dynamic>?)
               ?.map((e) => Pair.fromJson(e))
               .toList() ??

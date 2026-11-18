@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:usue_schedule/core/constants.dart';
+import 'package:usue_schedule/core/theme/theme.dart';
+import 'package:usue_schedule/dependencies/widgets/dependencies_scope.dart';
+import 'package:usue_schedule/features/cache/presentation/cache_manager_screen.dart';
+import 'package:usue_schedule/features/guide/presentation/guide_screen.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_view_type.dart';
 import 'package:usue_schedule/features/settings/controllers/settings_cubit.dart';
 import 'package:usue_schedule/shared/widgets/custom_list_tile.dart';
-
-import '../../core/theme/schedule_styles.dart';
-import '../../dependencies/widgets/dependencies_scope.dart';
-import '../cache/presentation/cache_manager_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -20,8 +20,7 @@ class SettingsScreen extends StatelessWidget {
     final SettingsCubit settingsCubit =
         DependenciesScope.of(context).settingsCubit;
     final theme = Theme.of(context);
-    final cacheProvider =
-        DependenciesScope.of(context).apiService.cacheProvider;
+    final cacheProvider = DependenciesScope.of(context).cacheProvider;
 
     return Scaffold(
       appBar: AppBar(
@@ -29,7 +28,7 @@ class SettingsScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: DecoratedBox(
-        decoration: ScheduleStyles.linearBackgroundDecoration(context),
+        decoration: context.linearBkgDec,
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 4),
           children: [
@@ -100,7 +99,7 @@ class SettingsScreen extends StatelessWidget {
                   );
                 }),
             SizedBox(height: 10),
-            if (cacheProvider != null)
+            if (cacheProvider.canCacheSchedule)
               _Section(
                 icon: Icons.storage,
                 title: 'Управление данными',
@@ -131,6 +130,11 @@ class SettingsScreen extends StatelessWidget {
                   onTap: () => Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => const AboutAppScreen())),
                 ),
+                CustomListTile(
+                  leadingIcon: Icons.question_mark_rounded,
+                  title: 'Справочник по приложению',
+                  onTap: () => Navigator.of(context).push(GuideScreen.route()),
+                )
               ],
             ),
           ],
@@ -183,7 +187,7 @@ class AboutAppScreen extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        decoration: ScheduleStyles.linearBackgroundDecoration(context),
+        decoration: context.linearBkgDec,
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
@@ -256,15 +260,15 @@ class AboutAppScreen extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   _ModernSection(
-                    title: 'Информация',
-                    icon: Icons.info_outline,
+                    title: 'Прочее',
+                    icon: Icons.more,
                     children: [
-                      _ActionTile(
-                        icon: Icons.verified_outlined,
-                        title: 'Лицензии',
-                        description: 'Информация о лицензиях ПО',
-                        onTap: () => _showLicenseDialog(context),
-                      ),
+                      // _ActionTile(
+                      //   icon: Icons.verified_outlined,
+                      //   title: 'Лицензии',
+                      //   description: 'Информация о лицензиях ПО',
+                      //   onTap: () => _showLicenseDialog(context),
+                      // ),
                       _ActionTile(
                         icon: Icons.share_outlined,
                         title: 'Поделиться',
@@ -276,11 +280,10 @@ class AboutAppScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 10),
 
                   // Футер с версией
                   _buildFooter(context),
-                  const SizedBox(height: 20),
                 ]),
               ),
             ),
@@ -294,7 +297,7 @@ class AboutAppScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -383,27 +386,25 @@ class AboutAppScreen extends StatelessWidget {
     }
   }
 
-  void _showLicenseDialog(BuildContext context) {
-    showAboutDialog(
-      context: context,
-      applicationName: Constants.appName,
-      applicationVersion: Constants.version,
-      applicationLegalese: '© 2026 ${Constants.author}',
-      applicationIcon: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.secondary,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Icon(Icons.school, size: 32, color: Colors.white),
-      ),
-    );
-  }
+//   void _showLicenseDialog(BuildContext context) => showAboutDialog(
+//         context: context,
+//         applicationName: Constants.appName,
+//         applicationVersion: Constants.version,
+//         applicationLegalese: '© 2026 ${Constants.author}',
+//         applicationIcon: Container(
+//           padding: const EdgeInsets.all(8),
+//           decoration: BoxDecoration(
+//             gradient: LinearGradient(
+//               colors: [
+//                 Theme.of(context).colorScheme.primary,
+//                 Theme.of(context).colorScheme.secondary,
+//               ],
+//             ),
+//             borderRadius: BorderRadius.circular(16),
+//           ),
+//           child: const Icon(Icons.school, size: 32, color: Colors.white),
+//         ),
+//       );
 }
 
 Widget _buildFooter(BuildContext context) {
@@ -612,7 +613,6 @@ class _ActionTile extends StatelessWidget {
   }
 }
 
-// Улучшенная плитка ссылки
 class _LinkTile extends StatelessWidget {
   final String title;
   final String url;
@@ -681,7 +681,6 @@ class _LinkTile extends StatelessWidget {
   }
 }
 
-// Улучшенная контактная плитка
 class _ContactTile extends StatelessWidget {
   final IconData icon;
   final String title;

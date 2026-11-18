@@ -27,7 +27,7 @@ class ServerException extends ApiException {
 
   ServerException(this.statusCode, [dynamic originalError])
       : super(
-            'Ошибка сервера${statusCode != null ? ' (код $statusCode)' : ''}');
+            'Ошибка сервера ${statusCode != null ? '(код $statusCode)' : ''}');
 }
 
 class ParseException extends ApiException {

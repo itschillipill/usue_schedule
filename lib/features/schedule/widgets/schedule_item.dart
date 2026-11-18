@@ -1,15 +1,17 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 import 'package:usue_schedule/features/schedule/models/schedule_pair.dart';
+
+import '../controllers/schedule_view_provider.dart';
+import '../models/schedule_type.dart';
 
 class ScheduleItem extends StatelessWidget {
   final List<SchedulePair> pairs;
-  final Map<String, Color> groupColors;
   final bool hasTitle;
   final bool isLast;
 
   const ScheduleItem({
     super.key,
-    required this.groupColors,
     required this.pairs,
     required this.hasTitle,
     required this.isLast,
@@ -18,6 +20,12 @@ class ScheduleItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final provider = context.read<ScheduleViewProvider>();
+    final ScheduleType scheduleType = provider.params.scheduleType;
+
+    final bool showTeacher = scheduleType != ScheduleType.teacher;
+    final bool showGroup = scheduleType != ScheduleType.group;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 6),
       width: double.infinity,
@@ -41,91 +49,109 @@ class ScheduleItem extends StatelessWidget {
                 fontSize: 18,
               ),
             ),
-          if (pairs.hasMultipleGroups) _buildGroupsChips(),
-          Wrap(
-            spacing: 5,
-            children: [
-              _buildIconText(
-                  context, Icons.meeting_room_outlined, pairs.audience),
-              _buildIconText(
-                  context, Icons.person_outline, pairs.teachers.join(', ')),
-            ],
+          RichText(
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            text: TextSpan(
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+              children: [
+                if (pairs.audience.isNotEmpty) ...[
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: Icon(
+                        Icons.meeting_room_outlined,
+                        size: 14,
+                        color: theme.hintColor,
+                      ),
+                    ),
+                  ),
+                  TextSpan(
+                    text: pairs.audience,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ],
+                if (pairs.audience.isNotEmpty && showTeacher)
+                  TextSpan(
+                    text: ' • ',
+                    style: TextStyle(color: theme.hintColor),
+                  ),
+                if (showTeacher)
+                  TextSpan(
+                    text: pairs.teachers.join(', '),
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+              ],
+            ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 2,
-            children: [
-              if (!pairs.hasMultipleGroups)
-                _buildSingleGroupChip(pairs.first.cleanGroup),
-              if (pairs.subgroups.isNotEmpty)
-                _buildSubgroupBadge(pairs.subgroups.join(', ')),
-            ],
-          ),
+          if (showGroup || pairs.subgroups.isNotEmpty) ...[
+            Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: [
+                if (pairs.hasMultipleGroups)
+                  ...pairs.map(
+                    (e) {
+                      return _buildChip(
+                        text: e.cleanGroup,
+                        color: provider.groupColors[pairs.first.cleanGroup] ??
+                            theme.colorScheme.primary,
+                      );
+                    },
+                  )
+                else if (showGroup)
+                  _buildChip(
+                    text: pairs.first.cleanGroup,
+                    color: provider.groupColors[pairs.first.cleanGroup] ??
+                        theme.colorScheme.primary,
+                  ),
+                if (pairs.subgroups.isNotEmpty)
+                  _buildChip(
+                    text: 'Подгр. ${pairs.subgroups.join(', ')}',
+                    color: Colors.purple,
+                    icon: Icons.account_tree_outlined,
+                  ),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildIconText(BuildContext context, IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16, color: Theme.of(context).hintColor),
-        const SizedBox(width: 4),
-        Flexible(
-          child: Text(
+  Widget _buildChip({
+    required String text,
+    required Color color,
+    IconData? icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 11, color: color),
+            const SizedBox(width: 3),
+          ],
+          Text(
             text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.8)),
+              fontSize: 11,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSubgroupBadge(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.purple.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
+        ],
       ),
-      child: Text(
-        'Подгруппы: $text',
-        style: const TextStyle(
-            fontSize: 11, color: Colors.purple, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget _buildSingleGroupChip(String group) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: (groupColors[group] ?? Colors.grey).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        group,
-        style: TextStyle(
-          fontSize: 12,
-          color: groupColors[group] ?? Colors.grey,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGroupsChips() {
-    return Wrap(
-      spacing: 2,
-      runSpacing: 3,
-      children: pairs.groups.map(_buildSingleGroupChip).toList(),
     );
   }
 }
